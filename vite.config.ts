@@ -6,6 +6,7 @@ import pkg from "./package.json" with { type: "json" };
 declare const process: { env: Record<string, string | undefined> };
 
 export default defineConfig({
+  base: "./",
   staged: {
     "*.{cjs,css,html,js,json,jsonc,jsx,md,mdx,mjs,scss,toml,ts,tsx,yaml,yml}": "vp fmt",
   },

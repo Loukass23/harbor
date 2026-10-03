@@ -2,6 +2,7 @@ import { createHtml5Bridge } from "@/lib/player/html5";
 import { createMpvBridge, probeMpv, type MpvRect } from "@/lib/player/mpv";
 import type { PlayerBridge } from "@/lib/player/bridge";
 import { isLinuxDesktop, isMacDesktop, isWindowsDesktop } from "@/lib/platform";
+import { createTizenAvplayBridge, isTizenAvplayAvailable } from "@/lib/player/tizen-avplay";
 
 export const SYNC_DRIFT_TOLERANCE_S = 0.6;
 export const SYNC_SUPPRESS_MS = 1400;
@@ -65,6 +66,10 @@ export async function pickBridge(
     getEmbedRect?: () => Promise<MpvRect | null> | MpvRect | null;
   },
 ): Promise<{ bridge: PlayerBridge; engine: "html5" | "mpv" }> {
+  if (isTizenAvplayAvailable()) {
+    console.log("[harbor] Using Samsung TV native AVPlay hardware player");
+    return { bridge: createTizenAvplayBridge(), engine: "html5" };
+  }
   if (want === "html5") return { bridge: createHtml5Bridge(), engine: "html5" };
   if (want === "mpv") {
     const probe = await probeMpv();

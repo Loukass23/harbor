@@ -66,7 +66,41 @@ if (isRemote) {
   document.body.style.userSelect = "auto";
   document.body.style.cursor = "auto";
 }
-if (!isPip && !isModal && !isHdrOverlay) {
+const isTizen = typeof window !== "undefined" && ("tizen" in window || "webapis" in window);
+if (isTizen) {
+  document.documentElement.dataset.os = "tizen";
+  document.documentElement.setAttribute("data-input-modality", "keys");
+  try {
+    const tizenObj = (
+      window as unknown as {
+        tizen?: { tvinputdevice?: { registerKeyBatch?: (keys: string[]) => void } };
+      }
+    ).tizen;
+    if (tizenObj?.tvinputdevice?.registerKeyBatch) {
+      tizenObj.tvinputdevice.registerKeyBatch([
+        "MediaPlay",
+        "MediaPause",
+        "MediaPlayPause",
+        "MediaFastForward",
+        "MediaRewind",
+        "MediaStop",
+        "Return",
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+      ]);
+    }
+  } catch (err) {
+    console.warn("[tizen] registerKeyBatch failed", err);
+  }
+} else if (!isPip && !isModal && !isHdrOverlay) {
   document.documentElement.dataset.os = isLinuxDesktop()
     ? "linux"
     : isMacDesktop()
