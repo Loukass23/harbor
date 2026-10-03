@@ -54,6 +54,7 @@ export default defineConfig(({ mode }) => {
   const devHost = process.env.TAURI_DEV_HOST;
   return {
     base: tizen ? "./" : "/",
+    publicDir: tizen ? false : "public",
     staged: { "*": "vp check --fix" },
     plugins: [
       react(),
@@ -86,6 +87,13 @@ export default defineConfig(({ mode }) => {
           })(),
       ),
       __BUILD_DATE__: JSON.stringify(new Date().toISOString().slice(0, 10)),
+      ...(process.env.VITE_HARBOR_SERVER_URL
+        ? {
+            "import.meta.env.VITE_HARBOR_SERVER_URL": JSON.stringify(
+              process.env.VITE_HARBOR_SERVER_URL,
+            ),
+          }
+        : {}),
     },
     // Both entries ship. index-tv.html is what the TV window loads; index.html
     // exists only so web_server.rs has a page to hand the phone for /remote,

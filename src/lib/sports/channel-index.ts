@@ -1,5 +1,6 @@
 import type { IptvChannel } from "../iptv/types";
 import { yieldToBrowser } from "../yield-to-browser";
+import { createModuleWorker } from "../cross-origin-worker";
 import {
   buildSportsChannelIndex,
   type PreparedChannel,
@@ -25,9 +26,7 @@ export async function prepareSportsChannels(
   let worker: Worker | null = null;
   try {
     if (typeof Worker !== "undefined")
-      worker = new Worker(new URL("./channel-index.worker.ts", import.meta.url), {
-        type: "module",
-      });
+      worker = createModuleWorker(new URL("./channel-index.worker.ts", import.meta.url));
   } catch {
     /* Sandboxed previews can disallow workers; the fallback still yields. */
   }

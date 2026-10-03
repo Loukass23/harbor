@@ -11,6 +11,7 @@ import { fetchWatchlist } from "@/lib/trakt/watchlist";
 import { fetchWatchedHistory, type HistoryItem } from "@/lib/trakt/history";
 import { traktItemToMeta } from "@/lib/trakt/to-meta";
 import type { TraktItem } from "@/lib/trakt/types";
+import { getCompanionServer } from "@/lib/tizen-server";
 import { readLocalEntries, subscribeWatchlist, type LocalEntry } from "@/lib/watchlist";
 import { localEntryToMeta, useLocalLibrary } from "@/lib/local-library";
 import {
@@ -418,7 +419,7 @@ function useHostLibrary(
  */
 export function RemoteHostMount() {
   const { settings } = useSettings();
-  const enabled = settings.serveWebUi || settings.remoteControlEnabled;
+  const enabled = isTizen || settings.serveWebUi || settings.remoteControlEnabled;
   const localeKey = `${settings.tmdbLanguage}:${settings.tmdbImageLangs.join(",")}:${settings.translateTitles}:${settings.translateDescriptions}`;
   const hostLibrary = useHostLibrary(
     enabled,
@@ -446,7 +447,7 @@ export function RemoteHostMount() {
   });
 
   useEffect(() => {
-    if (isTauri && enabled) pushSnapshot();
+    if ((isTauri || isTizen) && enabled) pushSnapshot();
   }, [settings.tmdbKey, settings.rpdbKey, settings.tvdbKey, localeKey, enabled]);
 
   useEffect(() => {
@@ -457,15 +458,26 @@ export function RemoteHostMount() {
       anilist: anilistConnected,
       mal: malConnected,
     });
-    if (isTauri && enabled) pushSnapshot();
+    if ((isTauri || isTizen) && enabled) pushSnapshot();
   }, [traktConnected, simklConnected, anilistConnected, malConnected, authKey, enabled]);
 
   useEffect(() => {
     setRemoteLibrary(hostLibrary);
-    if (isTauri && enabled) pushSnapshot();
+    if ((isTauri || isTizen) && enabled) pushSnapshot();
   }, [hostLibrary, enabled]);
 
   useEffect(() => {
+    if (isTizen) {
+      try {
+        // @ts-expect-error webapis may exist on Tizen
+        const model = window.webapis?.productinfo?.getModel?.() || "Samsung Smart TV";
+        setRemoteHostName(model);
+      } catch {
+        setRemoteHostName("Samsung TV");
+      }
+      if (enabled) pushSnapshot();
+      return;
+    }
     if (!isTauri) return;
     void invoke<{ name: string }>("harbor_lan_identity")
       .then((id) => {
@@ -482,8 +494,11 @@ export function RemoteHostMount() {
     const unsubs: Array<() => void> = [];
 
     if (isTizen) {
-      const serverUrl = localStorage.getItem("harbor_server_url") || "http://192.168.178.89:3001";
+      const serverUrl = getCompanionServer();
+      if (!serverUrl) return;
       const wsUrl = `${serverUrl.replace(/^http/, "ws")}/api/remote?role=host`;
+      let backoffMs = 1000;
+      let pingTimer: ReturnType<typeof setInterval>;
       const connectTvWs = () => {
         if (cancelled) return;
         try {
@@ -491,7 +506,13 @@ export function RemoteHostMount() {
           tvWs = ws;
           ws.onopen = () => {
             console.log("[RemoteTV] Connected to companion server remote relay");
+            backoffMs = 1000;
             pushSnapshot(true);
+            pingTimer = setInterval(() => {
+              if (ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({ t: "ping" }));
+              }
+            }, 25000);
           };
           ws.onmessage = (event) => {
             const raw = String(event.data);
@@ -529,9 +550,11 @@ export function RemoteHostMount() {
             }
           };
           ws.onclose = () => {
+            clearInterval(pingTimer);
             tvWs = null;
             if (!cancelled) {
-              setTimeout(connectTvWs, 5000);
+              setTimeout(connectTvWs, backoffMs);
+              backoffMs = Math.min(backoffMs * 1.5, 15000);
             }
           };
         } catch (e) {
@@ -540,6 +563,7 @@ export function RemoteHostMount() {
       };
       connectTvWs();
       unsubs.push(() => {
+        clearInterval(pingTimer);
         try {
           tvWs?.close();
         } catch {}

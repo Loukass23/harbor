@@ -1,5 +1,6 @@
 import { iterateM3uChannels } from "./m3u";
 import { yieldToBrowser } from "../yield-to-browser";
+import { createModuleWorker } from "../cross-origin-worker";
 import type { IptvChannel } from "./types";
 
 const WORKER_IDLE_TIMEOUT_MS = 15_000;
@@ -23,9 +24,7 @@ export async function parseM3uAsync(
   let worker: Worker | null = null;
   try {
     if (typeof Worker !== "undefined")
-      worker = new Worker(new URL("./m3u.worker.ts", import.meta.url), {
-        type: "module",
-      });
+      worker = createModuleWorker(new URL("./m3u.worker.ts", import.meta.url));
     if (worker) {
       const active = worker;
       await new Promise<void>((resolve, reject) => {

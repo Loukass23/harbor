@@ -1,5 +1,7 @@
 import { Suspense, lazy, useEffect, type ComponentType, type ReactNode } from "react";
 import { CurfewGuard } from "@/components/curfew-guard";
+import { RemoteHostMount } from "@/lib/remote/host-mount";
+import { RemoteOpenBridge } from "@/lib/remote/remote-open-bridge";
 import { GamepadRunner } from "@/components/gamepad-runner";
 import { HarborAvatarSync } from "@/components/harbor-avatar-sync";
 import { HarborNameSync } from "@/components/harbor-name-sync";
@@ -129,6 +131,8 @@ function BpTvRoot() {
         <BigPictureShell />
       </Suspense>
       <CurfewGuard />
+      <RemoteHostMount />
+      <RemoteOpenBridge />
     </>
   );
 }

@@ -17,19 +17,12 @@ import {
 
 const SUBTITLE_CREDENTIAL_HEADER = "x-harbor-subtitle-credential";
 
+import { getCompanionServer } from "./tizen-server";
+
 const isTauri = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
 const isTizen =
   typeof window !== "undefined" &&
   ("tizen" in window || "webapis" in window || window.location.protocol === "file:");
-const DEFAULT_HARBOR_SERVER = "http://192.168.178.89:3001";
-
-function getCompanionServer(): string {
-  try {
-    const saved = localStorage.getItem("harbor_server_url");
-    if (saved) return saved.replace(/\/+$/, "");
-  } catch {}
-  return DEFAULT_HARBOR_SERVER;
-}
 
 declare global {
   interface Window {
@@ -133,7 +126,9 @@ let proxyOriginCache: boolean | null = null;
 function webProxyAvailable(): boolean {
   if (proxyOriginCache !== null) return proxyOriginCache;
   try {
-    proxyOriginCache = /(^|\.)harbor\.site$/i.test(window.location.hostname);
+    proxyOriginCache =
+      import.meta.env.VITE_HARBOR_SELF_HOSTED === "1" ||
+      /(^|\.)harbor\.site$/i.test(window.location.hostname);
   } catch {
     proxyOriginCache = false;
   }

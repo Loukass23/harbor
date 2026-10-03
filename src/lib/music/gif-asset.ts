@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { createModuleWorker } from "../cross-origin-worker";
 import type { MusicGifFrames } from "./gif-frames";
 export type StoredMusicGif = { id: string; name: string; blob: Blob };
 const cache = new Map<string, Promise<MusicGifFrames>>();
@@ -34,7 +35,7 @@ export async function readMusicGif(id: string): Promise<StoredMusicGif | undefin
 }
 export function decodeGifFile(blob: Blob): Promise<MusicGifFrames> {
   return new Promise((resolve, reject) => {
-    const worker = new Worker(new URL("./gif-decoder.worker.ts", import.meta.url), { type: "module" });
+    const worker = createModuleWorker(new URL("./gif-decoder.worker.ts", import.meta.url));
     const finish = () => { clearTimeout(timer); worker.terminate(); };
     const timer = setTimeout(() => { finish(); reject(new Error("large")); }, 20000);
     worker.onmessage = (event: MessageEvent<{ animation?: MusicGifFrames; error?: string }>) => {

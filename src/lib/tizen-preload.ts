@@ -1,4 +1,5 @@
 import { parseBackup, applyBackup } from "@/lib/backup";
+import { getCompanionServer } from "./tizen-server";
 
 const PRELOAD_DONE_KEY = "harbor.preload.applied.v1";
 
@@ -20,11 +21,13 @@ export async function applyPreloadIfNeeded(): Promise<boolean> {
   // 2. Fallback: fetch from companion server endpoint
   if (!text) {
     try {
-      const server = localStorage.getItem("harbor_server_url") || "http://192.168.178.89:3001";
-      const resp = await fetch(`${server}/api/backup/preload`, { signal: AbortSignal.timeout(5000) });
-      if (resp.ok) {
-        text = await resp.text();
-        console.log(`[preload] Retrieved backup file from companion server: ${server}/api/backup/preload`);
+      const server = getCompanionServer();
+      if (server) {
+        const resp = await fetch(`${server}/api/backup/preload`, { signal: AbortSignal.timeout(5000) });
+        if (resp.ok) {
+          text = await resp.text();
+          console.log(`[preload] Retrieved backup file from companion server: ${server}/api/backup/preload`);
+        }
       }
     } catch {}
   }
