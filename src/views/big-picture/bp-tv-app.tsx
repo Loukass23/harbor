@@ -94,6 +94,42 @@ function BpTvSound() {
   return null;
 }
 
+function SmartViewReceiverMount() {
+  useEffect(() => {
+    if (typeof window === "undefined" || !("tizen" in window || "webapis" in window)) return;
+    let ws: WebSocket | null = null;
+    let cancelled = false;
+
+    const connect = () => {
+      if (cancelled) return;
+      try {
+        ws = new WebSocket("ws://127.0.0.1:8001/api/v2/channels/samsung.smartview.harbor?name=HarborTV");
+        ws.onmessage = (evt) => {
+          try {
+            const parsed = JSON.parse(String(evt.data));
+            const data = (parsed && typeof parsed === "object" && "data" in parsed) ? (parsed as { data: any }).data : parsed;
+            if (data && (data.action === "playMeta" || data.action === "openMeta")) {
+              window.dispatchEvent(new CustomEvent("harbor:remote-open", { detail: data }));
+            }
+          } catch {}
+        };
+        ws.onclose = () => {
+          ws = null;
+          if (!cancelled) setTimeout(connect, 5000);
+        };
+      } catch {}
+    };
+
+    connect();
+    return () => {
+      cancelled = true;
+      try { ws?.close(); } catch {}
+    };
+  }, []);
+
+  return null;
+}
+
 function BpTvRoot() {
   const { active } = useBigPicture();
   const { player } = useView();
@@ -133,6 +169,7 @@ function BpTvRoot() {
       <CurfewGuard />
       <RemoteHostMount />
       <RemoteOpenBridge />
+      <SmartViewReceiverMount />
     </>
   );
 }
