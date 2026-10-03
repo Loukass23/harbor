@@ -16,5 +16,6 @@ services:
     volumes:
       - .:/app
       - /app/node_modules
+      - /app/.pnpm-store
     tty: true
     stdin_open: true
