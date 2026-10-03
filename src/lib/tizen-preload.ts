@@ -5,7 +5,9 @@ const PRELOAD_DONE_KEY = "harbor.preload.applied.v1";
 
 export async function applyPreloadIfNeeded(): Promise<boolean> {
   if (typeof window === "undefined") return false;
-  if (localStorage.getItem(PRELOAD_DONE_KEY)) return false;
+  const alreadyDone = !!localStorage.getItem(PRELOAD_DONE_KEY);
+  const hasProfiles = !!localStorage.getItem("harbor.profiles.v1");
+  if (alreadyDone && hasProfiles) return false;
 
   let text: string | null = null;
 

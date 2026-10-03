@@ -516,11 +516,13 @@ export function RemoteHostMount() {
           };
           ws.onmessage = (event) => {
             const raw = String(event.data);
+            window.dispatchEvent(new CustomEvent("harbor:remote-cmd", { detail: { clientId: 1, raw } }));
             const msg = parseClientMessage(raw);
             if (!msg) {
               try {
                 const action = JSON.parse(raw);
                 if (action.action === "client_join") {
+                  window.dispatchEvent(new CustomEvent("harbor:remote-client", { detail: { action: "join", clientId: 1 } }));
                   broadcast({ t: "hello", proto: REMOTE_PROTO, server: "harbor-remote" });
                   pushSnapshot(true);
                 }
@@ -561,6 +563,16 @@ export function RemoteHostMount() {
           console.warn("[RemoteTV] WebSocket connection error:", e);
         }
       };
+
+      const onBroadcast = (e: Event) => {
+        const detail = (e as CustomEvent<string>).detail;
+        if (tvWs && tvWs.readyState === WebSocket.OPEN) {
+          tvWs.send(detail);
+        }
+      };
+      window.addEventListener("harbor:remote-broadcast", onBroadcast);
+      unsubs.push(() => window.removeEventListener("harbor:remote-broadcast", onBroadcast));
+
       connectTvWs();
       unsubs.push(() => {
         clearInterval(pingTimer);

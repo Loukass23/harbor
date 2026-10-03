@@ -1,4 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
+import { isTizen } from "@/lib/platform";
+import { getCompanionServer } from "@/lib/tizen-server";
 
 /**
  * Can a phone actually get here. Two independent facts, both of which fail
@@ -23,7 +25,18 @@ export const LAN_RECHECK_MS = 15_000;
  * phone panel must always keep a focusable way past it.
  */
 export async function readLanHost(): Promise<string | null> {
-  if (!hasTauri) return null;
+  if (!hasTauri) {
+    if (isTizen()) {
+      try {
+        const companion = getCompanionServer();
+        if (companion) {
+          const url = new URL(companion);
+          return url.hostname || null;
+        }
+      } catch {}
+    }
+    return null;
+  }
   try {
     const ip = await invoke<string | null>("lan_ip");
     return ip && ip.length > 0 ? ip : null;
@@ -38,7 +51,12 @@ export async function readLanHost(): Promise<string | null> {
  * nothing.
  */
 export async function readServeRunning(): Promise<boolean> {
-  if (!hasTauri) return false;
+  if (!hasTauri) {
+    if (isTizen()) {
+      return true;
+    }
+    return false;
+  }
   try {
     return await invoke<boolean>("web_serve_status");
   } catch {

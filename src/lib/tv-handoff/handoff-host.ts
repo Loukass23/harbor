@@ -56,10 +56,14 @@ let active: HandoffHost | null = null;
 let retired: string[] = [];
 
 function broadcast(offer: HandoffOffer | null, ack?: HandoffAck): void {
-  if (!hasTauri) return;
   const msg: HandoffServerMessage = { t: HANDOFF_MSG, proto: HANDOFF_PROTO, offer };
   if (ack) msg.ack = ack;
-  void invoke("remote_ws_broadcast", { payload: JSON.stringify(msg) }).catch(() => {});
+  const payload = JSON.stringify(msg);
+  if (hasTauri) {
+    void invoke("remote_ws_broadcast", { payload }).catch(() => {});
+  } else if (typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent("harbor:remote-broadcast", { detail: payload }));
+  }
 }
 
 export function startHandoffHost(opts: HandoffHostOptions): HandoffHost {
@@ -188,6 +192,42 @@ export function startHandoffHost(opts: HandoffHostOptions): HandoffHost {
     }).then((u) => {
       if (stopped) u();
       else unsubs.push(u);
+    });
+
+    timer = window.setInterval(() => {
+      if (!session.needsRemint()) return;
+      remint();
+      publish();
+    }, 1000);
+  } else if (typeof window !== "undefined") {
+    const handleRemoteCmd = (e: Event) => {
+      const detail = (e as CustomEvent<{ clientId: number; raw: string }>).detail;
+      const raw = detail?.raw;
+      if (!raw || !raw.includes(HANDOFF_MSG)) return;
+      const env = parseHandoffEnvelope(raw);
+      if (!env) return;
+      if (!env.ok) {
+        settle(env.nonce, false, "badPayload");
+        return;
+      }
+      enqueue(detail.clientId, env.msg);
+    };
+
+    const handleRemoteClient = (e: Event) => {
+      const p = (e as CustomEvent<{ action: string; clientId: number }>).detail;
+      if (!p) return;
+      if (p.action === "join") {
+        publish();
+        return;
+      }
+      if (p.action === "leave" && session.releaseClient(p.clientId)) publish();
+    };
+
+    window.addEventListener("harbor:remote-cmd", handleRemoteCmd);
+    window.addEventListener("harbor:remote-client", handleRemoteClient);
+    unsubs.push(() => {
+      window.removeEventListener("harbor:remote-cmd", handleRemoteCmd);
+      window.removeEventListener("harbor:remote-client", handleRemoteClient);
     });
 
     timer = window.setInterval(() => {
