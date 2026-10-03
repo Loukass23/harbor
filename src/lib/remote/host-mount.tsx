@@ -53,10 +53,19 @@ import {
 } from "./protocol";
 
 const isTauri = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
+const isTizen =
+  typeof window !== "undefined" &&
+  ("tizen" in window || "webapis" in window || window.location.protocol === "file:");
+
+let tvWs: WebSocket | null = null;
 
 function broadcast(msg: RemoteServerMessage) {
-  if (!isTauri) return;
-  void invoke("remote_ws_broadcast", { payload: JSON.stringify(msg) }).catch(() => {});
+  const payload = JSON.stringify(msg);
+  if (isTauri) {
+    void invoke("remote_ws_broadcast", { payload }).catch(() => {});
+  } else if (tvWs && tvWs.readyState === WebSocket.OPEN) {
+    tvWs.send(payload);
+  }
 }
 
 function pushSnapshot(force = false) {
@@ -467,71 +476,139 @@ export function RemoteHostMount() {
   }, [enabled]);
 
   useEffect(() => {
-    if (!isTauri || !enabled) return;
+    if ((!isTauri && !isTizen) || !enabled) return;
 
     let cancelled = false;
     const unsubs: Array<() => void> = [];
 
-    void listen<{ clientId: number; raw: string }>("remote://cmd", (e) => {
-      const raw = e.payload?.raw;
-      if (!raw) return;
-      const msg = parseClientMessage(raw);
-      if (!msg) {
-        broadcast({ t: "error", message: "invalid message" });
-        return;
-      }
-      if (msg.t === "hello") {
-        broadcast({ t: "hello", proto: REMOTE_PROTO, server: "harbor-remote" });
-        pushSnapshot(true);
-        return;
-      }
-      if (msg.t === "cmd") {
-        void (async () => {
-          try {
-            if (msg.command.action === "castDiscover") {
-              setRemoteCastDiscovering(true);
-              setRemoteCastDevices([]);
+    if (isTizen) {
+      const serverUrl = localStorage.getItem("harbor_server_url") || "http://192.168.178.89:3001";
+      const wsUrl = `${serverUrl.replace(/^http/, "ws")}/api/remote?role=host`;
+      const connectTvWs = () => {
+        if (cancelled) return;
+        try {
+          const ws = new WebSocket(wsUrl);
+          tvWs = ws;
+          ws.onopen = () => {
+            console.log("[RemoteTV] Connected to companion server remote relay");
+            pushSnapshot(true);
+          };
+          ws.onmessage = (event) => {
+            const raw = String(event.data);
+            const msg = parseClientMessage(raw);
+            if (!msg) {
               try {
-                const devices = await discoverCastDevices();
-                setRemoteCastDevices(devices);
-              } finally {
-                setRemoteCastDiscovering(false);
-              }
-              pushSnapshot();
+                const action = JSON.parse(raw);
+                if (action.action === "client_join") {
+                  broadcast({ t: "hello", proto: REMOTE_PROTO, server: "harbor-remote" });
+                  pushSnapshot(true);
+                }
+              } catch {}
               return;
             }
-            if (msg.command.action === "ping") {
-              broadcast({ t: "pong", at: Date.now() });
+            if (msg.t === "hello") {
+              broadcast({ t: "hello", proto: REMOTE_PROTO, server: "harbor-remote" });
+              pushSnapshot(true);
               return;
             }
-            if (isMangaCommand(msg.command.action)) {
-              await dispatchMangaCommand(msg.command);
-              return;
+            if (msg.t === "cmd") {
+              void (async () => {
+                try {
+                  if (msg.command.action === "ping") {
+                    broadcast({ t: "pong", at: Date.now() });
+                    return;
+                  }
+                  await dispatchRemoteCommand(msg.command);
+                  if (!SKIP_SNAPSHOT.has(msg.command.action)) pushSnapshot();
+                } catch (err) {
+                  const message = err instanceof Error ? err.message : "remote command failed";
+                  broadcast({ t: "error", message });
+                  pushSnapshot();
+                }
+              })();
             }
-            await dispatchRemoteCommand(msg.command);
-            // nav/setText: focusin/out + 400ms tick cover textEntry; skip churn.
-            if (!SKIP_SNAPSHOT.has(msg.command.action)) pushSnapshot();
-          } catch (err) {
-            const message = err instanceof Error ? err.message : "remote command failed";
-            broadcast({ t: "error", message });
-            pushSnapshot();
-          }
-        })();
-      }
-    }).then((u) => {
-      if (cancelled) u();
-      else unsubs.push(u);
-    });
+          };
+          ws.onclose = () => {
+            tvWs = null;
+            if (!cancelled) {
+              setTimeout(connectTvWs, 5000);
+            }
+          };
+        } catch (e) {
+          console.warn("[RemoteTV] WebSocket connection error:", e);
+        }
+      };
+      connectTvWs();
+      unsubs.push(() => {
+        try {
+          tvWs?.close();
+        } catch {}
+        tvWs = null;
+      });
+    }
 
-    void listen<{ action: string }>("remote://client", (e) => {
-      if (e.payload?.action === "join") {
-        broadcast({ t: "hello", proto: REMOTE_PROTO, server: "harbor-remote" });
-        pushSnapshot(true);
-      }
-    }).then((u) => {
-      if (cancelled) u();
-      else unsubs.push(u);
-    });
+    if (isTauri) {
+      void listen<{ clientId: number; raw: string }>("remote://cmd", (e) => {
+        const raw = e.payload?.raw;
+        if (!raw) return;
+        const msg = parseClientMessage(raw);
+        if (!msg) {
+          broadcast({ t: "error", message: "invalid message" });
+          return;
+        }
+        if (msg.t === "hello") {
+          broadcast({ t: "hello", proto: REMOTE_PROTO, server: "harbor-remote" });
+          pushSnapshot(true);
+          return;
+        }
+        if (msg.t === "cmd") {
+          void (async () => {
+            try {
+              if (msg.command.action === "castDiscover") {
+                setRemoteCastDiscovering(true);
+                setRemoteCastDevices([]);
+                try {
+                  const devices = await discoverCastDevices();
+                  setRemoteCastDevices(devices);
+                } finally {
+                  setRemoteCastDiscovering(false);
+                }
+                pushSnapshot();
+                return;
+              }
+              if (msg.command.action === "ping") {
+                broadcast({ t: "pong", at: Date.now() });
+                return;
+              }
+              if (isMangaCommand(msg.command.action)) {
+                await dispatchMangaCommand(msg.command);
+                return;
+              }
+              await dispatchRemoteCommand(msg.command);
+              // nav/setText: focusin/out + 400ms tick cover textEntry; skip churn.
+              if (!SKIP_SNAPSHOT.has(msg.command.action)) pushSnapshot();
+            } catch (err) {
+              const message = err instanceof Error ? err.message : "remote command failed";
+              broadcast({ t: "error", message });
+              pushSnapshot();
+            }
+          })();
+        }
+      }).then((u) => {
+        if (cancelled) u();
+        else unsubs.push(u);
+      });
+
+      void listen<{ action: string }>("remote://client", (e) => {
+        if (e.payload?.action === "join") {
+          broadcast({ t: "hello", proto: REMOTE_PROTO, server: "harbor-remote" });
+          pushSnapshot(true);
+        }
+      }).then((u) => {
+        if (cancelled) u();
+        else unsubs.push(u);
+      });
+    }
 
     unsubs.push(subscribeRemoteSession(() => pushSnapshot()));
     let mangaRaf = 0;

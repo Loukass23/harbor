@@ -8,9 +8,20 @@ export function isWeb(): boolean {
   return typeof window !== "undefined" && !("__TAURI_INTERNALS__" in window);
 }
 
-export type OsClass = "linux" | "macos" | "windows" | "android" | "web";
+export function isTizen(): boolean {
+  if (typeof window === "undefined") return false;
+  return (
+    "tizen" in window ||
+    "webapis" in window ||
+    window.location.protocol === "file:" ||
+    /Tizen/i.test(navigator.userAgent || "")
+  );
+}
+
+export type OsClass = "linux" | "macos" | "windows" | "android" | "tizen" | "web";
 
 function detectOs(): OsClass {
+  if (isTizen()) return "tizen";
   if (!isTauri()) return "web";
   const platform = nativePlatform();
   if (platform === "linux") return "linux";
@@ -57,7 +68,15 @@ let cachedTv: boolean | null = null;
 
 export function isAndroidTv(): boolean {
   if (cachedTv !== null) return cachedTv;
-  if (!isAndroid() || typeof navigator === "undefined") {
+  if (typeof navigator === "undefined") {
+    cachedTv = false;
+    return false;
+  }
+  if (isTizen()) {
+    cachedTv = true;
+    return true;
+  }
+  if (!isAndroid()) {
     cachedTv = false;
     return false;
   }
@@ -71,7 +90,7 @@ export function isMobileDevice(): boolean {
   // A television reports Android and answers the touch heuristics below with a
   // 1080p viewport, so without this it is classed as a phone and served the
   // mobile remote instead of Big Picture.
-  if (isAndroidTv()) return false;
+  if (isAndroidTv() || isTizen()) return false;
   const ua = navigator.userAgent || "";
   if (/Android|webOS|iPhone|iPod|BlackBerry|IEMobile|Opera Mini|iPad/i.test(ua)) return true;
   if (/Macintosh/i.test(ua) && (navigator.maxTouchPoints ?? 0) > 1) return true;

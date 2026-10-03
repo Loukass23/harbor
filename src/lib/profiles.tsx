@@ -399,7 +399,25 @@ function readState(): ProfilesState {
       }
       return next;
     });
-    return { profiles: migrated, activeId: parsed.activeId };
+    // Deduplicate profiles by ID and by normalized name to heal any duplicate profiles
+    const seenIds = new Set<string>();
+    const seenNames = new Set<string>();
+    const deduped: Profile[] = [];
+    for (const p of migrated) {
+      if (seenIds.has(p.id)) continue;
+      const nameKey = p.name ? p.name.trim().toLowerCase() : "";
+      if (nameKey && seenNames.has(nameKey)) continue;
+      seenIds.add(p.id);
+      if (nameKey) seenNames.add(nameKey);
+      deduped.push(p);
+    }
+    const finalActiveId = deduped.some((p) => p.id === parsed.activeId)
+      ? parsed.activeId
+      : (deduped.find((p) => p.isPrimary)?.id ?? deduped[0]?.id ?? null);
+    if (deduped.length !== parsed.profiles.length) {
+      writeState({ profiles: deduped, activeId: finalActiveId });
+    }
+    return { profiles: deduped, activeId: finalActiveId };
   } catch {
     return { profiles: [], activeId: null };
   }

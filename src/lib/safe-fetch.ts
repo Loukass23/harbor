@@ -18,6 +18,18 @@ import {
 const SUBTITLE_CREDENTIAL_HEADER = "x-harbor-subtitle-credential";
 
 const isTauri = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
+const isTizen =
+  typeof window !== "undefined" &&
+  ("tizen" in window || "webapis" in window || window.location.protocol === "file:");
+const DEFAULT_HARBOR_SERVER = "http://192.168.178.89:3001";
+
+function getCompanionServer(): string {
+  try {
+    const saved = localStorage.getItem("harbor_server_url");
+    if (saved) return saved.replace(/\/+$/, "");
+  } catch {}
+  return DEFAULT_HARBOR_SERVER;
+}
 
 declare global {
   interface Window {
@@ -62,6 +74,7 @@ function countCrossing(kind: BridgeKind, url: string): void {
 const DIRECT_HOSTS = new Set(["torrentio.strem.fun", "stremio.torbox.app"]);
 
 const PROXY_HOSTS = new Set([
+  "api.simkl.com",
   "v3-cinemeta.strem.io",
   "opensubtitles-v3.strem.io",
   "opensubtitles.strem.io",
@@ -140,14 +153,20 @@ function rewriteForWeb(url: string, init?: RequestInit): { url: string; init?: R
     PROXY_HOSTS.has(parsed.hostname) || PROXY_SUFFIXES.some((s) => parsed.hostname.endsWith(s));
   if (!proxiable) return { url, init };
   const localDev = /^(?:localhost|127\.0\.0\.1)$/i.test(window.location.hostname);
-  if (!webProxyAvailable() && !(localDev && DEV_PROXY_HOSTS.has(parsed.hostname)))
+  if (!webProxyAvailable() && !(localDev && DEV_PROXY_HOSTS.has(parsed.hostname)) && !isTizen)
     return { url, init };
 
-  const proxied = `/api-proxy/${parsed.hostname}${parsed.pathname}${parsed.search}`;
+  const base = isTizen ? getCompanionServer() : "";
+  let proxied: string;
+  if (parsed.hostname === "api.simkl.com") {
+    proxied = `${base}/api-simkl${parsed.pathname}${parsed.search}`;
+  } else {
+    proxied = `${base}/api-proxy/${parsed.hostname}${parsed.pathname}${parsed.search}`;
+  }
   if (!init?.headers) return { url: proxied, init };
   const out = new Headers(init.headers as HeadersInit);
   const auth = out.get("authorization");
-  if (auth && !localDev) {
+  if (auth && (!localDev || isTizen)) {
     out.delete("authorization");
     out.set("x-harbor-auth", auth);
   }

@@ -202,6 +202,16 @@ export type PlanInput = {
  * household forever. A profile the user actually made before signing in is pushed up as
  * a new profile instead, so the worst case is a duplicate they can delete.
  */
+const PLACEHOLDER_NAMES = new Set(["me", "you", "profile", "default profile"]);
+
+function isLikelyPlaceholder(name: string | null | undefined): boolean {
+  if (!name) return true;
+  const trimmed = name.trim().toLowerCase();
+  if (!trimmed) return true;
+  if (PLACEHOLDER_NAMES.has(trimmed)) return true;
+  return /^guest \d+$/i.test(trimmed);
+}
+
 export function planRoster(input: PlanInput): RosterPlan {
   const { local, server, firstPull, mapping } = input;
   const live = server.filter((p) => p.deletedAt == null);
@@ -217,25 +227,60 @@ export function planRoster(input: PlanInput): RosterPlan {
     if (sid) localBySyncId.set(sid, p);
   }
 
+  // Available unmapped local profiles that can be matched against wire profiles
+  const unmatchedLocals = new Map<string, LocalProfileLike>();
+  for (const p of local) {
+    if (!mapping[p.id]) {
+      unmatchedLocals.set(p.id, p);
+    }
+  }
+
   const replaceWith: LocalProfileLike[] = [];
   const syncIdByLocalId: Record<string, string> = {};
   for (const wire of live) {
-    const existing = localBySyncId.get(wire.syncId);
-    const localId = existing ? existing.id : newLocalId();
+    let existing = localBySyncId.get(wire.syncId);
+    let localId: string;
+
+    if (existing) {
+      localId = existing.id;
+    } else {
+      // Check if an unmapped local profile has the same name (case-insensitive)
+      const wireNameNorm = wire.name.trim().toLowerCase();
+      let matchCandidate: LocalProfileLike | undefined;
+      for (const candidate of unmatchedLocals.values()) {
+        if (candidate.name.trim().toLowerCase() === wireNameNorm) {
+          matchCandidate = candidate;
+          break;
+        }
+      }
+      // If primary wire profile and no match by name, check for unmapped primary
+      if (!matchCandidate && wire.isPrimary) {
+        for (const candidate of unmatchedLocals.values()) {
+          if (candidate.isPrimary && !isLikelyPlaceholder(candidate.name)) {
+            matchCandidate = candidate;
+            break;
+          }
+        }
+      }
+
+      if (matchCandidate) {
+        existing = matchCandidate;
+        localId = matchCandidate.id;
+        unmatchedLocals.delete(matchCandidate.id);
+      } else {
+        localId = newLocalId();
+      }
+    }
+
     replaceWith.push(fromWire(wire, localId, existing));
     syncIdByLocalId[localId] = wire.syncId;
   }
 
-  // DELETION REQUIRES A TOMBSTONE. dropLocalIds used to be "every local profile the
-  // server did not mention", which made absence destructive: parseRoster skips any row
-  // with a non-string name or syncId, so one malformed field, one truncated array or one
-  // stale `current` echoed inside a push rejection would purge that profile's entire
-  // local data set on every device that pulled it. The server has never been observed
-  // answering once. Absence now means "the server's view is incomplete", and the profile
-  // is kept and pushed back.
   const kept = new Set(replaceWith.map((p) => p.id));
+  const seenNames = new Set(replaceWith.map((p) => p.name.trim().toLowerCase()));
   const push: LocalProfileLike[] = [];
   const dropLocalIds: string[] = [];
+
   for (const p of local) {
     if (kept.has(p.id)) continue;
     const sid = mapping[p.id];
@@ -249,10 +294,19 @@ export function planRoster(input: PlanInput): RosterPlan {
       push.push(p);
       continue;
     }
-    if (firstPull && isBootstrapProfile(p)) {
+    // Drop placeholder profiles on first pull when server already has live profiles
+    if (firstPull && (isBootstrapProfile(p) || isLikelyPlaceholder(p.name))) {
       dropLocalIds.push(p.id);
       continue;
     }
+    // Deduplicate: if replaceWith already has a profile with the identical name, do not duplicate
+    const pNameNorm = p.name.trim().toLowerCase();
+    if (seenNames.has(pNameNorm)) {
+      dropLocalIds.push(p.id);
+      continue;
+    }
+
+    seenNames.add(pNameNorm);
     // The server roster already names a primary. Uploading a second one makes two devices
     // disagree about which profile owns the shared Stremio session.
     replaceWith.push({ ...p, isPrimary: false });

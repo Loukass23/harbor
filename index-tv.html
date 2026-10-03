@@ -45,12 +45,25 @@
           /* leave the authored viewport alone */
         }
       })();
+      // Watchdog: guarantee boot overlay never permanently covers screen if stalled
+      setTimeout(function () {
+        try {
+          var b = document.getElementById("boot");
+          if (b) b.remove();
+          var r = document.getElementById("root");
+          if (r) {
+            r.removeAttribute("data-startup-hidden");
+            r.inert = false;
+          }
+        } catch (e) {}
+      }, 7000);
     </script>
     <meta name="theme-color" content="#111214" />
     <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex" />
     <meta name="googlebot" content="noindex, nofollow, noarchive, nosnippet, noimageindex" />
     <meta name="referrer" content="no-referrer" />
-    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="icon" type="image/png" href="./favicon.png" />
+    <script type="text/javascript" src="$WEBAPIS/webapis/webapis.js"></script>
     <title>Harbor</title>
     <link rel="preconnect" href="https://api.fontshare.com" crossorigin />
     <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin />

@@ -50,10 +50,27 @@ function servePublicMediapipe() {
 
 export default defineConfig(({ mode }) => {
   const android = mode === "android" || process.env.HARBOR_TARGET === "android";
+  const tizen = mode === "tizen" || process.env.HARBOR_TARGET === "tizen";
   const devHost = process.env.TAURI_DEV_HOST;
   return {
+    base: tizen ? "./" : "/",
     staged: { "*": "vp check --fix" },
-    plugins: [react(), tailwindcss(), silenceMediapipeSourcemap(), servePublicMediapipe()],
+    plugins: [
+      react(),
+      tailwindcss(),
+      silenceMediapipeSourcemap(),
+      servePublicMediapipe(),
+      ...(tizen
+        ? [
+            {
+              name: "tizen-remove-crossorigin",
+              transformIndexHtml(html: string) {
+                return html.replace(/\s*crossorigin(="[^"]*")?/g, "");
+              },
+            },
+          ]
+        : []),
+    ],
     clearScreen: false,
     define: {
       __APP_VERSION__: JSON.stringify(pkg.version),
@@ -79,7 +96,29 @@ export default defineConfig(({ mode }) => {
     // failure is a bare SyntaxError before React mounts, with no error surface
     // on a device you cannot open devtools on. Pin a floor the hardware meets.
     // This lowers syntax only; esbuild adds no API polyfills.
-    ...(android
+    ...(tizen
+      ? {
+          build: {
+            target: "chrome108",
+            rollupOptions: {
+              input: { tv: "index-tv.html" },
+              output: {
+                manualChunks(id: string) {
+                  if (id.includes("node_modules/react") || id.includes("node_modules/react-dom")) {
+                    return "react-core";
+                  }
+                  if (id.includes("node_modules/@tanstack")) {
+                    return "tanstack";
+                  }
+                  if (id.includes("big-picture")) {
+                    return "bp";
+                  }
+                },
+              },
+            },
+          },
+        }
+      : android
       ? {
           build: {
             target: "chrome87",

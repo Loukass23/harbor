@@ -17,6 +17,42 @@ import "@/index.css";
 
 applyOsDataset();
 
+const isTizen = typeof window !== "undefined" && ("tizen" in window || "webapis" in window);
+if (isTizen) {
+  document.documentElement.dataset.os = "tizen";
+  document.documentElement.setAttribute("data-input-modality", "keys");
+  try {
+    const tizenObj = (
+      window as unknown as {
+        tizen?: { tvinputdevice?: { registerKeyBatch?: (keys: string[]) => void } };
+      }
+    ).tizen;
+    if (tizenObj?.tvinputdevice?.registerKeyBatch) {
+      tizenObj.tvinputdevice.registerKeyBatch([
+        "MediaPlay",
+        "MediaPause",
+        "MediaPlayPause",
+        "MediaFastForward",
+        "MediaRewind",
+        "MediaStop",
+        "Return",
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+      ]);
+    }
+  } catch (err) {
+    console.warn("[tizen] registerKeyBatch failed", err);
+  }
+}
+
 // No startup-ready ping here, and that is deliberate. Desktop sets
 // visible:false on its window and reveals it from on_page_load inside the
 // #[cfg(desktop)] run(); harbor_startup_ready only calls set_focus and is not
@@ -27,6 +63,13 @@ applyOsDataset();
 
 async function mount() {
   performance.mark("harbor:mount-start");
+  // Check and apply backup preload if available (bundled or companion server)
+  try {
+    const { applyPreloadIfNeeded } = await import("@/lib/tizen-preload");
+    await applyPreloadIfNeeded();
+  } catch (err) {
+    console.warn("[tizen] Preload check failed", err);
+  }
   await Promise.all([loadSecrets(), hydrateCustomThemes().catch(() => {})]);
   performance.mark("harbor:secrets-done");
   // Only the selected language, and only if it is not the one compiled in.

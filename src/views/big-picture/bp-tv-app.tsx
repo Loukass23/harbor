@@ -30,7 +30,7 @@ import { LetterboxdProvider } from "@/lib/stremboxd/provider";
 import { TogetherProvider } from "@/lib/together/provider";
 import { TopRankModalProvider } from "@/lib/top-rank-modal";
 import { TraktProvider } from "@/lib/trakt/provider";
-import { ViewProvider } from "@/lib/view";
+import { ViewProvider, useView } from "@/lib/view";
 import { setBpTvShell } from "./bp-logic";
 import { setBpOverscanDefault, TEN_FOOT_OVERSCAN } from "./bp-safe-area";
 
@@ -46,6 +46,10 @@ setBpOverscanDefault(TEN_FOOT_OVERSCAN);
 
 const BigPictureShell = lazy(() =>
   import("./bp-shell").then((m) => ({ default: m.BigPictureShell })),
+);
+
+const PlayerView = lazy(() =>
+  import("@/views/player").then((m) => ({ default: m.PlayerView })),
 );
 
 type BpTvProvider = ComponentType<{ children: ReactNode }>;
@@ -90,6 +94,7 @@ function BpTvSound() {
 
 function BpTvRoot() {
   const { active } = useBigPicture();
+  const { player } = useView();
 
   // The kid check that used to guard this was the second half of the black screen: the
   // shell had already exited and this refused to re-enter, so nothing was mounted at all.
@@ -112,6 +117,14 @@ function BpTvRoot() {
       <SettingsProfileBridge />
       <TrackerProfileBridge />
       <ProfileSyncRunner />
+      {player && (
+        <Suspense fallback={null}>
+          <PlayerView
+            key={player.meta.id.startsWith("iptv:") ? "player-live" : `player-${player.meta.id}`}
+            src={player}
+          />
+        </Suspense>
+      )}
       <Suspense fallback={null}>
         <BigPictureShell />
       </Suspense>
