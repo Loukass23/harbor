@@ -11,3 +11,4 @@ onlyBuiltDependencies:
   - esbuild
   - protobufjs
   - "@resvg/resvg-js"
+confirmModulesPurge: false
