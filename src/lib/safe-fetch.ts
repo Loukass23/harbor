@@ -4,6 +4,18 @@ import { TrackerBlockedError, isBlockedUrl, noteBlocked } from "./privacy/blockl
 import { canFallbackAfterNativeFetchError } from "./safe-fetch-policy";
 
 const isTauri = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
+const isTizen =
+  typeof window !== "undefined" &&
+  ("tizen" in window || "webapis" in window || window.location.protocol === "file:");
+const DEFAULT_HARBOR_SERVER = "http://192.168.178.89:3001";
+
+function getCompanionServer(): string {
+  try {
+    const saved = localStorage.getItem("harbor_server_url");
+    if (saved) return saved.replace(/\/+$/, "");
+  } catch {}
+  return DEFAULT_HARBOR_SERVER;
+}
 
 // Torrentio + TorBox sit behind Cloudflare that blocks datacenter IPs, so on web they
 // MUST be fetched directly from the browser's residential IP (they set CORS, so it
@@ -58,7 +70,13 @@ function rewriteForWeb(url: string, init?: RequestInit): { url: string; init?: R
     PROXY_HOSTS.has(parsed.hostname) || PROXY_SUFFIXES.some((s) => parsed.hostname.endsWith(s));
   if (!proxiable) return { url, init };
 
-  const proxied = `/api-proxy/${parsed.hostname}${parsed.pathname}${parsed.search}`;
+  const base = isTizen ? getCompanionServer() : "";
+  let proxied: string;
+  if (parsed.hostname === "api.simkl.com") {
+    proxied = `${base}/api-simkl${parsed.pathname}${parsed.search}`;
+  } else {
+    proxied = `${base}/api-proxy/${parsed.hostname}${parsed.pathname}${parsed.search}`;
+  }
   if (!init?.headers) return { url: proxied, init };
   const out = new Headers(init.headers as HeadersInit);
   const auth = out.get("authorization");

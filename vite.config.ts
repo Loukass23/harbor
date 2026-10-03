@@ -26,8 +26,18 @@ export default defineConfig({
     },
     options: { typeAware: true, typeCheck: true },
   },
-  plugins: lazyPlugins(() => [react(), tailwindcss()]),
+  plugins: lazyPlugins(() => [
+    react(),
+    tailwindcss(),
+    {
+      name: "tizen-remove-crossorigin",
+      transformIndexHtml(html: string) {
+        return html.replace(/\s*crossorigin(="[^"]*")?/g, "");
+      },
+    },
+  ]),
   build: {
+    target: "es2020",
     rolldownOptions: {
       onLog(level, log, handler) {
         if (log.code === "EVAL" && log.id?.includes("/lottie-web/")) return;
