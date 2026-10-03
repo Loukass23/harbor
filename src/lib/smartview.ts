@@ -102,7 +102,7 @@ export function connectSamsungTvChannel(
 
   return {
     send: (event: string, data?: unknown) => {
-      if (ws && ws.readyState === WebSocket.OPEN) {
+      if (!closed && ws && ws.readyState === WebSocket.OPEN) {
         ws.send(JSON.stringify({ event, data }));
       }
     },
