@@ -110,8 +110,14 @@ export default defineConfig(({ mode }) => {
                   if (id.includes("node_modules/@tanstack")) {
                     return "tanstack";
                   }
-                  if (id.includes("big-picture")) {
-                    return "bp";
+                  if (id.includes("node_modules/lucide-react")) {
+                    return "icons";
+                  }
+                  if (id.includes("node_modules/lottie-web")) {
+                    return "lottie";
+                  }
+                  if (id.includes("node_modules/hls.js") || id.includes("node_modules/mpegts.js")) {
+                    return "video-vendor";
                   }
                 },
               },
