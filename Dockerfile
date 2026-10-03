@@ -5,8 +5,9 @@ RUN npm install -g corepack@latest && corepack enable
 
 WORKDIR /app
 
-COPY package.json pnpm-lock.yaml ./
-RUN corepack prepare pnpm@11.8.0 --activate
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml* .npmrc* ./
+RUN corepack prepare pnpm@11.9.0 --activate
+RUN pnpm config set confirm-modules-purge false
 RUN pnpm install --frozen-lockfile || pnpm install --dangerously-allow-all-builds || pnpm install
 
 COPY . .
