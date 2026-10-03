@@ -82,5 +82,12 @@
     "vite": "^7.0.4",
     "vite-plugin-static-copy": "^2.0.0"
   },
-  "packageManager": "pnpm@11.9.0"
+  "packageManager": "pnpm@11.9.0",
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "protobufjs",
+      "@resvg/resvg-js"
+    ]
+  }
 }
