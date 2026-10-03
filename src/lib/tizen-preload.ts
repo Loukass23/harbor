@@ -12,8 +12,12 @@ export async function applyPreloadIfNeeded(): Promise<boolean> {
   try {
     const resp = await fetch("./preload-backup.harbx", { signal: AbortSignal.timeout(3000) });
     if (resp.ok) {
-      text = await resp.text();
-      console.log("[preload] Found bundled backup file ./preload-backup.harbx");
+      const candidate = await resp.text();
+      const parsedCandidate = parseBackup(candidate);
+      if (parsedCandidate.ok) {
+        text = candidate;
+        console.log("[preload] Found valid bundled backup file ./preload-backup.harbx");
+      }
     }
   } catch {}
 
