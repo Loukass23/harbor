@@ -5,5 +5,5 @@ export const SIMKL_CLIENT_ID =
 export const SIMKL_VERIFY_URL = "https://simkl.com/pin";
 export const WATCHED_RATIO = 0.85;
 export const SIMKL_WATCHED_RATIO = 0.8;
-export const SIMKL_APP_NAME = "harbor";
+export const SIMKL_APP_NAME = "harbor-tv";
 export const SIMKL_APP_VERSION = "0.9.75";
