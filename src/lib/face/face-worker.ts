@@ -4,7 +4,7 @@ import {
   embedWorkerLargestFace,
   ensureWorkerFaceEngine,
   scanWorkerFrame,
-} from "./face-worker-engine";
+} from "@/lib/face/face-worker-engine";
 import type { FaceWorkerRequest, FaceWorkerResponse } from "./face-worker-protocol";
 
 const scope = self as DedicatedWorkerGlobalScope;

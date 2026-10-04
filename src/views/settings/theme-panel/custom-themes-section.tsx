@@ -35,9 +35,14 @@ import {
   type ThemePreset,
 } from "@/lib/theme";
 import { useT } from "@/lib/i18n";
+import { useThemePreviews } from "@/lib/theme-preview-images";
 
 export function CustomThemesSection() {
   const t = useT();
+  // Re-renders when the lazy theme-preview artwork lands (see theme.ts
+  // ensureThemePreviews); entries below are rebuilt so memoized children
+  // pick up the hydrated previewImage URLs.
+  const themePreviews = useThemePreviews();
   const { settings, update } = useSettings();
   const [themes, setThemes] = useState<CustomTheme[]>(() => getCustomThemes());
   const [error, setError] = useState<string | null>(null);
@@ -115,7 +120,7 @@ export function CustomThemesSection() {
   const activeId = settings.theme.preset;
   const activeTheme = activeId === "custom" ? null : getThemeById(activeId);
 
-  const entries = useMemo(() => buildEntries(themes), [themes]);
+  const entries = useMemo(() => buildEntries(themes), [themes, themePreviews]);
 
   const activateTheme = (id: string, nav?: ThemePreset["navCustomization"]) => {
     const next = getThemeById(id);

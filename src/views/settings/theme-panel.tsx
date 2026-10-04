@@ -3,6 +3,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { getCustomThemes, subscribeCustomThemes } from "@/lib/custom-themes";
 import { useSettings } from "@/lib/settings";
 import { FEATURED_CUSTOM_THEMES, getThemeById, THEME_PRESETS, type ThemeSettings } from "@/lib/theme";
+import { useThemePreviews } from "@/lib/theme-preview-images";
 import { nextBackgroundImage } from "@/lib/theme-background";
 import { useT } from "@/lib/i18n";
 import { ROW_DESC, Section, Segmented, ToggleRow } from "./shared";
@@ -216,19 +217,21 @@ function WindowTab() {
   );
 }
 
-const COMMUNITY_PREVIEW: IconThumb[] = [...FEATURED_CUSTOM_THEMES, ...Object.values(THEME_PRESETS)]
-  .filter((tp) => tp.previewImage)
-  .slice(0, 5)
-  .map((tp) => ({ src: tp.previewImage, alt: tp.name }));
-
 function ThemeCommunityCta() {
   const t = useT();
+  // Preview artwork arrives after mount (see theme-preview-images.ts); the
+  // CTA renders without covers until then and fills them in on hydration.
+  useThemePreviews();
+  const previews: IconThumb[] = [...FEATURED_CUSTOM_THEMES, ...Object.values(THEME_PRESETS)]
+    .filter((tp) => tp.previewImage)
+    .slice(0, 5)
+    .map((tp) => ({ src: tp.previewImage as string, alt: tp.name }));
   return (
     <MarketCta
       variant="browse"
       label={t("Browse community themes")}
       sublabel={t("Fresh looks shared by the Harbor community")}
-      preview={COMMUNITY_PREVIEW}
+      preview={previews}
       onClick={() => requestThemeLibrary({ tab: "community" })}
     />
   );

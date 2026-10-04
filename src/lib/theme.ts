@@ -1,17 +1,4 @@
 import { kawaiiCss } from "./theme-kawaii";
-import auroraPreview from "@/assets/theme-previews/aurora.png";
-import crunchPreview from "@/assets/theme-previews/crunchy.png";
-import draculaPreview from "@/assets/theme-previews/dracula.png";
-import forestPreview from "@/assets/theme-previews/forest.png";
-import harborPreview from "@/assets/theme-previews/harbor.png";
-import kawaiiPreview from "@/assets/theme-previews/kawaii.jpg";
-import minuiPreview from "@/assets/theme-previews/minui.png";
-import minuiDarkPreview from "@/assets/theme-previews/minui-dark.png";
-import noirPreview from "@/assets/theme-previews/noir.png";
-import nordPreview from "@/assets/theme-previews/nord.png";
-import royalPreview from "@/assets/theme-previews/royal.png";
-import stremioPreview from "@/assets/theme-previews/stremio.png";
-import velvetPreview from "@/assets/theme-previews/velvet.png";
 import { getCustomThemes } from "./custom-themes";
 import { t } from "./i18n";
 
@@ -107,6 +94,10 @@ export type ThemePreset = {
     renamed: Record<string, string>;
   };
   previewImage?: string;
+  // Filename under src/assets/theme-previews/ (e.g. "harbor.webp"). The URL
+  // is hydrated into previewImage on demand via ensureThemePreviews() — the
+  // images never enter the boot graph (see theme-preview-images.ts).
+  previewFile?: string;
   fontPair?: FontPairId;
   css?: string;
   js?: string;
@@ -121,12 +112,58 @@ export type FontPair = {
   sans: string;
 };
 
+// On-demand preview artwork hydration (see theme-preview-images.ts).
+//
+// THEME_PRESETS / FEATURED_CUSTOM_THEMES carry only previewFile at module
+// scope so the ~0.7MB of preview WebPs never enter any boot graph. The first
+// consumer that renders previews calls ensureThemePreviews() (via the
+// useThemePreviews() hook, which also subscribes for the re-render when the
+// URLs land); the resolved URLs are written back onto previewImage, the field
+// every consumer already reads.
+let themePreviewsPromise: Promise<void> | null = null;
+let themePreviewsVersionValue = 0;
+const themePreviewListeners = new Set<() => void>();
+
+export function themePreviewsVersion(): number {
+  return themePreviewsVersionValue;
+}
+
+export function subscribeThemePreviews(fn: () => void): () => void {
+  themePreviewListeners.add(fn);
+  return () => themePreviewListeners.delete(fn);
+}
+
+export function ensureThemePreviews(): Promise<void> {
+  if (themePreviewsPromise) return themePreviewsPromise;
+  themePreviewsPromise = (async () => {
+    try {
+      const { loadThemePreviewImage } = await import("./theme-preview-images");
+      const all: ThemePreset[] = [...Object.values(THEME_PRESETS), ...FEATURED_CUSTOM_THEMES];
+      await Promise.all(
+        all.map(async (p) => {
+          if (p.previewFile && !p.previewImage) {
+            try {
+              p.previewImage = await loadThemePreviewImage(p.previewFile);
+            } catch {
+              /* a missing preview degrades to the token swatch, never breaks */
+            }
+          }
+        }),
+      );
+    } finally {
+      themePreviewsVersionValue += 1;
+      for (const fn of themePreviewListeners) fn();
+    }
+  })();
+  return themePreviewsPromise;
+}
+
 export const THEME_PRESETS: Record<ThemePresetId, ThemePreset> = {
   "cool-grey": {
     id: "cool-grey",
     name: "Harbor default",
     blurb: "What ships out of the box.",
-    previewImage: harborPreview,
+    previewFile: "harbor.webp",
     swatch: ["#2c2e36", "#3a3d47", "#dcdde4"],
     tokens: {
       "--color-canvas": "oklch(0.18 0.004 260)",
@@ -147,7 +184,7 @@ export const THEME_PRESETS: Record<ThemePresetId, ThemePreset> = {
     id: "nord",
     name: "Nord",
     blurb: "Cool grey-blue. Arctic and crisp.",
-    previewImage: nordPreview,
+    previewFile: "nord.webp",
     swatch: ["#2e3440", "#434c5e", "#88c0d0"],
     tokens: {
       "--color-canvas": "#2e3440",
@@ -169,7 +206,7 @@ export const THEME_PRESETS: Record<ThemePresetId, ThemePreset> = {
     id: "stremio",
     name: "Stremio",
     blurb: "Purple accent, Indigo gradient, Narrow icon rail.",
-    previewImage: stremioPreview,
+    previewFile: "stremio.webp",
     swatch: ["#0c0b11", "#1a173e", "#7b5bf5"],
     tokens: {
       "--color-canvas": "#0c0b11",
@@ -197,7 +234,7 @@ export const THEME_PRESETS: Record<ThemePresetId, ThemePreset> = {
     id: "crunch",
     name: "Crunchy",
     blurb: "Charcoal chrome with a spice-orange accent. Bold and clean.",
-    previewImage: crunchPreview,
+    previewFile: "crunchy.webp",
     swatch: ["#000000", "#272727", "#ff640a"],
     tokens: {
       "--color-canvas": "#000000",
@@ -226,7 +263,7 @@ export const THEME_PRESETS: Record<ThemePresetId, ThemePreset> = {
     id: "tokyo-night",
     name: "Royal",
     blurb: "Deep navy with a warm orange accent.",
-    previewImage: royalPreview,
+    previewFile: "royal.webp",
     swatch: ["#0c1118", "#1c2230", "#f08032"],
     tokens: {
       "--color-canvas": "#0c1118",
@@ -248,7 +285,7 @@ export const THEME_PRESETS: Record<ThemePresetId, ThemePreset> = {
     id: "dracula",
     name: "Dracula",
     blurb: "Violet on graphite, bold accents. Easy on the eyes.",
-    previewImage: draculaPreview,
+    previewFile: "dracula.webp",
     swatch: ["#282a36", "#44475a", "#bd93f9"],
     tokens: {
       "--color-canvas": "#282a36",
@@ -270,7 +307,7 @@ export const THEME_PRESETS: Record<ThemePresetId, ThemePreset> = {
     id: "forest",
     name: "Forest",
     blurb: "Greens, low saturation.",
-    previewImage: forestPreview,
+    previewFile: "forest.webp",
     swatch: ["#1a221d", "#26312a", "#dde7df"],
     tokens: {
       "--color-canvas": "oklch(0.18 0.018 145)",
@@ -292,7 +329,7 @@ export const THEME_PRESETS: Record<ThemePresetId, ThemePreset> = {
     id: "noir",
     name: "Noir",
     blurb: "Pure black. Clean.",
-    previewImage: noirPreview,
+    previewFile: "noir.webp",
     swatch: ["#000000", "#0a0a0a", "#ffffff"],
     tokens: {
       "--color-canvas": "#000000",
@@ -1664,7 +1701,7 @@ export const FEATURED_CUSTOM_THEMES: ThemePreset[] = [
     buttonStyle: "flat",
     bokeh: false,
     css: kawaiiCss,
-    previewImage: kawaiiPreview,
+    previewFile: "kawaii.webp",
   },
   {
     id: "aurora" as ThemePresetId,
@@ -1694,13 +1731,13 @@ export const FEATURED_CUSTOM_THEMES: ThemePreset[] = [
     cardStyle: "glass",
     buttonStyle: "glossy",
     bokeh: true,
-    previewImage: auroraPreview,
+    previewFile: "aurora.webp",
   },
   {
     id: "minui" as ThemePresetId,
     name: "MinUI",
     blurb: "Floating icon dock. Crisp and light. Big targets, restrained chrome.",
-    previewImage: minuiPreview,
+    previewFile: "minui.webp",
     swatch: ["#f7f7f8", "#ffffff", "#0d7c66"],
     tokens: {
       "--color-canvas": "#f6f6f7",
@@ -1730,7 +1767,7 @@ export const FEATURED_CUSTOM_THEMES: ThemePreset[] = [
     id: "minui-dark" as ThemePresetId,
     name: "MinUI Dark",
     blurb: "MinUI after dark. Same floating dock, deep charcoal chrome.",
-    previewImage: minuiDarkPreview,
+    previewFile: "minui-dark.webp",
     swatch: ["#101014", "#1a1a20", "#14b8a6"],
     tokens: {
       "--color-canvas": "#101014",
@@ -1787,7 +1824,7 @@ export const TEMPLATE_THEMES: ThemePreset[] = [
     buttonStyle: "flat",
     bokeh: false,
     fontPair: "sentient-switzer",
-    previewImage: velvetPreview,
+    previewFile: "velvet.webp",
   },
 ];
 

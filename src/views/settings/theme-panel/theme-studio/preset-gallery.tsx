@@ -1,11 +1,16 @@
 import { THEME_PRESETS, type ThemePreset } from "@/lib/theme";
 import { useT } from "@/lib/i18n";
+import { useThemePreviews } from "@/lib/theme-preview-images";
 import { Fit } from "../custom-themes-section/community-store/market/fit";
 import { tokensFromPreset } from "../custom-themes-section/community-store/market/fit-palette";
 import { PaletteSeam } from "../custom-themes-section/community-store/market/palette-seam";
 
 export function PresetGallery({ onSeed }: { onSeed: (t: ThemePreset) => void }) {
   const t = useT();
+  // Triggers the on-demand preview artwork load; the gallery re-renders
+  // with covers when they arrive (Fit renders the token swatch until
+  // cover is set).
+  useThemePreviews();
   return (
     <div className="grid grid-cols-2 gap-2.5">
       {Object.values(THEME_PRESETS).map((p) => (

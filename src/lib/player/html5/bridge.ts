@@ -1,5 +1,3 @@
-import Hls from "hls.js";
-import mpegts from "mpegts.js";
 import {
   initialPlayerSnapshot,
   type PlayerBridge,
@@ -28,6 +26,11 @@ import { isSafeProviderSubtitleUrl } from "@/lib/subtitles/provider-url";
 
 let DOCUMENT_PIP_KNOWN_BROKEN = false;
 
+type HlsModule = typeof import("hls.js");
+type MpegtsModule = typeof import("mpegts.js");
+type HlsInstance = InstanceType<HlsModule["default"]>;
+type MpegtsInstance = ReturnType<MpegtsModule["default"]["createPlayer"]>;
+
 export function createHtml5Bridge(): PlayerBridge {
   let video: HTMLVideoElement | null = null;
   let host: HTMLElement | null = null;
@@ -40,8 +43,8 @@ export function createHtml5Bridge(): PlayerBridge {
   let abLoopB: number | null = null;
   let mediaSessionBound = false;
   let pendingVolume = 1;
-  let hls: Hls | null = null;
-  let tsPlayer: ReturnType<typeof mpegts.createPlayer> | null = null;
+  let hls: HlsInstance | null = null;
+  let tsPlayer: MpegtsInstance | null = null;
   let isLiveSrc = false;
   let audioProbeDone = false;
   const subTracks: SubTrack[] = [];
@@ -547,7 +550,11 @@ export function createHtml5Bridge(): PlayerBridge {
       const isTs =
         bare.endsWith(".ts") ||
         (src.notWebReady === true && !isHls && !/\.(mp4|webm|mov|mkv|mpd)$/.test(bare));
-      if (isHls && Hls.isSupported()) {
+      if (isHls) {
+        const [{ default: Hls }] = await Promise.all([
+          import("hls.js"),
+        ]);
+        if (!Hls.isSupported()) return;
         hls = new Hls(
           src.notWebReady === true || src.isLive === true
             ? {
@@ -562,7 +569,11 @@ export function createHtml5Bridge(): PlayerBridge {
         hls.attachMedia(video);
         hls.on(Hls.Events.AUDIO_TRACKS_UPDATED, refreshSnapshot);
         hls.on(Hls.Events.AUDIO_TRACK_SWITCHED, refreshSnapshot);
-      } else if (isTs && mpegts.isSupported()) {
+      } else if (isTs) {
+        const [{ default: mpegts }] = await Promise.all([
+          import("mpegts.js"),
+        ]);
+        if (!mpegts.isSupported()) return;
         tsPlayer = mpegts.createPlayer(
           { type: "mpegts", url: src.url, isLive: true, cors: true },
           { enableWorker: true, liveBufferLatencyChasing: true, lazyLoadMaxDuration: 4 },

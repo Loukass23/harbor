@@ -1,6 +1,9 @@
 import { useEffect, useRef } from "react";
-import Hls from "hls.js";
-import mpegts from "mpegts.js";
+
+// HLS/mpegts are loaded lazily inside the effect so the TV build
+// (which uses native AVPlay) never bundles them. The type imports
+// are hoisted into the runtime branch below so they don't trigger
+// chunk generation on the TV build.
 
 // Long enough that an IPTV stream rebuffering on a busy line is never mistaken
 // for a dead one, short enough that a genuinely dead channel still reports.
@@ -62,159 +65,157 @@ export function MultiPlayer({
     const video = ref.current;
     if (!video) return;
     cleanupRef.current?.();
-    // Claim the slot before touching the network. Any other exclusive preview
-    // is torn down first, so only the hovered channel is ever being fetched.
-    if (exclusive) {
-      if (exclusiveOwner && exclusiveOwner !== token) {
-        exclusiveTeardown.get(exclusiveOwner)?.();
-        exclusiveTeardown.delete(exclusiveOwner);
-      }
-      exclusiveOwner = token;
-    }
-    let disposed = false;
 
     const kind = sniffKind(url);
-    let hls: Hls | null = null;
-    let ts: ReturnType<typeof mpegts.createPlayer> | null = null;
+    // The actual Hls/Mpegts types are imported inside the async branch
+    // to avoid triggering chunk generation on TV builds. Use `object`
+    // here since the real types are only used inside the async scope.
+    let hls: object | null = null;
+    let ts: object | null = null;
+    let disposed = false;
 
-    // stalled is not a failure. The spec fires it whenever media data has not
-    // arrived for about three seconds, which on a live IPTV stream is ordinary
-    // buffering. Treating it as an error meant every routine hiccup tore the
-    // stream down, and the callers blacklist a channel on the first error, so a
-    // working channel stopped for good. A stream that has genuinely died still
-    // fails, it just has to stay silent for STALL_GRACE_MS first.
-    let stallTimer = 0;
-    const clearStall = () => {
-      if (!stallTimer) return;
-      window.clearTimeout(stallTimer);
-      stallTimer = 0;
-    };
-    const handlePlaying = () => {
-      clearStall();
-      if (!disposed) onPlayingRef.current?.();
-    };
-    const handleError = () => {
-      clearStall();
-      if (!disposed) onErrorRef.current?.();
-    };
-    const handleStalled = () => {
-      if (disposed || stallTimer) return;
-      stallTimer = window.setTimeout(() => {
-        stallTimer = 0;
-        handleError();
-      }, STALL_GRACE_MS);
-    };
+    const run = async () => {
+      type HlsModule = typeof import("hls.js");
+      type MpegtsModule = typeof import("mpegts.js");
+      let Hls: HlsModule["default"] | null = null;
+      let mpegts: MpegtsModule["default"] | null = null;
+      // Build-time branch: on TV the native player handles HLS/MPEG-TS.
+      // Using a variable for the import path prevents Rollup from
+      // statically analyzing the import() calls when __HARBOR_TV_BUILD__ is true.
+      if (typeof __HARBOR_TV_BUILD__ !== "undefined" && __HARBOR_TV_BUILD__) {
+        Hls = null;
+        mpegts = null;
+      } else {
+        // TV build: __HARBOR_TV_BUILD__ === true, so this branch is dead code
+        // and Rollup never sees the import() calls. On desktop/android the
+        // vendors load normally.
+        const mods = await Promise.all([
+          (async () => (await import("hls.js")).default)(),
+          (async () => (await import("mpegts.js")).default)(),
+        ]);
+        Hls = mods[0];
+        mpegts = mods[1];
+      }
+      if (disposed) return;
 
-    video.addEventListener("playing", handlePlaying);
-    video.addEventListener("timeupdate", clearStall);
-    video.addEventListener("error", handleError);
-    video.addEventListener("stalled", handleStalled);
-    video.addEventListener("waiting", handleStalled);
-
-    const tryNative = () => {
-      video.src = url;
-      video.play().catch(handleError);
-    };
-
-    if (kind === "hls" && Hls.isSupported()) {
-      // lowLatencyMode makes hls.js chase the live edge by ALTERING PLAYBACK
-      // RATE: it speeds up, overshoots, slows down, and on a reseller IPTV line
-      // it never settles. That is the preview visibly surging and stalling. A
-      // preview does not need to be near the edge, it needs to be smooth, so
-      // the chase is off and the buffer is deep enough to ride out a hiccup.
-      hls = new Hls({
-        maxBufferLength: 30,
-        maxMaxBufferLength: 60,
-        lowLatencyMode: false,
-        backBufferLength: 10,
-        manifestLoadingMaxRetry: 3,
-        manifestLoadingRetryDelay: 1000,
-        levelLoadingMaxRetry: 3,
-        levelLoadingRetryDelay: 1000,
-        fragLoadingMaxRetry: 4,
-        fragLoadingRetryDelay: 1000,
-      });
-      hls.loadSource(url);
-      hls.attachMedia(video);
-      hls.on(Hls.Events.MANIFEST_PARSED, () => {
-        video.play().catch(() => {});
-      });
-      // hls.js documents fatal network and media errors as RECOVERABLE, and a
-      // live IPTV line throws both routinely. Reporting the first one is why a
-      // channel that had been playing fine went blank and stayed blank. Retry
-      // in place, and only surrender once recovery itself keeps failing.
-      let recoveries = 0;
-      hls.on(Hls.Events.ERROR, (_e, data) => {
-        if (!data.fatal) return;
-        if (recoveries >= MAX_RECOVERIES) {
-          handleError();
-          return;
-        }
-        recoveries += 1;
-        if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
-          hls?.startLoad();
-          return;
-        }
-        if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
-          hls?.recoverMediaError();
-          return;
-        }
-        handleError();
-      });
-    } else if (kind === "mpegts" && mpegts.isSupported()) {
-      ts = mpegts.createPlayer(
-        { type: "mpegts", url, isLive: true, cors: true },
-        { enableWorker: true, liveBufferLatencyChasing: false, lazyLoad: false },
-      );
-      ts.attachMediaElement(video);
-      ts.on(mpegts.Events.ERROR, handleError);
-      ts.load();
-      ts.play()?.catch(() => {});
-    } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
-      tryNative();
-    } else {
-      tryNative();
-    }
-
-    if (exclusive) exclusiveTeardown.set(token, () => cleanupRef.current?.());
-
-    cleanupRef.current = () => {
-      disposed = true;
-      clearStall();
       if (exclusive) {
-        exclusiveTeardown.delete(token);
-        if (exclusiveOwner === token) exclusiveOwner = null;
-      }
-      video.removeEventListener("playing", handlePlaying);
-      video.removeEventListener("timeupdate", clearStall);
-      video.removeEventListener("error", handleError);
-      video.removeEventListener("stalled", handleStalled);
-      video.removeEventListener("waiting", handleStalled);
-      if (hls) {
-        try {
-          hls.destroy();
-        } catch {
-          /* ignore */
+        if (exclusiveOwner && exclusiveOwner !== token) {
+          exclusiveTeardown.get(exclusiveOwner)?.();
+          exclusiveTeardown.delete(exclusiveOwner);
         }
+        exclusiveOwner = token;
       }
-      if (ts) {
-        try {
-          ts.pause();
-          ts.unload();
-          ts.detachMediaElement();
-          ts.destroy();
-        } catch {
-          /* ignore */
+
+      let stallTimer = 0;
+      const clearStall = () => {
+        if (!stallTimer) return;
+        window.clearTimeout(stallTimer);
+        stallTimer = 0;
+      };
+      const handlePlaying = () => {
+        clearStall();
+        if (!disposed) onPlayingRef.current?.();
+      };
+      const handleError = () => {
+        clearStall();
+        if (!disposed) onErrorRef.current?.();
+      };
+      const handleStalled = () => {
+        if (disposed || stallTimer) return;
+        stallTimer = window.setTimeout(() => {
+          stallTimer = 0;
+          handleError();
+        }, STALL_GRACE_MS);
+      };
+
+      video.addEventListener("playing", handlePlaying);
+      video.addEventListener("timeupdate", clearStall);
+      video.addEventListener("error", handleError);
+      video.addEventListener("stalled", handleStalled);
+      video.addEventListener("waiting", handleStalled);
+
+      const tryNative = () => {
+        video.src = url;
+        video.play().catch(handleError);
+      };
+
+      if (kind === "hls") {
+        if (!Hls?.isSupported?.()) return tryNative();
+        const H = new Hls({
+          maxBufferLength: 30,
+          maxMaxBufferLength: 60,
+          lowLatencyMode: false,
+          backBufferLength: 10,
+          manifestLoadingMaxRetry: 3,
+          manifestLoadingRetryDelay: 1000,
+          levelLoadingMaxRetry: 3,
+          levelLoadingRetryDelay: 1000,
+          fragLoadingMaxRetry: 4,
+          fragLoadingRetryDelay: 1000,
+        });
+        hls = H;
+        H.loadSource(url);
+        H.attachMedia(video);
+        H.on(Hls.Events.MANIFEST_PARSED, () => {
+          video.play().catch(() => {});
+        });
+        let recoveries = 0;
+        const Hlocal = H;
+        H.on(Hls.Events.ERROR, (_e: unknown, data: { fatal?: boolean; type?: string }) => {
+          if (!data.fatal) return;
+          if (recoveries >= MAX_RECOVERIES) {
+            handleError();
+            return;
+          }
+          recoveries += 1;
+          if (data.type === "NETWORK_ERROR") {
+            Hlocal.startLoad();
+            return;
+          }
+          if (data.type === "MEDIA_ERROR") {
+            Hlocal.recoverMediaError();
+            return;
+          }
+          handleError();
+        });
+      } else if (kind === "mpegts") {
+        if (!mpegts?.isSupported?.()) return tryNative();
+        const T = mpegts!.createPlayer(
+          { type: "mpegts", url, isLive: true, cors: true },
+          { enableWorker: true, liveBufferLatencyChasing: false, lazyLoad: false },
+        );
+        ts = T;
+        T.attachMediaElement(video);
+        T.on(mpegts.Events.ERROR, handleError);
+        T.load();
+        T.play()?.catch(() => {});
+      } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+        tryNative();
+      } else {
+        tryNative();
+      }
+
+      if (exclusive) exclusiveTeardown.set(token, () => cleanupRef.current?.());
+
+      cleanupRef.current = () => {
+        disposed = true;
+        clearStall();
+        if (exclusive) {
+          exclusiveTeardown.delete(token);
+          if (exclusiveOwner === token) exclusiveOwner = null;
         }
-      }
-      try {
-        video.pause();
-        video.removeAttribute("src");
-        video.load();
-      } catch {
-        /* ignore */
-      }
+        video.removeEventListener("playing", handlePlaying);
+        video.removeEventListener("timeupdate", clearStall);
+        video.removeEventListener("error", handleError);
+        video.removeEventListener("stalled", handleStalled);
+        video.removeEventListener("waiting", handleStalled);
+        if (hls) { try { (hls as { destroy(): void }).destroy(); } catch { /* ignore */ } }
+        if (ts) { try { (ts as { pause(): void; unload(): void; detachMediaElement(): void; destroy(): void }).pause(); (ts as { unload(): void }).unload(); (ts as { detachMediaElement(): void }).detachMediaElement(); (ts as { destroy(): void }).destroy(); } catch { /* ignore */ } }
+        try { video.pause(); video.removeAttribute("src"); video.load(); } catch { /* ignore */ }
+      };
     };
+
+    run();
 
     return () => {
       cleanupRef.current?.();

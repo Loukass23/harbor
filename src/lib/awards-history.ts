@@ -65,9 +65,124 @@ export function subscribeBundledAwards(fn: () => void): () => void {
   return () => listeners.delete(fn);
 }
 
+const IS_TV_APP =
+  typeof window !== "undefined" && ("tizen" in window || "webapis" in window);
+
+// TV-side awards cache: the widget ships no awards chunk (see the
+// /api/tv/awards route, winners-only). The fetched table persists here so
+// an offline TV still shows marks from the last sync.
+const TV_AWARDS_DB = "harbor-tv-data";
+const TV_AWARDS_KEY = "tv-awards-v1";
+
+function tvIdbOpen(): Promise<IDBDatabase> {
+  return new Promise((resolve, reject) => {
+    try {
+      const req = indexedDB.open(TV_AWARDS_DB, 1);
+      req.onupgradeneeded = () => {
+        if (!req.result.objectStoreNames.contains("kv")) req.result.createObjectStore("kv");
+      };
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    } catch (e) {
+      reject(e);
+    }
+  });
+}
+
+async function tvIdbGetAwards(): Promise<string | null> {
+  const db = await tvIdbOpen();
+  try {
+    return await new Promise<string | null>((resolve, reject) => {
+      try {
+        const tx = db.transaction("kv", "readonly");
+        const rq = tx.objectStore("kv").get(TV_AWARDS_KEY);
+        rq.onsuccess = () => resolve(typeof rq.result === "string" ? rq.result : null);
+        rq.onerror = () => reject(rq.error);
+      } catch (e) {
+        reject(e);
+      }
+    });
+  } finally {
+    try {
+      db.close();
+    } catch {}
+  }
+}
+
+async function tvIdbSetAwards(json: string): Promise<void> {
+  const db = await tvIdbOpen();
+  try {
+    await new Promise<void>((resolve, reject) => {
+      try {
+        const tx = db.transaction("kv", "readwrite");
+        tx.objectStore("kv").put(json, TV_AWARDS_KEY);
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+      } catch (e) {
+        reject(e);
+      }
+    });
+  } finally {
+    try {
+      db.close();
+    } catch {}
+  }
+}
+
+async function ensureTvAwards(): Promise<void> {
+  // 1. Companion server (fresh table, then persist for offline use).
+  try {
+    const { getCompanionServer } = await import("./tizen-server");
+    const server = getCompanionServer();
+    if (server) {
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 8000);
+      try {
+        const resp = await fetch(`${server}/api/tv/awards`, { signal: ctrl.signal });
+        if (resp.ok) {
+          const body = (await resp.json()) as { data?: unknown };
+          if (body && body.data && typeof body.data === "object") {
+            setBundledAwards(body.data, true);
+            try {
+              await tvIdbSetAwards(JSON.stringify(body.data));
+            } catch {}
+            return;
+          }
+        }
+      } finally {
+        clearTimeout(timer);
+      }
+    }
+  } catch {
+    /* fall through to the offline cache */
+  }
+  // 2. Last synced table (offline TV).
+  try {
+    const cached = await tvIdbGetAwards();
+    if (cached) {
+      setBundledAwards(JSON.parse(cached) as unknown, true);
+      return;
+    }
+  } catch {
+    /* no cache */
+  }
+  requested = false;
+}
+
 export function ensureBundledAwards(): void {
   if (requested) return;
   requested = true;
+  // Build-time branch (see __HARBOR_TV_BUILD__ in vite.config.ts): in the
+  // tizen build rollup folds this to the fetch path and never emits the
+  // 4.2MB awards JSON chunk. The runtime check covers non-vite consumers.
+  if (typeof __HARBOR_TV_BUILD__ !== "undefined" && __HARBOR_TV_BUILD__) {
+    void ensureTvAwards();
+    return;
+  }
+  if (IS_TV_APP) {
+    void ensureTvAwards();
+    return;
+  }
   void import("@/data/awards.json")
     .then((m) => setBundledAwards(m.default, true))
     .catch(() => {

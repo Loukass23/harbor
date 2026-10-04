@@ -1,5 +1,6 @@
 import { useT } from "@/lib/i18n";
 import { THEME_PRESETS } from "@/lib/theme";
+import { useThemePreviews } from "@/lib/theme-preview-images";
 import { ROW_ACTION } from "@/views/settings/kit";
 import { useSettingsActiveContext } from "@/views/settings/shared";
 import { Fit } from "@/views/settings/theme-panel/custom-themes-section/community-store/market/fit";
@@ -9,6 +10,9 @@ const PREVIEW_THEMES = [THEME_PRESETS.nord, THEME_PRESETS["tokyo-night"]];
 
 export function AccountThemeCta() {
   const t = useT();
+  // nord's cover loads on demand; tokyo-night has no preview file and
+  // keeps rendering its token swatch via Fit.
+  useThemePreviews();
   const { openPage } = useSettingsActiveContext();
 
   return (

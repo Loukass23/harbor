@@ -75,6 +75,10 @@ export default defineConfig(({ mode }) => {
     clearScreen: false,
     define: {
       __APP_VERSION__: JSON.stringify(pkg.version),
+      // P3: lets shared modules drop desktop-only payload imports (awards
+      // JSON) from the TV graph at build time — rollup folds the dead
+      // branch, so the chunk is never emitted for tizen.
+      __HARBOR_TV_BUILD__: JSON.stringify(tizen),
       __IS_BETA_BUILD__: JSON.stringify(process.env.HARBOR_CHANNEL !== "stable"),
       __BUILD_ID__: JSON.stringify(
         process.env.HARBOR_BUILD_ID ||
@@ -150,6 +154,11 @@ export default defineConfig(({ mode }) => {
                     return "lottie";
                   }
                   if (id.includes("node_modules/hls.js") || id.includes("node_modules/mpegts.js")) {
+                    // TV build: don't create a separate video-vendor chunk.
+                    // The dynamic imports are guarded by __HARBOR_TV_BUILD__ and
+                    // will be tree-shaken out; returning null lets them be
+                    // bundled inline where the dead code eliminator removes them.
+                    if (tizen) return null;
                     return "video-vendor";
                   }
                 },
@@ -205,7 +214,22 @@ export default defineConfig(({ mode }) => {
       ),
     },
     resolve: {
-      alias: { "@": "/src" },
+      // Tizen TV substitutes (P2): the X-Ray face engine pulls
+      // onnxruntime-web (~13MB wasm), MediaPipe and desktop-only model
+      // files that cannot run in the TV widget (publicDir is off for the
+      // tizen build). The stub keeps the worker + hook contracts and
+      // rejects with a clear message through the existing error channel.
+      // Array form: first match wins, so the exact engine path resolves
+      // before the "@" prefix.
+      alias: tizen
+        ? [
+            {
+              find: "@/lib/face/face-worker-engine",
+              replacement: "/src/lib/face/face-worker-engine.tizen",
+            },
+            { find: "@", replacement: "/src" },
+          ]
+        : { "@": "/src" },
     },
     assetsInclude: ["**/*.onnx", "**/*.tflite"],
     optimizeDeps: {

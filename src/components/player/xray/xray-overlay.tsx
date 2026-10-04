@@ -16,6 +16,11 @@ import { XrayBrowser } from "./xray-browser";
 import type { XrayPerson } from "./xray-actor-card";
 
 const IS_TAURI = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
+// The TV widget ships no face models (publicDir is off for the tizen build)
+// and the engine is stubbed out there — never trigger a scan, but keep the
+// metadata cast rail working.
+const IS_TV =
+  typeof window !== "undefined" && ("tizen" in window || "webapis" in window);
 const NO_CAST: CastEntry[] = [];
 
 async function loadBitmap(url: string, signal?: AbortSignal): Promise<ImageBitmap> {
@@ -53,7 +58,7 @@ export function XrayOverlay({
   const { people, ready, galleryReady, progress, error } = useFaceId({
     metaKey: meta.id,
     cast: cast ?? NO_CAST,
-    liveScan: active && settings.xrayLiveScan && pageVisible,
+    liveScan: active && settings.xrayLiveScan && pageVisible && !IS_TV,
     isPaused,
     loadBitmap,
   });
