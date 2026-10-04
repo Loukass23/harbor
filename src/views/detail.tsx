@@ -19,6 +19,7 @@ import { isTextInLanguage } from "@/lib/providers/anime-episode-build";
 import { peekAnimeArt, saveAnimeArt } from "@/lib/providers/anime-art-cache";
 import { imdbToKitsu, tmdbTvToKitsu } from "@/lib/providers/anime-mapping";
 import { kitsuAnime, kitsuMainTvSeries } from "@/lib/providers/kitsu";
+import { isOrphanAnimeCandidate } from "@/lib/anime-detect";
 import { recordAnimeCwId } from "@/lib/anime-cw-ids";
 import { stripFranchiseSuffix } from "@/lib/providers/jikan";
 import { peekCachedLogo, resolveLogo } from "@/lib/logo";
@@ -598,32 +599,18 @@ export function DetailView({
       // accept the hit only when the year verdict agrees.
       if (k == null) {
         const name = meta.name || detail?.title;
-        const hasAnimationGenre =
-          meta.type === "anime" ||
-          !!meta.animeFormat ||
-          (meta.genres ?? []).some((g) => g.toLowerCase() === "animation") ||
-          (detail?.genres ?? []).some((g) => g.toLowerCase() === "animation") ||
-          (detail?.genresRich ?? []).some(
-            (g) => g.id === 16 || g.name.toLowerCase() === "animation",
-          );
-
-        const lang = detail?.originalLanguage?.toLowerCase();
-        const countries = (detail?.productionCountriesRich ?? []).map((c) => c.iso.toUpperCase());
-        const metaCountry = meta.country?.toLowerCase() ?? "";
-
-        const isEastAsian =
-          (lang != null && (lang === "ja" || lang === "zh" || lang === "ko")) ||
-          countries.some((c) => ["JP", "CN", "KR", "TW"].includes(c)) ||
-          /japan|china|korea|taiwan/i.test(metaCountry);
-
-        const isWestern =
-          (lang === "en" || /united states|united kingdom|canada|australia/i.test(metaCountry)) &&
-          !isEastAsian;
-
-        const animeLike =
-          meta.type === "anime" ||
-          !!meta.animeFormat ||
-          (hasAnimationGenre && !isWestern && (isEastAsian || (!lang && !metaCountry)));
+        const animeLike = isOrphanAnimeCandidate({
+          type: meta.type,
+          animeFormat: meta.animeFormat,
+          genres: [
+            ...(meta.genres ?? []),
+            ...(detail?.genres ?? []),
+            ...(detail?.genresRich ?? []).map((g) => g.name),
+          ],
+          country: meta.country,
+          originalLanguage: detail?.originalLanguage,
+          productionCountries: (detail?.productionCountriesRich ?? []).map((c) => c.iso),
+        });
         if (animeLike && name && name.trim().length >= 2) {
           const hits = await searchAnime(name).catch(() => []);
           const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "");
