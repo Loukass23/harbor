@@ -598,10 +598,7 @@ export function DetailView({
       // accept the hit only when the year verdict agrees.
       if (k == null) {
         const name = meta.name || detail?.title;
-        // Only trust the title-search fallback for titles that already look
-        // animation-like; a live-action show (e.g. Lioness) must never flip
-        // the detail page to an anime via a fuzzy name match.
-        const animeLike =
+        const hasAnimationGenre =
           meta.type === "anime" ||
           !!meta.animeFormat ||
           (meta.genres ?? []).some((g) => g.toLowerCase() === "animation") ||
@@ -609,6 +606,24 @@ export function DetailView({
           (detail?.genresRich ?? []).some(
             (g) => g.id === 16 || g.name.toLowerCase() === "animation",
           );
+
+        const lang = detail?.originalLanguage?.toLowerCase();
+        const countries = (detail?.productionCountriesRich ?? []).map((c) => c.iso.toUpperCase());
+        const metaCountry = meta.country?.toLowerCase() ?? "";
+
+        const isEastAsian =
+          (lang != null && (lang === "ja" || lang === "zh" || lang === "ko")) ||
+          countries.some((c) => ["JP", "CN", "KR", "TW"].includes(c)) ||
+          /japan|china|korea|taiwan/i.test(metaCountry);
+
+        const isWestern =
+          (lang === "en" || /united states|united kingdom|canada|australia/i.test(metaCountry)) &&
+          !isEastAsian;
+
+        const animeLike =
+          meta.type === "anime" ||
+          !!meta.animeFormat ||
+          (hasAnimationGenre && !isWestern && (isEastAsian || (!lang && !metaCountry)));
         if (animeLike && name && name.trim().length >= 2) {
           const hits = await searchAnime(name).catch(() => []);
           const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "");
@@ -662,6 +677,9 @@ export function DetailView({
     detail?.year,
     detail?.genres,
     detail?.genresRich,
+    detail?.originalLanguage,
+    detail?.productionCountriesRich,
+    meta.country,
     meta.releaseInfo,
   ]);
 
