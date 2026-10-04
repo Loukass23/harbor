@@ -107,13 +107,38 @@ export default defineConfig(({ mode }) => {
     ...(tizen
       ? {
           build: {
-            target: "chrome108",
+            // Phase 4 — Tizen 9.0 ships a modern Chromium: target esnext to
+            // drop legacy polyfills/transpiled helpers from the TV bundle.
+            target: "esnext",
+            // Inline critical shell assets (boot mark, fonts CSS) as base64
+            // so first paint never waits on extra asset round-trips.
+            assetsInlineLimit: 16384,
             rollupOptions: {
               input: { tv: "index-tv.html" },
               output: {
+                // Aggressive manual chunking: the shell boots on react-core
+                // alone; spatial D-pad navigation, the AVPlay media pipeline,
+                // and heavy vendors defer until after first paint.
                 manualChunks(id: string) {
                   if (id.includes("node_modules/react") || id.includes("node_modules/react-dom")) {
                     return "react-core";
+                  }
+                  // Spatial D-pad navigation engine — deferred module.
+                  if (
+                    id.includes("src/lib/keyboard-navigation") ||
+                    id.includes("src/views/big-picture/bp-virtual-row") ||
+                    id.includes("src/views/big-picture/bp-tv-gpu-nav")
+                  ) {
+                    return "tv-nav";
+                  }
+                  // AVPlay media pipeline (native bridge + off-thread
+                  // stream selection) — deferred until playback starts.
+                  if (
+                    id.includes("src/lib/player/tizen-avplay") ||
+                    id.includes("src/lib/tv-stream-select") ||
+                    id.includes("src/workers/tv-stream-select")
+                  ) {
+                    return "avplay-pipeline";
                   }
                   if (id.includes("node_modules/@tanstack")) {
                     return "tanstack";

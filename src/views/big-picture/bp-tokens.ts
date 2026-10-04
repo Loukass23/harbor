@@ -109,7 +109,9 @@ export const BP_TOKENS = `
      renders 3px behind it.
      NEEDS AN EYE at 1140x641. This is an apparent size across a room, so push it
      live and go bigger or smaller rather than deriving it again. */
-  --bp-hero-give: 0px;
+  /* How much of its hero box Home hands back. On a 1080/641 TV canvas, 64px
+     ensures the first row cards are fully visible without being cut in half. */
+  --bp-hero-give: 64px;
 
   /* A television lays out on 1080x607, and at that height 500 of Big Picture's
      677 clamps resolve to their px floor rather than their vh term. The floor
@@ -171,7 +173,7 @@ export const BP_TOKENS = `
    element that carries the problem, and inherited from there by the hero. */
 [data-bp-root][data-bp-tv] [data-bp-home-hero],
 [data-bp-root][data-bp-tv] [data-bp-page-hero] {
-  --bp-hero-give: 56px;
+  --bp-hero-give: 110px;
 }
 
 /* ==========================================================================

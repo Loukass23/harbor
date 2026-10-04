@@ -105,6 +105,8 @@ export class TizenAVPlayEngine implements PlayerBridge {
 
     // Apply transparent background to allow hardware video plane through
     if (typeof document !== "undefined") {
+      document.documentElement.setAttribute("data-avplay-active", "true");
+      document.body.setAttribute("data-avplay-active", "true");
       this.prevDocBg = document.documentElement.style.backgroundColor;
       this.prevBodyBg = document.body.style.backgroundColor;
       document.documentElement.style.backgroundColor = "transparent";
@@ -115,6 +117,11 @@ export class TizenAVPlayEngine implements PlayerBridge {
         this.prevRootBg = rootEl.style.backgroundColor;
         rootEl.style.backgroundColor = "transparent";
       }
+
+      const bpRoots = document.querySelectorAll<HTMLElement>("[data-bp-root], [data-bp-tv], [data-bp-shell]");
+      bpRoots.forEach((el) => {
+        el.style.backgroundColor = "transparent";
+      });
     }
 
     host.style.backgroundColor = "transparent";
@@ -141,6 +148,11 @@ export class TizenAVPlayEngine implements PlayerBridge {
   public detach(): void {
     this.stopTickers();
 
+    if (typeof document !== "undefined") {
+      document.documentElement.removeAttribute("data-avplay-active");
+      document.body.removeAttribute("data-avplay-active");
+    }
+
     if (this.resizeObserver) {
       this.resizeObserver.disconnect();
       this.resizeObserver = null;
@@ -160,18 +172,49 @@ export class TizenAVPlayEngine implements PlayerBridge {
       if (rootEl && this.prevRootBg !== null) {
         rootEl.style.backgroundColor = this.prevRootBg;
       }
+      const bpRoots = document.querySelectorAll<HTMLElement>("[data-bp-root], [data-bp-tv], [data-bp-shell]");
+      bpRoots.forEach((el) => {
+        el.style.backgroundColor = "";
+      });
     }
 
     this.host = null;
   }
 
   public syncDisplayRect(): void {
-    if (!this.host) return;
+    if (!this.isAvailable()) return;
+
+    const doc = typeof document !== "undefined" ? document.documentElement : null;
+    const clientW = doc?.clientWidth || window.innerWidth || 1920;
+    const clientH = doc?.clientHeight || window.innerHeight || 1080;
+
+    if (!this.host) {
+      this.setDisplayRect(0, 0, 1920, 1080);
+      return;
+    }
+
     const rect = this.host.getBoundingClientRect();
-    const x = Math.round(rect.left);
-    const y = Math.round(rect.top);
-    const width = Math.max(1, Math.round(rect.width));
-    const height = Math.max(1, Math.round(rect.height));
+
+    // Check if host covers the full viewport (full-screen stage)
+    const isFullscreen =
+      rect.left <= 2 &&
+      rect.top <= 2 &&
+      rect.width >= clientW - 4 &&
+      rect.height >= clientH - 4;
+
+    if (isFullscreen) {
+      this.setDisplayRect(0, 0, 1920, 1080);
+      return;
+    }
+
+    // Proportional mapping from CSS pixels to Samsung's 1920x1080 coordinate space
+    const scaleX = 1920 / clientW;
+    const scaleY = 1080 / clientH;
+
+    const x = Math.round(rect.left * scaleX);
+    const y = Math.round(rect.top * scaleY);
+    const width = Math.max(1, Math.round(rect.width * scaleX));
+    const height = Math.max(1, Math.round(rect.height * scaleY));
 
     this.setDisplayRect(x, y, width, height);
   }
@@ -180,7 +223,11 @@ export class TizenAVPlayEngine implements PlayerBridge {
     if (!this.isAvailable()) return;
     try {
       webapis!.avplay!.setDisplayRect(left, top, width, height);
-      webapis!.avplay!.setDisplayMethod("PLAYER_DISPLAY_MODE_LETTER_BOX");
+      try {
+        webapis!.avplay!.setDisplayMethod("PLAYER_DISPLAY_MODE_LETTER_BOX");
+      } catch {
+        // Some states or devices might reject setDisplayMethod before prepare
+      }
     } catch (err) {
       console.warn("[tizen-avplay] setDisplayRect failed", err);
     }
@@ -209,6 +256,16 @@ export class TizenAVPlayEngine implements PlayerBridge {
 
     try {
       this.open(src.url);
+
+      // Phase 2 DirectPlay: hint the hardware pipeline before prepare().
+      // HEVC/AAC decode on the Tizen VPU; a generous buffer avoids rebuffer
+      // stalls on high-bitrate 4K without touching the WebView heap.
+      try {
+        webapis!.avplay!.setStreamingProperty("BUFFER_SIZE", "16");
+        webapis!.avplay!.setStreamingProperty("BUFFERING_TIMEOUT", "20");
+      } catch {
+        // Some firmware builds ignore custom streaming properties
+      }
 
       // Pass custom streaming headers if available
       if (src.headers) {
@@ -291,6 +348,8 @@ export class TizenAVPlayEngine implements PlayerBridge {
   private handlePrepared(): void {
     if (!this.isAvailable()) return;
     try {
+      this.syncDisplayRect();
+
       const durMs = webapis!.avplay!.getDuration();
       if (typeof durMs === "number" && durMs > 0) {
         this.snap.durationSec = durMs / 1000;
@@ -312,6 +371,7 @@ export class TizenAVPlayEngine implements PlayerBridge {
     try {
       const state = this.getState();
       if (state === "PAUSED" || state === "READY") {
+        this.syncDisplayRect();
         webapis!.avplay!.play();
         this.snap.status = "playing";
         this.emit();

@@ -1,0 +1,62 @@
+/*
+ * Phase 1 — hardware-accelerated TV navigation (Tizen 9.0).
+ *
+ * Rule: every D-pad focus shift and spatial animation maps strictly to the
+ * compositor-only properties `transform: translate3d()` and `opacity`.
+ * Anything else (left/top/width/box-shadow layout, background sweeps) forces
+ * a main-thread style+layout recalc per keypress and drops the 10-foot UI
+ * below 60fps on low-end panels.
+ *
+ * Imported once from main-tv.tsx so desktop styling is untouched.
+ */
+
+/* Virtualized row track: the ONLY property that moves per focus change. */
+.bp-virtual-track {
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+}
+
+/* Tile focus ring: opacity crossfade, never box-shadow re-layout. */
+[data-bp-virtual-row] [data-bp-focusable] {
+  opacity: 0.72;
+  transform: translate3d(0, 0, 0) scale(1);
+  transition:
+    opacity 140ms ease-out,
+    transform 140ms ease-out;
+  will-change: transform, opacity;
+}
+
+[data-bp-virtual-row] [data-bp-focusable="true"] {
+  opacity: 1;
+  transform: translate3d(0, -4px, 0) scale(1.04);
+}
+
+/* Shelf vertical travel: translate the rows container, never scrollTop jumps
+   that invalidate layout of every mounted row. */
+[data-bp-virtual-shelf] {
+  transform: translate3d(0, 0, 0);
+  transition: transform 180ms ease-out;
+  will-change: transform;
+}
+
+/* Player OSD over the native AVPlay plane: transparent, composited once. */
+[data-harbor-player-osd] {
+  transform: translate3d(0, 0, 0);
+  opacity: 1;
+  transition: opacity 160ms ease-out;
+  will-change: opacity;
+}
+
+[data-harbor-player-osd][data-hidden="true"] {
+  opacity: 0;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bp-virtual-track,
+  [data-bp-virtual-row] [data-bp-focusable],
+  [data-bp-virtual-shelf],
+  [data-harbor-player-osd] {
+    transition: none;
+  }
+}

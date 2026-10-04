@@ -7,6 +7,7 @@ import { ensureUiLocale } from "@/lib/i18n/load-locale";
 import { loadSecrets } from "@/lib/secret-store";
 import { BpTvApp } from "@/views/big-picture/bp-tv-app";
 import "@/index.css";
+import "@/views/big-picture/bp-tv-gpu-nav.css";
 
 // The Android TV entry. index.html / main.tsx stay the desktop entry and must
 // never import this file: pulling BpTvApp into that graph changes the desktop

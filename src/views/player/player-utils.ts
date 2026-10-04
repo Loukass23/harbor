@@ -34,6 +34,9 @@ export function embedFlags(
   videoWidth: number,
   videoHeight: number,
 ): { mpvEmbedWindowsActive: boolean; stageBg: string } {
+  if (isTizenAvplayAvailable()) {
+    return { mpvEmbedWindowsActive: false, stageBg: "bg-transparent" };
+  }
   const embedOn = engine === "mpv" && mpvEmbed;
   const mpvEmbedWindowsActive = embedOn && isWindowsDesktop();
   const hasFrame = videoWidth > 0 && videoHeight > 0;

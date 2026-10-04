@@ -98,7 +98,11 @@ export function BpConnecting({
 
   const everPlayedRef = useRef(false);
   const hasProgress = usePlaybackFlag(() => getPlaybackPosition() > 0.3);
-  if (hasProgress && (snap.durationSec > 0 || snap.status === "playing")) {
+  if (
+    (hasProgress && (snap.durationSec > 0 || snap.status === "playing")) ||
+    snap.status === "playing" ||
+    (snap.positionSec && snap.positionSec > 0.3)
+  ) {
     everPlayedRef.current = true;
   }
   const sessionKey = `${src.meta.id}::${src.episode?.season ?? ""}:${src.episode?.episode ?? ""}`;
@@ -362,9 +366,10 @@ export function BpConnecting({
       )}
       <div className="absolute inset-0" style={{ background: "var(--bp-scrim-side)" }} />
       <div className="absolute inset-0" style={{ background: "var(--bp-scrim-up)" }} />
+      <div className="absolute inset-0 bg-black/35" />
 
       <div className="absolute inset-0 flex flex-col justify-end px-[var(--bp-gutter)] pb-[calc(clamp(38px,6vh,96px)_+_var(--bp-safe-y,0px))]">
-        <div className="flex w-[min(100%,clamp(440px,54vw,1080px))] flex-col gap-[clamp(13px,1.8vh,30px)] [animation:bp-rise_var(--bp-dur-slow)_var(--bp-ease)_120ms_backwards] motion-reduce:[animation:none]">
+        <div className="flex w-[min(100%,clamp(560px,75vw,1200px))] flex-col gap-[clamp(13px,1.8vh,30px)] [animation:bp-rise_var(--bp-dur-slow)_var(--bp-ease)_120ms_backwards] motion-reduce:[animation:none]">
           <BpConnectMark logo={logo} title={title} />
 
           {(episode || source) && (

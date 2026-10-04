@@ -98,6 +98,19 @@
         height: 100%;
       }
 
+      html[data-avplay-active],
+      body[data-avplay-active],
+      html[data-avplay-active] body,
+      html[data-avplay-active] #root,
+      html[data-avplay-active] [data-bp-root],
+      html[data-avplay-active] [data-bp-tv],
+      html[data-avplay-active] [data-bp-shell],
+      html[data-avplay-active] [data-player-stage],
+      html[data-avplay-active] [data-player-video-mount] {
+        background: transparent !important;
+        background-color: transparent !important;
+      }
+
       /* The boot splash is inline on purpose. Measured on a Fire TV Stick 4K
          Max: the html lands at 195ms and the first React paint at 9952ms, so
          anything owned by the bundle cannot cover the boot at all. #08090A is

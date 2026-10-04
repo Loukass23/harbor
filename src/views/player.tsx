@@ -1464,6 +1464,7 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
       data-docked={docked}
       data-native-dock={nativeDock}
       data-audio-only={docked && dockMinimized}
+      data-player-stage
       dir="ltr"
       className={`fixed z-[100] overflow-hidden ${docked ? "sports-player-dock" : "inset-0"} ${stageBg}`}
       style={{ ...(screenLocked ? { cursor: "default" } : cursorStyle), ...dockDrag.style }}
