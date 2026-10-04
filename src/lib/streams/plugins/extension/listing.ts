@@ -144,7 +144,7 @@ const HDR_TOKENS: Record<string, string> = {
 const HDR_PHRASES = /(?:dolby\s*vision|dolby\s*atmos\s*vision)/i;
 
 /** Where the title ends. Whatever follows is the provider's own detail rather than the name. */
-const TITLE_BREAK = /[({\[]/;
+const TITLE_BREAK = /[({[]/;
 const RELEASE_BREAK =
   /(?:\s|^)(?:web-?dl|webrip|bluray|bdrip|hdrip|dvdrip|remux|[a-z]{2,3}rip|[sh][0-9]{1,2}(?:e[0-9]{1,3})?|[0-9]{3,4}[pi])(?=\s|$)/i;
 
@@ -159,14 +159,16 @@ const YEAR = /\b(19[3-9][0-9]|20[0-9]{2})\b/;
  * that happen to contain one, and breaking them apart would lose them. Only `Hindi-English`, where
  * both halves are words on their own, is two statements. */
 function words(text: string): string[] {
-  return text
-    .replace(/[()[\]{}]/g, " ")
-    .split(/[\s/,|·•+&]+/u)
-    // A hyphenated pair is offered both ways: whole, and split, so a name that contains a hyphen is
-    // still readable as itself and a pair of languages is readable as two.
-    .flatMap((w) => (/-/.test(w) ? [w, ...w.split("-")] : [w]))
-    .map((w) => w.trim())
-    .filter(Boolean);
+  return (
+    text
+      .replace(/[()[\]{}]/g, " ")
+      .split(/[\s/,|·•+&]+/u)
+      // A hyphenated pair is offered both ways: whole, and split, so a name that contains a hyphen is
+      // still readable as itself and a pair of languages is readable as two.
+      .flatMap((w) => (/-/.test(w) ? [w, ...w.split("-")] : [w]))
+      .map((w) => w.trim())
+      .filter(Boolean)
+  );
 }
 
 /** Words that only mean something together: `Dual Audio` says there is more than one audio track,

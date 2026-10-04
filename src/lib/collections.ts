@@ -83,11 +83,7 @@ export const MAX_COLLECTION_TAGS = 8;
 export const MAX_TAG_LENGTH = 24;
 
 export function normalizeTag(raw: string): string {
-  return raw
-    .trim()
-    .replace(/\s+/g, " ")
-    .replace(/[<>]/g, "")
-    .slice(0, MAX_TAG_LENGTH);
+  return raw.trim().replace(/\s+/g, " ").replace(/[<>]/g, "").slice(0, MAX_TAG_LENGTH);
 }
 
 let memoryFallback: Collection[] | null = null;
@@ -435,7 +431,7 @@ export function useCollections(): Collection[] {
 export function useCollection(id: string | null): Collection | null {
   const collections = useCollections();
   return useMemo(
-    () => (id ? collections.find((c) => c.id === id) ?? null : null),
+    () => (id ? (collections.find((c) => c.id === id) ?? null) : null),
     [collections, id],
   );
 }

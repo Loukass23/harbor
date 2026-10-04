@@ -233,9 +233,7 @@ export function MatchDetailView({
           failed={failed}
           sport={sportsLeagueByTag(game.league)?.group ?? ""}
         />
-        <WhereToWatch
-          game={{ ...current, broadcasts: current.broadcasts ?? game.broadcasts }}
-        />
+        <WhereToWatch game={{ ...current, broadcasts: current.broadcasts ?? game.broadcasts }} />
         <EventOdds game={current} />
       </div>
       {!officialBoxing && (
@@ -395,9 +393,7 @@ function LineupsTab({ detail }: { detail: SportsMatchDetail }) {
   const t = useT();
   if (!detail.homeRoster.length && !detail.awayRoster.length) {
     return (
-      <div className="text-center text-sm text-ink-subtle">
-        {t("Lineups not available yet.")}
-      </div>
+      <div className="text-center text-sm text-ink-subtle">{t("Lineups not available yet.")}</div>
     );
   }
 
@@ -638,15 +634,7 @@ function statMeasure(value: string): number | null {
   return plain ? Number(plain[0]) : null;
 }
 
-function StatRow({
-  label,
-  hVal,
-  aVal,
-}: {
-  label: ProfileStatLabel;
-  hVal: string;
-  aVal: string;
-}) {
+function StatRow({ label, hVal, aVal }: { label: ProfileStatLabel; hVal: string; aVal: string }) {
   const t = useT();
   const ranked = label !== "Stance";
   const hNum = ranked ? statMeasure(hVal || "") : null;
@@ -736,15 +724,7 @@ function MmaProfileTab({ detail }: { detail: SportsMatchDetail }) {
 function StatsTab({ detail }: { detail: SportsMatchDetail }) {
   const t = useT();
 
-  const StatsTabRow = ({
-    label,
-    hVal,
-    aVal,
-  }: {
-    label: string;
-    hVal?: string;
-    aVal?: string;
-  }) => {
+  const StatsTabRow = ({ label, hVal, aVal }: { label: string; hVal?: string; aVal?: string }) => {
     if (!hVal && !aVal) return null;
 
     const ranked = !RECORD_VALUE.test(hVal || "") && !RECORD_VALUE.test(aVal || "");
@@ -762,9 +742,7 @@ function StatsTab({ detail }: { detail: SportsMatchDetail }) {
         <span className="text-ink-subtle">
           {label === "Overall Record" ? t("Overall Record") : label}
         </span>
-        <span
-          className={`w-12 text-end font-bold ${aIsGreater ? "text-green-500" : "text-ink"}`}
-        >
+        <span className={`w-12 text-end font-bold ${aIsGreater ? "text-green-500" : "text-ink"}`}>
           {aVal || "0"}
         </span>
       </div>
@@ -788,12 +766,7 @@ function StatsTab({ detail }: { detail: SportsMatchDetail }) {
       {!!detail.allStats.length && (
         <div className="flex flex-col gap-1 rounded-2xl bg-elevated/20 p-4 ring-1 ring-edge-soft/50 shadow-sm">
           {detail.allStats.map((stat, i) => (
-            <StatsTabRow
-              key={i}
-              label={stat.label}
-              hVal={stat.homeValue}
-              aVal={stat.awayValue}
-            />
+            <StatsTabRow key={i} label={stat.label} hVal={stat.homeValue} aVal={stat.awayValue} />
           ))}
         </div>
       )}

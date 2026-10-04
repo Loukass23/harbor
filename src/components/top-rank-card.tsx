@@ -90,8 +90,10 @@ export const TopRankCard = memo(function TopRankCard({ meta, rank }: { meta: Met
           lineHeight: 1,
           letterSpacing: "-0.01em",
           WebkitTextStroke: "2.6px var(--color-ink-muted)",
-          WebkitMaskImage: "linear-gradient(to right, transparent 0, #000 12%, #000 54%, transparent 82%)",
-          maskImage: "linear-gradient(to right, transparent 0, #000 12%, #000 54%, transparent 82%)",
+          WebkitMaskImage:
+            "linear-gradient(to right, transparent 0, #000 12%, #000 54%, transparent 82%)",
+          maskImage:
+            "linear-gradient(to right, transparent 0, #000 12%, #000 54%, transparent 82%)",
         }}
       >
         {rank >= 10 ? (
@@ -134,7 +136,13 @@ export const TopRankCard = memo(function TopRankCard({ meta, rank }: { meta: Met
   );
 });
 
-export const AnimeRankCard = memo(function AnimeRankCard({ meta, rank }: { meta: Meta; rank: number }) {
+export const AnimeRankCard = memo(function AnimeRankCard({
+  meta,
+  rank,
+}: {
+  meta: Meta;
+  rank: number;
+}) {
   const { openMeta } = useView();
   const { open: openContextMenu } = useContextMenu();
   const { settings } = useSettings();

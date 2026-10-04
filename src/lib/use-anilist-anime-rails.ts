@@ -68,7 +68,10 @@ export function useAnilistAnimeRailsState(): AnilistRailsState {
       setState({
         rails:
           recs.length >= MIN_RECS
-            ? [{ key: "recommended", title: "Recommended for you", metas: recs.slice(0, 40) }, ...out]
+            ? [
+                { key: "recommended", title: "Recommended for you", metas: recs.slice(0, 40) },
+                ...out,
+              ]
             : out,
         loading: false,
         error: false,

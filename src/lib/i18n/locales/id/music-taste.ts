@@ -37,7 +37,8 @@ const musicTaste: Record<string, string> = {
   "music.explore.performance": "Layak ditonton",
   "music.explore.stage": "Panggung & sesi",
   "music.explore.liveFrom": "{artist} secara langsung",
-  "music.explore.performanceHint": "Panggung besar, sesi akrab, dan penampilan untuk ditonton lagi.",
+  "music.explore.performanceHint":
+    "Panggung besar, sesi akrab, dan penampilan untuk ditonton lagi.",
   "music.explore.watchPerformance": "Tonton penampilan",
   "music.explore.events": "Barisan depan festival",
   "music.explore.eventHint": "Set terbaru lebih dulu. Pilih acara dan jelajahi tahunnya.",

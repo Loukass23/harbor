@@ -43,16 +43,18 @@ export function startMediaSessionWindowTracking(): () => void {
     if (!live) return;
     revision++;
     setFocused(event.payload.focused && !event.payload.minimized);
-  }).then(async (stop) => {
-    if (!live) {
-      stop();
-      return;
-    }
-    unlisten = stop;
-    const observed = revision;
-    const focused = await getCurrentWindow().isFocused();
-    if (live && revision === observed) setFocused(focused);
-  }).catch(() => {});
+  })
+    .then(async (stop) => {
+      if (!live) {
+        stop();
+        return;
+      }
+      unlisten = stop;
+      const observed = revision;
+      const focused = await getCurrentWindow().isFocused();
+      if (live && revision === observed) setFocused(focused);
+    })
+    .catch(() => {});
   return () => {
     live = false;
     unlisten?.();

@@ -667,7 +667,8 @@ export function HarborReader({
     (chapter.volume ? t("Volume {volume}", { volume: chapter.volume }) : undefined);
   const persistReadingPosition = useCallback(
     (line: number) => {
-      if (!paragraphs.length || (!chapter.legacy && chapterIndex < 0) || !bookChapters.length) return;
+      if (!paragraphs.length || (!chapter.legacy && chapterIndex < 0) || !bookChapters.length)
+        return;
       const safeLine = Math.max(0, Math.min(paragraphs.length - 1, line));
       const chapterProgress =
         paragraphs.length <= 1 ? 100 : Math.round((safeLine / (paragraphs.length - 1)) * 100);

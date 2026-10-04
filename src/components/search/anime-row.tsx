@@ -51,7 +51,12 @@ export function AnimeRow({ items, onClose }: { items: AnimeHit[]; onClose: () =>
 function AnimeRowItem({ hit, onOpen }: { hit: AnimeHit; onOpen: (hit: AnimeHit) => void }) {
   const t = useT();
   const { settings } = useSettings();
-  const poster = usePosterChain(settings.rpdbKey, animeHitMetaId(hit), hit.poster ?? undefined, "series");
+  const poster = usePosterChain(
+    settings.rpdbKey,
+    animeHitMetaId(hit),
+    hit.poster ?? undefined,
+    "series",
+  );
   return (
     <button
       onClick={() => onOpen(hit)}
@@ -75,7 +80,9 @@ function AnimeRowItem({ hit, onOpen }: { hit: AnimeHit; onOpen: (hit: AnimeHit) 
         <span className="truncate text-[16px] font-semibold text-ink">{hit.name}</span>
         <span className="flex items-center gap-2 text-[12.5px] text-ink-muted">
           {hit.year && <span>{hit.year}</span>}
-          {hit.year && hit.score > 0 && <span aria-hidden className="h-1 w-1 rounded-full bg-ink-subtle" />}
+          {hit.year && hit.score > 0 && (
+            <span aria-hidden className="h-1 w-1 rounded-full bg-ink-subtle" />
+          )}
           {hit.score > 0 && (
             <span className="flex items-center gap-1 text-ink">
               <Star size={11} className="fill-accent text-accent" />

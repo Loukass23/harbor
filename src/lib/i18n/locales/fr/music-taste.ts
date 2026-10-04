@@ -32,7 +32,8 @@ const musicTaste: Record<string, string> = {
   "music.explore.keepExploring": "Continuer à explorer",
   "music.explore.forYou": "Au-delà de vos favoris",
   "music.explore.because": "Parce que vous écoutez {title} · {artist}",
-  "music.explore.listenHint": "Écoutez ou enregistrez des titres pour en découvrir d’autres similaires.",
+  "music.explore.listenHint":
+    "Écoutez ou enregistrez des titres pour en découvrir d’autres similaires.",
   "music.explore.sceneHint": "Explorez les sons et les scènes, sans frontières.",
   "music.explore.performance": "À voir",
   "music.explore.stage": "Scènes et sessions",

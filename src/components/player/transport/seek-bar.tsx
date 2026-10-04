@@ -180,7 +180,8 @@ export function SeekBar({
           hovered={hover != null}
           segments={segmentSpans}
         />
-        {hover != null && !(overDot && scrub == null) &&
+        {hover != null &&
+          !(overDot && scrub == null) &&
           (trickplayActive ? (
             <ThumbPreview
               time={hover}

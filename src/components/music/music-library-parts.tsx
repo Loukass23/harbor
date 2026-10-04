@@ -79,78 +79,122 @@ export function LibraryTrackList({
   const resultsRef = useRef<HTMLDivElement>(null);
   const [slowFilter, setSlowFilter] = useState(false);
   useEffect(() => {
-    if (!filtering) { setSlowFilter(false); return; }
+    if (!filtering) {
+      setSlowFilter(false);
+      return;
+    }
     const timer = setTimeout(() => setSlowFilter(true), 180);
     return () => clearTimeout(timer);
   }, [filtering]);
   useEffect(() => {
-    if (filterKey === undefined || filtering || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (
+      filterKey === undefined ||
+      filtering ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    )
+      return;
     const animation = resultsRef.current?.animate(
-      [{ opacity: 0.45, transform: "translateY(3px)" }, { opacity: 1, transform: "translateY(0)" }],
+      [
+        { opacity: 0.45, transform: "translateY(3px)" },
+        { opacity: 1, transform: "translateY(0)" },
+      ],
       { duration: 160, easing: "cubic-bezier(.2,.7,.3,1)" },
     );
     return () => animation?.cancel();
   }, [filterKey, filtering]);
   const play = (track: MusicTrack, queue: MusicTrack[]) => {
-    if (onPlayOverride) { onPlayOverride(track, queue); return; }
+    if (onPlayOverride) {
+      onPlayOverride(track, queue);
+      return;
+    }
     recordMusicPlaylistPlayback(selectedPlaylist, queue);
     openSourcePicker(track, queue);
   };
   const { openSourcePicker } = useMusicSourcePicker();
   const positions = useMemo(() => new Map(order.map((track, index) => [track.id, index])), [order]);
-  const added = useMemo(() => new Set(selectedPlaylist?.tracks.map((track) => track.id)), [selectedPlaylist?.tracks]);
+  const added = useMemo(
+    () => new Set(selectedPlaylist?.tracks.map((track) => track.id)),
+    [selectedPlaylist?.tracks],
+  );
   const liked = useMemo(() => new Set(likedIds), [likedIds]);
-  const keys = useMemo(() => tracks.map(track => track.id), [tracks]);
+  const keys = useMemo(() => tracks.map((track) => track.id), [tracks]);
   const renderRow = (displayIndex: number) => {
     const track = tracks[displayIndex];
     const playing = nowPlayingMatches(now, track);
-    return <LibraryTrack
-      key={track.id}
-      track={track}
-      tracks={tracks}
-      index={positions.get(track.id) ?? 0}
-      displayIndex={view ? displayIndex : undefined}
-      showAlbum={Boolean(view)}
-      count={order.length}
-      liked={likedIdsFor(track).some(id => liked.has(id))}
-      alreadyAdded={added.has(track.id)}
-      onAdd={onAdd}
-      onRemove={onRemove}
-      onMove={onMove}
-      onPlay={play}
-      nowPlaying={playing}
-      loading={musicSourceRequestMatches(sourceRequest, track) || (playing && now.phase === "resolving")}
-    />;
+    return (
+      <LibraryTrack
+        key={track.id}
+        track={track}
+        tracks={tracks}
+        index={positions.get(track.id) ?? 0}
+        displayIndex={view ? displayIndex : undefined}
+        showAlbum={Boolean(view)}
+        count={order.length}
+        liked={likedIdsFor(track).some((id) => liked.has(id))}
+        alreadyAdded={added.has(track.id)}
+        onAdd={onAdd}
+        onRemove={onRemove}
+        onMove={onMove}
+        onPlay={play}
+        nowPlaying={playing}
+        loading={
+          musicSourceRequestMatches(sourceRequest, track) || (playing && now.phase === "resolving")
+        }
+      />
+    );
   };
   return (
     <section className="music-library-tracklist" data-playlist-view={view} aria-busy={filtering}>
-      {(title || subtitle || showControls) && <div className="music-library-tracklist-header">
-        <div>
-          {title && <h3>{title}</h3>}
-          {subtitle && <p>{subtitle}</p>}
+      {(title || subtitle || showControls) && (
+        <div className="music-library-tracklist-header">
+          <div>
+            {title && <h3>{title}</h3>}
+            {subtitle && <p>{subtitle}</p>}
+          </div>
+          {showControls &&
+            (!onAdd && !onRemove && tracks.length > 0 ? (
+              <MusicCollectionControls tracks={tracks} onPlay={play} />
+            ) : (
+              <span>{tracks.length}</span>
+            ))}
         </div>
-        {showControls && (!onAdd && !onRemove && tracks.length > 0 ? (
-          <MusicCollectionControls tracks={tracks} onPlay={play} />
-        ) : (
-          <span>{tracks.length}</span>
-        ))}
-      </div>}
-      {view && tracks.length > 0 && <div className="music-playlist-columns" aria-hidden="true">
-        <span>#</span><span>{t("music.playlistTools.title")}</span><span className="music-playlist-album">{t("music.playlistTools.album")}</span><span /><span>{t("music.sort.duration")}</span><span />
-      </div>}
-      <div ref={resultsRef} style={{ position: "relative" }}>
-      <div inert={filtering} style={{ visibility: slowFilter && filtering ? "hidden" : undefined }}>
-      {tracks.length ? (
-        tracks.length > 100
-          ? <MusicVirtualTrackList keys={keys} compact={view === "compact"} renderRow={renderRow} />
-          : <div>{tracks.map((_, index) => renderRow(index))}</div>
-      ) : (
-        <p className="music-library-empty">{emptyCopy ?? t("music.library.saveEmpty")}</p>
       )}
-      </div>
-      {slowFilter && filtering && <div style={{ position: "absolute", inset: 0 }}>
-        <MusicTrackRowsSkeleton rows={Math.max(1, Math.min(tracks.length || order.length, 6))} />
-      </div>}
+      {view && tracks.length > 0 && (
+        <div className="music-playlist-columns" aria-hidden="true">
+          <span>#</span>
+          <span>{t("music.playlistTools.title")}</span>
+          <span className="music-playlist-album">{t("music.playlistTools.album")}</span>
+          <span />
+          <span>{t("music.sort.duration")}</span>
+          <span />
+        </div>
+      )}
+      <div ref={resultsRef} style={{ position: "relative" }}>
+        <div
+          inert={filtering}
+          style={{ visibility: slowFilter && filtering ? "hidden" : undefined }}
+        >
+          {tracks.length ? (
+            tracks.length > 100 ? (
+              <MusicVirtualTrackList
+                keys={keys}
+                compact={view === "compact"}
+                renderRow={renderRow}
+              />
+            ) : (
+              <div>{tracks.map((_, index) => renderRow(index))}</div>
+            )
+          ) : (
+            <p className="music-library-empty">{emptyCopy ?? t("music.library.saveEmpty")}</p>
+          )}
+        </div>
+        {slowFilter && filtering && (
+          <div style={{ position: "absolute", inset: 0 }}>
+            <MusicTrackRowsSkeleton
+              rows={Math.max(1, Math.min(tracks.length || order.length, 6))}
+            />
+          </div>
+        )}
       </div>
     </section>
   );
@@ -266,7 +310,9 @@ function LibraryTrack({
         setOpen(true);
       }}
     >
-      <span className="music-library-track-number">{String((displayIndex ?? index) + 1).padStart(2, "0")}</span>
+      <span className="music-library-track-number">
+        {String((displayIndex ?? index) + 1).padStart(2, "0")}
+      </span>
       <div className="music-library-track-play">
         <button
           type="button"
@@ -310,7 +356,11 @@ function LibraryTrack({
           </span>
         </span>
       </div>
-      {showAlbum && <span className="music-playlist-album" title={track.album}>{track.album || "—"}</span>}
+      {showAlbum && (
+        <span className="music-playlist-album" title={track.album}>
+          {track.album || "—"}
+        </span>
+      )}
       <button
         type="button"
         className="music-library-track-save"
@@ -549,19 +599,23 @@ export function PlaylistHeader({
           }}
           disabled={working || busy}
         />
-        <HoverTooltip label={t(cloning ? "music.playlist.likeThisWorking" : "music.playlist.likeThis")} side="top" align="center">
-        <button
-          ref={likeButton}
-          type="button"
-          aria-haspopup="menu"
-          aria-expanded={asking}
-          aria-label={t(cloning ? "music.playlist.likeThisWorking" : "music.playlist.likeThis")}
-          disabled={working || busy || cloning || playlist.tracks.length === 0}
-          onClick={() => setAsking(true)}
-          className="grid size-11 shrink-0 place-items-center rounded-full text-ink-muted transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-accent disabled:opacity-50"
+        <HoverTooltip
+          label={t(cloning ? "music.playlist.likeThisWorking" : "music.playlist.likeThis")}
+          side="top"
+          align="center"
         >
-          <PlaylistVariation size={30} />
-        </button>
+          <button
+            ref={likeButton}
+            type="button"
+            aria-haspopup="menu"
+            aria-expanded={asking}
+            aria-label={t(cloning ? "music.playlist.likeThisWorking" : "music.playlist.likeThis")}
+            disabled={working || busy || cloning || playlist.tracks.length === 0}
+            onClick={() => setAsking(true)}
+            className="grid size-11 shrink-0 place-items-center rounded-full text-ink-muted transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-accent disabled:opacity-50"
+          >
+            <PlaylistVariation size={30} />
+          </button>
         </HoverTooltip>
         <AnchoredMenu
           anchorRef={likeButton}
@@ -580,27 +634,27 @@ export function PlaylistHeader({
           </div>
         </AnchoredMenu>
         <HoverTooltip label={t("music.playlist.rename")} side="top" align="center">
-        <button
-          type="button"
-          aria-label={t("music.playlist.rename")}
-          ref={renameButton}
-          disabled={working || busy}
-          onClick={() => setRenaming(true)}
-          className="grid size-11 shrink-0 place-items-center rounded-full text-ink-muted transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-accent disabled:opacity-50"
-        >
-          <PlaylistRename size={26} />
-        </button>
+          <button
+            type="button"
+            aria-label={t("music.playlist.rename")}
+            ref={renameButton}
+            disabled={working || busy}
+            onClick={() => setRenaming(true)}
+            className="grid size-11 shrink-0 place-items-center rounded-full text-ink-muted transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-accent disabled:opacity-50"
+          >
+            <PlaylistRename size={26} />
+          </button>
         </HoverTooltip>
         <HoverTooltip label={t("music.playlist.delete")} side="top" align="center">
-        <button
-          type="button"
-          aria-label={t("music.playlist.delete")}
-          disabled={working || busy}
-          onClick={() => void remove()}
-          className="grid size-11 shrink-0 place-items-center rounded-full text-ink-muted transition-colors hover:text-danger focus-visible:outline-2 focus-visible:outline-accent disabled:opacity-50"
-        >
-          <Trash2 size={26} />
-        </button>
+          <button
+            type="button"
+            aria-label={t("music.playlist.delete")}
+            disabled={working || busy}
+            onClick={() => void remove()}
+            className="grid size-11 shrink-0 place-items-center rounded-full text-ink-muted transition-colors hover:text-danger focus-visible:outline-2 focus-visible:outline-accent disabled:opacity-50"
+          >
+            <Trash2 size={26} />
+          </button>
         </HoverTooltip>
         <HoverTooltip label={t("music.m3u.export")} side="top" align="center">
           <button

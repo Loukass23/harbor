@@ -118,7 +118,8 @@ export function createListStore(storageKey: string): ListStore {
     if (memoryFallback) return memoryFallback.map((l) => ({ ...l, items: [...l.items] }));
     try {
       const key = activeKey();
-      const raw = localStorage.getItem(key) ?? (key !== storageKey ? localStorage.getItem(storageKey) : null);
+      const raw =
+        localStorage.getItem(key) ?? (key !== storageKey ? localStorage.getItem(storageKey) : null);
       if (!raw) return [];
       const arr = JSON.parse(raw) as unknown;
       if (!Array.isArray(arr)) return [];

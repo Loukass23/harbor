@@ -1,8 +1,4 @@
-import {
-  fetchInstalledAddons,
-  fetchManifestAt,
-  filterEnabled,
-} from "@/lib/addon-store";
+import { fetchInstalledAddons, fetchManifestAt, filterEnabled } from "@/lib/addon-store";
 import { torboxAddonFor, userAddons, withDebridKeys, type Addon } from "@/lib/addons";
 import { applyOrderToItems, loadDisplayOrder } from "@/lib/addons-store/reorder";
 import { buildDebridClients } from "@/lib/debrid/registry";
@@ -85,7 +81,8 @@ async function gatherStreamAddons(authKey: string | null, settings: Settings): P
   const torbox = torboxAddonFor(settings.tbKey);
   if (torbox) {
     const i = list.findIndex(
-      (a) => a.manifest.id === "app.torbox.stremio" || a.transportUrl?.includes("stremio.torbox.app"),
+      (a) =>
+        a.manifest.id === "app.torbox.stremio" || a.transportUrl?.includes("stremio.torbox.app"),
     );
     if (i >= 0) {
       if (list[i].transportUrl !== torbox.transportUrl) list[i] = torbox;

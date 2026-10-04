@@ -59,7 +59,9 @@ export function VersionItem({ entry, isCurrent }: { entry: VersionEntry; isCurre
       ) : (
         <SButton onClick={() => openUrl(RELEASES_URL)}>{t("Releases")}</SButton>
       )}
-      {open && <VersionNotesModal entry={entry} isCurrent={isCurrent} onClose={() => setOpen(false)} />}
+      {open && (
+        <VersionNotesModal entry={entry} isCurrent={isCurrent} onClose={() => setOpen(false)} />
+      )}
     </div>
   );
 }

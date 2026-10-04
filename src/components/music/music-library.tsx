@@ -198,40 +198,40 @@ export function MusicLibrary({
         </div>
         <div className="music-library-actions music-library-header-actions">
           <HoverTooltip label={t("music.home.addFolder")} align="center">
-              <button
-                type="button"
-                className="music-library-icon-action"
-                aria-label={t("music.home.addFolder")}
-                onClick={() => openConnections("local")}
-              >
-                <FolderOpen size={28} aria-hidden="true" />
-              </button>
+            <button
+              type="button"
+              className="music-library-icon-action"
+              aria-label={t("music.home.addFolder")}
+              onClick={() => openConnections("local")}
+            >
+              <FolderOpen size={28} aria-hidden="true" />
+            </button>
           </HoverTooltip>
           <HoverTooltip label={t("music.m3u.import")} align="center">
-              <button
-                type="button"
-                className="music-library-icon-action"
-                aria-label={t("music.m3u.import")}
-                aria-busy={working}
-                disabled={working}
-                onClick={importM3u}
-              >
-                <FileUp size={28} aria-hidden="true" />
-              </button>
+            <button
+              type="button"
+              className="music-library-icon-action"
+              aria-label={t("music.m3u.import")}
+              aria-busy={working}
+              disabled={working}
+              onClick={importM3u}
+            >
+              <FileUp size={28} aria-hidden="true" />
+            </button>
           </HoverTooltip>
           <HoverTooltip label={t("music.row.newPlaylist")} align="end">
-              <button
-                type="button"
-                className="music-library-icon-action"
-                aria-label={t("music.row.newPlaylist")}
-                aria-expanded={creating}
-                onClick={() => {
-                  setFilter("playlists");
-                  setCreating((value) => !value);
-                }}
-              >
-                <Plus size={28} aria-hidden="true" />
-              </button>
+            <button
+              type="button"
+              className="music-library-icon-action"
+              aria-label={t("music.row.newPlaylist")}
+              aria-expanded={creating}
+              onClick={() => {
+                setFilter("playlists");
+                setCreating((value) => !value);
+              }}
+            >
+              <Plus size={28} aria-hidden="true" />
+            </button>
           </HoverTooltip>
         </div>
       </header>
@@ -354,7 +354,14 @@ export function MusicLibrary({
           <MusicCollectionGrid
             entries={arranged}
             emptyCopy={t(query ? "music.searchEmpty" : "music.playlist.first")}
-            emptyState={!query && !readError ? <MusicLibraryEmptyState onConnect={() => openConnections("local")} onTastes={onTastes} /> : undefined}
+            emptyState={
+              !query && !readError ? (
+                <MusicLibraryEmptyState
+                  onConnect={() => openConnections("local")}
+                  onTastes={onTastes}
+                />
+              ) : undefined
+            }
             onOpen={(entry) => (entry.item ? onOpen(entry.item, shelf) : onCollection(entry))}
           />
         ))}

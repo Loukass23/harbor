@@ -2,7 +2,12 @@ import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { useProfiles, type Profile } from "@/lib/profiles";
 import { currentAuthor, subscribeAuthor, type Author } from "@/lib/theme-auth";
-import { currentStatus, setStatus, subscribeStatus, type PresenceStatus } from "@/lib/social/presence";
+import {
+  currentStatus,
+  setStatus,
+  subscribeStatus,
+  type PresenceStatus,
+} from "@/lib/social/presence";
 import { openMyProfile } from "@/lib/social/open-my-profile";
 import { openNotificationCenter } from "@/lib/social/notification-open";
 

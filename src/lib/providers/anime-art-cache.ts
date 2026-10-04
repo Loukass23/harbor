@@ -59,7 +59,8 @@ export function saveAnimeArt(key: string | undefined | null, art: AnimeArt): voi
     backdrops: art.backdrops?.length ? art.backdrops : prev?.backdrops,
     t: Date.now(),
   };
-  if (prev && next.bg === prev.bg && next.logo === prev.logo && next.backdrops === prev.backdrops) return;
+  if (prev && next.bg === prev.bg && next.logo === prev.logo && next.backdrops === prev.backdrops)
+    return;
   mem.set(key, next);
   persist();
 }

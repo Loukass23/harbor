@@ -28,7 +28,9 @@ export function HoverTooltip({
 }) {
   const [open, setOpen] = useState(false);
   const [pos, setPos] = useState<{ top: number; left: number; anchor: number } | null>(null);
-  const [placed, setPlaced] = useState<{ top: number; left: number; flipped: boolean } | null>(null);
+  const [placed, setPlaced] = useState<{ top: number; left: number; flipped: boolean } | null>(
+    null,
+  );
   const wrapRef = useRef<HTMLDivElement>(null);
   const tipRef = useRef<HTMLDivElement>(null);
   const timer = useRef<number | null>(null);
@@ -45,8 +47,7 @@ export function HoverTooltip({
     const r = el.getBoundingClientRect();
     setPos({
       top: side === "top" ? r.top - 8 : r.bottom + 8,
-      left:
-        align === "center" ? r.left + r.width / 2 : align === "end" ? r.right - 8 : r.left + 8,
+      left: align === "center" ? r.left + r.width / 2 : align === "end" ? r.right - 8 : r.left + 8,
       anchor: r.left + r.width / 2,
     });
   };
@@ -100,7 +101,8 @@ export function HoverTooltip({
     setPlaced({ top, left, flipped });
   }, [open, pos, side, align]);
 
-  const shown = side === "top" ? (placed?.flipped ? "bottom" : "top") : placed?.flipped ? "top" : "bottom";
+  const shown =
+    side === "top" ? (placed?.flipped ? "bottom" : "top") : placed?.flipped ? "top" : "bottom";
   const originX = align === "center" ? "50%" : align === "end" ? "100%" : "14px";
   const arrowLeft = placed && pos ? Math.min(Math.max(12, pos.anchor - placed.left), 999) : 12;
 

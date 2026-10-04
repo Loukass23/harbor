@@ -94,9 +94,10 @@ export async function resurfaceCandidates(
     } else {
       try {
         const adj = await fetchAdjacentEpisodes(meta, cur, { tmdbKey: opts.tmdbKey });
-        nx = adj.next && resurfaceAired(adj.next.airDate)
-          ? { season: adj.next.season, episode: adj.next.episode }
-          : null;
+        nx =
+          adj.next && resurfaceAired(adj.next.airDate)
+            ? { season: adj.next.season, episode: adj.next.episode }
+            : null;
         cache.set(key, { next: nx, t: now });
       } catch {
         // A failed lookup must remain retryable on the next refresh.
@@ -108,7 +109,9 @@ export async function resurfaceCandidates(
         .then((list) => {
           const target = nextUnwatchedAfter(list, cur, watchedFor(i, cur));
           if (!target) return null;
-          const entry = list.find((e) => e.season === target.season && e.episode === target.episode);
+          const entry = list.find(
+            (e) => e.season === target.season && e.episode === target.episode,
+          );
           return entry && resurfaceAired(entry.airDate)
             ? { season: target.season, episode: target.episode }
             : null;

@@ -12,9 +12,16 @@ button[data-music-dock-like][data-burst] > svg {
   animation: dock-like-pop 300ms ease-in-out both;
 }
 @keyframes dock-like-pop {
-  0%, 100% { transform: scale(1); }
-  35% { transform: scale(.94); }
-  65% { transform: scale(1.08); }
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  35% {
+    transform: scale(0.94);
+  }
+  65% {
+    transform: scale(1.08);
+  }
 }
 .dock-like-burst {
   position: absolute;
@@ -35,17 +42,29 @@ button[data-music-dock-like][data-burst] > svg {
   animation: dock-like-ring 360ms ease-out both;
 }
 @keyframes dock-like-ring {
-  from { opacity: .24; transform: translate(-50%, -50%) scale(.75); }
-  to { opacity: 0; transform: translate(-50%, -50%) scale(1.15); }
+  from {
+    opacity: 0.24;
+    transform: translate(-50%, -50%) scale(0.75);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.15);
+  }
 }
-.dock-like-dot { display: none; }
+.dock-like-dot {
+  display: none;
+}
 @media (prefers-reduced-motion: reduce) {
   [data-like-burst][data-burst] > svg,
   button.music-now-action[data-burst] > svg,
   button[data-music-dock-like][data-burst] > svg {
     animation: none;
   }
-  .dock-like-burst { visibility: hidden; }
+  .dock-like-burst {
+    visibility: hidden;
+  }
   /* Release the one-shot state even if motion is re-enabled later. */
-  .dock-like-ring { animation-duration: 1ms; }
+  .dock-like-ring {
+    animation-duration: 1ms;
+  }
 }

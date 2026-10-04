@@ -3,7 +3,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import whiteBoat from "@/assets/lottie/addons-boat-white.json";
 import darkBoat from "@/assets/lottie/addons-boat-dark.json";
 import harborBoat from "@/assets/lottie/harbor-loader.json";
-import { prefetchTopAddonLogos, prefetchedTopAddonLogos } from "@/lib/providers/addon-logo-prefetch";
+import {
+  prefetchTopAddonLogos,
+  prefetchedTopAddonLogos,
+} from "@/lib/providers/addon-logo-prefetch";
 
 type Size = "xs" | "sm" | "md" | "lg" | "xl";
 
@@ -20,7 +23,8 @@ const XLINK = "http://www.w3.org/1999/xlink";
 function darkBackground(): boolean {
   if (typeof document === "undefined") return true;
   const probe = document.createElement("div");
-  probe.style.cssText = "background-color:var(--color-canvas);position:absolute;opacity:0;pointer-events:none";
+  probe.style.cssText =
+    "background-color:var(--color-canvas);position:absolute;opacity:0;pointer-events:none";
   document.body.appendChild(probe);
   const m = getComputedStyle(probe).backgroundColor.match(/[\d.]+/g);
   probe.remove();

@@ -1,5 +1,9 @@
 import { compatibleVocalVersion, shouldResolvePreferredSource } from "./source-version";
-import { cancelMusicQueueAutomation, markMusicQueueAutomationStarted, ownsMusicQueueAutomation } from "./queue-automation";
+import {
+  cancelMusicQueueAutomation,
+  markMusicQueueAutomationStarted,
+  ownsMusicQueueAutomation,
+} from "./queue-automation";
 import { activeProfileId, activeProfileIsPrimary } from "@/lib/active-profile-id";
 import { hydrateListeningAffinity, observeMusicListening } from "./listening-affinity";
 import { filterBlockedTracks, hydrateArtistBlockStore } from "./artist-blocks";
@@ -42,7 +46,11 @@ import {
   writeCheckpointToDb,
   type MusicCheckpoint,
 } from "./session-checkpoint";
-import { beginMusicQueue, getMusicPlaybackOrigin, restoreMusicPlaybackOrigin } from "./playback-origin";
+import {
+  beginMusicQueue,
+  getMusicPlaybackOrigin,
+  restoreMusicPlaybackOrigin,
+} from "./playback-origin";
 import { hydrateMusicContextTracks, hydrateMusicRecentContexts } from "./recent-context";
 import { hydrateMusicDestinations } from "./recent-destinations";
 import { hydrateMusicSourceConsent } from "./source-consent";
@@ -120,7 +128,11 @@ function sourcesFor(
     invoke<MusicSourceCandidate[]>("music_source_candidates", { track }),
     timeout,
   ])
-    .then((value) => (Array.isArray(value) ? value.filter(candidate => compatibleVocalVersion(track, candidate.track)) : []))
+    .then((value) =>
+      Array.isArray(value)
+        ? value.filter((candidate) => compatibleVocalVersion(track, candidate.track))
+        : [],
+    )
     .catch((error) => {
       queuedSources.delete(key);
       throw error;
@@ -755,7 +767,12 @@ export async function playMusic(
   recoverPlayback = null;
   const catalog = track.connectorId === "catalog" && !track.playbackUrl;
   const preferredSource = readMusicPreference("harbor.music.preferred-source.v1");
-  const resolvePreferred = shouldResolvePreferredSource(track, preferredSource, explicitSource !== null, failedAttempts.size > 0);
+  const resolvePreferred = shouldResolvePreferredSource(
+    track,
+    preferredSource,
+    explicitSource !== null,
+    failedAttempts.size > 0,
+  );
   const workingSource = state.current?.connectorId;
   let alternatives: MusicTrack[] = [];
   let searchedAlternatives = catalog || resolvePreferred;
@@ -783,9 +800,16 @@ export async function playMusic(
   });
   try {
     if (catalog || resolvePreferred) {
-      const candidates = await sourcesFor(track).catch(error => {
+      const candidates = await sourcesFor(track).catch((error) => {
         if (catalog) throw error;
-        return [{ connectorId: track.connectorId ?? "", connectorName: "", health: "healthy" as const, track }];
+        return [
+          {
+            connectorId: track.connectorId ?? "",
+            connectorName: "",
+            health: "healthy" as const,
+            track,
+          },
+        ];
       });
       if (!ownsRequest()) return;
       const playable = candidates.filter(
@@ -794,8 +818,19 @@ export async function playMusic(
           candidate.track.connectorId !== "catalog" &&
           !failedAttempts.has(`${candidate.track.connectorId}:${candidate.track.id}`),
       );
-      if (!catalog && !playable.some(candidate => candidate.track.connectorId === track.connectorId && candidate.track.id === track.id)) {
-        playable.push({ connectorId: track.connectorId ?? "", connectorName: "", health: "healthy", track });
+      if (
+        !catalog &&
+        !playable.some(
+          (candidate) =>
+            candidate.track.connectorId === track.connectorId && candidate.track.id === track.id,
+        )
+      ) {
+        playable.push({
+          connectorId: track.connectorId ?? "",
+          connectorName: "",
+          health: "healthy",
+          track,
+        });
       }
       const preferred = readMusicPreference("harbor.music.preferred-source.v1");
       const ranked = rankByExplicitness(playable, explicitnessOf(track));

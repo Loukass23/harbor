@@ -85,14 +85,7 @@ export function usePlaybackPresence(params: {
       positionSec: 0,
       durationSec: 0,
     });
-  }, [
-    liveGuideOpen,
-    snap.status,
-    src.meta.id,
-    src.meta.name,
-    src.meta.poster,
-    src.liveProgram,
-  ]);
+  }, [liveGuideOpen, snap.status, src.meta.id, src.meta.name, src.meta.poster, src.liveProgram]);
 
   useEffect(() => () => setPlaybackPresence(null), []);
 }

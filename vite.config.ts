@@ -167,13 +167,13 @@ export default defineConfig(({ mode }) => {
           },
         }
       : android
-      ? {
-          build: {
-            target: "chrome87",
-            rollupOptions: { input: { tv: "index-tv.html", main: "index.html" } },
-          },
-        }
-      : {}),
+        ? {
+            build: {
+              target: "chrome87",
+              rollupOptions: { input: { tv: "index-tv.html", main: "index.html" } },
+            },
+          }
+        : {}),
     server: {
       host: devHost || "127.0.0.1",
       port: 1420,

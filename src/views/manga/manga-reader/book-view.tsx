@@ -84,9 +84,12 @@ function sampledAspect(srcs: string[]): Promise<number> {
   if (srcs.length === 0) return Promise.resolve(1.4);
   const idxs = [
     ...new Set(
-      [0, Math.floor(srcs.length * 0.25), Math.floor(srcs.length * 0.5), Math.floor(srcs.length * 0.75)].filter(
-        (i) => i < srcs.length,
-      ),
+      [
+        0,
+        Math.floor(srcs.length * 0.25),
+        Math.floor(srcs.length * 0.5),
+        Math.floor(srcs.length * 0.75),
+      ].filter((i) => i < srcs.length),
     ),
   ];
   return Promise.all(idxs.map((i) => measureAspect(srcs[i]))).then((aspects) => {
@@ -220,15 +223,12 @@ export function BookFlip({
         : null;
     if (httpMod) {
       window.fetch = ((input: RequestInfo | URL, init?: RequestInit) => {
-        const u =
-          typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
+        const u = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
         const host = hostOf(u);
         const headers =
           headersRef.current?.[u] ?? (host && hosts.has(host) ? IMAGE_FALLBACK_HEADERS : undefined);
         if (headers) {
-          return httpMod.then((m) =>
-            (m.fetch as unknown as typeof fetch)(u, { headers }),
-          );
+          return httpMod.then((m) => (m.fetch as unknown as typeof fetch)(u, { headers }));
         }
         return origFetch(input, init);
       }) as typeof fetch;

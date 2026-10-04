@@ -73,7 +73,10 @@ async function sendRequest<T>(
     res = await doFetch(path, opts);
     assertOwner();
     if (!RETRY_STATUSES.has(res.status)) break;
-    const body = await res.clone().text().catch(() => "");
+    const body = await res
+      .clone()
+      .text()
+      .catch(() => "");
     assertOwner();
     const policy = simklRetryPolicy(res.status, body, res.headers.get("Retry-After"), attempt);
     if (policy.cooldown) {

@@ -1,6 +1,7 @@
 const settingsRefinements: Record<string, string> = {
   "Playback cache folder": "مجلد التخزين المؤقت للتشغيل",
-  "Temporary video buffering, including debrid streams. Applies when playback restarts; existing files stay in their current folder.": "تخزين مؤقت للفيديو، بما في ذلك بث ديبريد. يُطبّق عند إعادة بدء التشغيل؛ تبقى الملفات الموجودة في مجلدها الحالي.",
+  "Temporary video buffering, including debrid streams. Applies when playback restarts; existing files stay in their current folder.":
+    "تخزين مؤقت للفيديو، بما في ذلك بث ديبريد. يُطبّق عند إعادة بدء التشغيل؛ تبقى الملفات الموجودة في مجلدها الحالي.",
   "Skipped: {reason}": "تم التخطي: {reason}",
   "1 option formatted correctly": "تم تنسيق خيار واحد بشكل صحيح",
   "1. Open Movies\n2. Select a title\n3. Press Play\n4. Describe what happens":

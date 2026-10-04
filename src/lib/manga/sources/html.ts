@@ -110,9 +110,7 @@ export function parseHtmlConfig(raw: string): HtmlSourceConfig | null {
       title: str(chapters.title),
       date: str(chapters.date),
       listUrl:
-        chapters.listUrl &&
-        typeof chapters.listUrl === "object" &&
-        str(chapters.listUrl.match)
+        chapters.listUrl && typeof chapters.listUrl === "object" && str(chapters.listUrl.match)
           ? {
               match: str(chapters.listUrl.match)!,
               replace: typeof chapters.listUrl.replace === "string" ? chapters.listUrl.replace : "",

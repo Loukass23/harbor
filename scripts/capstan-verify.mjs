@@ -117,7 +117,8 @@ export function structureProblems() {
 
   const release = join(dest, "runtime", "release");
   const wanted = readStagePlan()?.modules ?? [];
-  if (!existsSync(stagedJava())) bad.push(`runtime has no ${stagedTarget().includes("windows") ? "bin/java.exe" : "bin/java"}`);
+  if (!existsSync(stagedJava()))
+    bad.push(`runtime has no ${stagedTarget().includes("windows") ? "bin/java.exe" : "bin/java"}`);
   else if (!existsSync(release)) bad.push("runtime has no release file");
   else if (!wanted.length) bad.push("STAGE.json does not say which modules were asked for");
   else {
@@ -215,7 +216,9 @@ export function pingStaged(onLog) {
       }
     });
     child.on("error", (error) => finish(`could not start the staged runtime: ${error.message}`));
-    child.on("exit", (code) => finish(`the staged runtime exited with ${code} before answering ping`));
+    child.on("exit", (code) =>
+      finish(`the staged runtime exited with ${code} before answering ping`),
+    );
     child.stdin.write('{"id":"v1","method":"ping"}\n');
   });
 }
@@ -227,7 +230,9 @@ export async function verifyStage(onLog) {
   const target = stagedTarget();
   if (target !== hostTriple()) {
     onLog?.(`staged for ${target}, so the bridge was not started: this machine cannot run it`);
-    onLog?.("that runtime is verified for shape only, and must be started on the platform it is for");
+    onLog?.(
+      "that runtime is verified for shape only, and must be started on the platform it is for",
+    );
     return [];
   }
   return pingStaged(onLog);
@@ -251,7 +256,10 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   const say = (line) => console.log(`[capstan] ${line}`);
   const bad = await verifyStage(say);
   if (bad.length) {
-    for (const line of ["the staged extension runtime is not usable:", ...bad.map((b) => `  ${b}`)]) {
+    for (const line of [
+      "the staged extension runtime is not usable:",
+      ...bad.map((b) => `  ${b}`),
+    ]) {
       console.error(`[capstan] ${line}`);
     }
     console.error("[capstan] Run: pnpm run setup:capstan");

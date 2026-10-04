@@ -21,7 +21,8 @@ export function CommentsSection({
   onOpenAuthor?: (h: string) => void;
 }) {
   const t = useT();
-  const { state, comments, total, hasMore, loadMore, submit, remove, toggleLike, sending } = useComments(handle);
+  const { state, comments, total, hasMore, loadMore, submit, remove, toggleLike, sending } =
+    useComments(handle);
   const [shown, setShown] = useState(COMMENTS_PAGE);
 
   useEffect(() => {
@@ -77,7 +78,9 @@ export function CommentsSection({
       )}
 
       {state === "error" && (
-        <p className="py-6 text-center text-[13px] text-ink-subtle">{t("Could not load comments")}</p>
+        <p className="py-6 text-center text-[13px] text-ink-subtle">
+          {t("Could not load comments")}
+        </p>
       )}
 
       {state === "empty" && (

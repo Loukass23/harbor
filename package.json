@@ -80,17 +80,18 @@
     "cheerio": "^1.2.0",
     "typescript": "~5.8.3",
     "vite": "7.3.6",
-    "vite-plugin-static-copy": "^2.0.0"
+    "vite-plugin-static-copy": "^2.0.0",
+    "vite-plus": "0.2.4"
   },
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
+  },
+  "packageManager": "pnpm@11.9.0",
   "pnpm": {
     "onlyBuiltDependencies": [
       "@resvg/resvg-js",
       "esbuild",
       "protobufjs"
     ]
-  },
-  "engines": {
-    "node": "^20.19.0 || >=22.12.0"
-  },
-  "packageManager": "pnpm@11.9.0"
+  }
 }

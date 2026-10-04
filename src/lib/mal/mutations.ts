@@ -86,7 +86,8 @@ export async function saveListEntry(input: {
 }): Promise<SavedEntry> {
   const params = new URLSearchParams();
   if (input.status) params.set("status", input.status);
-  if (input.numEpisodesWatched != null) params.set("num_watched_episodes", String(input.numEpisodesWatched));
+  if (input.numEpisodesWatched != null)
+    params.set("num_watched_episodes", String(input.numEpisodesWatched));
   const data = await malRequest<RawStatus>(`/anime/${input.malId}/my_list_status`, {
     method: "PATCH",
     body: params,

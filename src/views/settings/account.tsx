@@ -43,7 +43,9 @@ function ProfilesTab() {
   return (
     <Section
       title={t("Profiles")}
-      subtitle={t("Create profiles for the people who use Harbor. Each can have its own appearance, settings, and PIN.")}
+      subtitle={t(
+        "Create profiles for the people who use Harbor. Each can have its own appearance, settings, and PIN.",
+      )}
     >
       <SettingGroup label={t("Everyone on this Harbor")}>
         <p className={`max-w-[70ch] ${ROW_DESC}`}>
@@ -80,7 +82,9 @@ function StremioTab() {
       </Section>
       <Section
         title={t("Synced addons")}
-        subtitle={t("Harbor pulls your addon collection from Stremio. Manage individual addons in Streaming sources.")}
+        subtitle={t(
+          "Harbor pulls your addon collection from Stremio. Manage individual addons in Streaming sources.",
+        )}
       >
         <SyncedAddonsCard />
       </Section>

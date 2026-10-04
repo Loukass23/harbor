@@ -34,7 +34,9 @@ export function BpSubtitleSync({
           label={busy ? t("Cancel sync") : t("Auto sync")}
           on={busy}
           seed
-          icon={busy ? <Loader2 size={19} className={SPIN} /> : <Wand2 size={19} strokeWidth={2.2} />}
+          icon={
+            busy ? <Loader2 size={19} className={SPIN} /> : <Wand2 size={19} strokeWidth={2.2} />
+          }
           onPress={() => {
             if (!canSync || !autoSync) return;
             if (busy) autoSync.stop();

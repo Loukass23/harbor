@@ -91,19 +91,20 @@ export function MusicLinkedBio({
 
   return (
     <>
-      {parts.map((part, index): ReactNode =>
-        typeof part === "string" ? (
-          part
-        ) : (
-          <button
-            key={`${part.at}:${index}`}
-            type="button"
-            className={`music-linked-bio-link ${className}`}
-            onClick={() => entities[part.at]?.run()}
-          >
-            {part.text}
-          </button>
-        ),
+      {parts.map(
+        (part, index): ReactNode =>
+          typeof part === "string" ? (
+            part
+          ) : (
+            <button
+              key={`${part.at}:${index}`}
+              type="button"
+              className={`music-linked-bio-link ${className}`}
+              onClick={() => entities[part.at]?.run()}
+            >
+              {part.text}
+            </button>
+          ),
       )}
     </>
   );

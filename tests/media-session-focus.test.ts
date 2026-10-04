@@ -5,41 +5,52 @@ import ts from "typescript";
 
 type Session = typeof import("../src/lib/media-session");
 type Call = { command: string; args?: Record<string, unknown> };
-const settle = () => new Promise<void>(resolve => setImmediate(resolve));
+const settle = () => new Promise<void>((resolve) => setImmediate(resolve));
 
 function deferred<T>() {
   let resolve!: (value: T) => void;
   let reject!: (reason: Error) => void;
-  const promise = new Promise<T>((yes, no) => { resolve = yes; reject = no; });
+  const promise = new Promise<T>((yes, no) => {
+    resolve = yes;
+    reject = no;
+  });
   return { promise, resolve, reject };
 }
 
-function fixture(options: {
-  focused?: boolean;
-  windows?: boolean;
-  native?: boolean;
-  focusQuery?: Promise<boolean>;
-  registration?: Promise<void>;
-  invoke?: (call: Call) => Promise<unknown>;
-} = {}) {
+function fixture(
+  options: {
+    focused?: boolean;
+    windows?: boolean;
+    native?: boolean;
+    focusQuery?: Promise<boolean>;
+    registration?: Promise<void>;
+    invoke?: (call: Call) => Promise<unknown>;
+  } = {},
+) {
   const calls: Call[] = [];
   const events = new Set<(event: { payload: { focused: boolean; minimized: boolean } }) => void>();
   let locked = false;
   let now = 1000;
   const mocks: Record<string, unknown> = {
-    "@tauri-apps/api/core": { invoke: (command: string, args?: Record<string, unknown>) => {
-      const call = { command, args };
-      calls.push(call);
-      return options.invoke?.(call) ?? Promise.resolve();
-    } },
-    "@tauri-apps/api/event": { listen: async (_name: string, handler: (event: any) => void) => {
-      await options.registration;
-      events.add(handler);
-      return () => events.delete(handler);
-    } },
-    "@tauri-apps/api/window": { getCurrentWindow: () => ({
-      isFocused: () => options.focusQuery ?? Promise.resolve(options.focused ?? true),
-    }) },
+    "@tauri-apps/api/core": {
+      invoke: (command: string, args?: Record<string, unknown>) => {
+        const call = { command, args };
+        calls.push(call);
+        return options.invoke?.(call) ?? Promise.resolve();
+      },
+    },
+    "@tauri-apps/api/event": {
+      listen: async (_name: string, handler: (event: any) => void) => {
+        await options.registration;
+        events.add(handler);
+        return () => events.delete(handler);
+      },
+    },
+    "@tauri-apps/api/window": {
+      getCurrentWindow: () => ({
+        isFocused: () => options.focusQuery ?? Promise.resolve(options.focused ?? true),
+      }),
+    },
     "@/lib/platform": { isWindowsDesktop: () => options.windows ?? true },
     "@/lib/player/interaction-lock": { isPlayerInteractionLocked: () => locked },
   };
@@ -49,17 +60,27 @@ function fixture(options: {
   }).outputText;
   const exports = {} as Session;
   new Function("require", "exports", "window", "document", "Date", compiled)(
-    (id: string) => { assert.ok(id in mocks, id); return mocks[id]; }, exports,
+    (id: string) => {
+      assert.ok(id in mocks, id);
+      return mocks[id];
+    },
+    exports,
     options.native === false ? {} : { __TAURI_INTERNALS__: {} },
-    { hasFocus: () => options.focused ?? true }, { now: () => now },
+    { hasFocus: () => options.focused ?? true },
+    { now: () => now },
   );
   return {
-    ...exports, calls,
+    ...exports,
+    calls,
     focus: (focused: boolean, minimized = false) => {
       for (const handler of events) handler({ payload: { focused, minimized } });
     },
-    advance: (ms = 1000) => { now += ms; },
-    lock: (value: boolean) => { locked = value; },
+    advance: (ms = 1000) => {
+      now += ms;
+    },
+    lock: (value: boolean) => {
+      locked = value;
+    },
     listeners: () => events.size,
   };
 }
@@ -68,14 +89,17 @@ test("paused Windows sessions withdraw on blur and restore the latest track/seek
   const h = fixture();
   h.startMediaSessionWindowTracking();
   await settle();
-  h.updateMediaControls(false, "Video", "Episode", null, 180, 12, .6);
+  h.updateMediaControls(false, "Video", "Episode", null, 180, 12, 0.6);
   await settle();
   h.focus(false);
   h.focus(false);
-  h.updateMediaControls(false, "Music", "Artist", null, 200, 20, .7);
+  h.updateMediaControls(false, "Music", "Artist", null, 200, 20, 0.7);
   h.notifyMediaSeeked(35);
   await settle();
-  assert.deepEqual(h.calls.map(call => call.command), ["media_controls_update", "media_controls_clear"]);
+  assert.deepEqual(
+    h.calls.map((call) => call.command),
+    ["media_controls_update", "media_controls_clear"],
+  );
   assert.equal(h.mediaKeyGate(), false, "a queued OS play event cannot resume withdrawn media");
   h.focus(true);
   await settle();
@@ -100,7 +124,11 @@ test("playing in the background retains media keys, pausing/minimizing yields th
   assert.equal(h.mediaKeyGate(), false);
   h.updateMediaControls(true, "Track", "Artist", null, 180, 13);
   await settle();
-  assert.equal(h.calls.at(-1)?.args?.playing, true, "explicit playback can reclaim keys in background");
+  assert.equal(
+    h.calls.at(-1)?.args?.playing,
+    true,
+    "explicit playback can reclaim keys in background",
+  );
   assert.equal(h.mediaKeyGate(), true);
   h.advance();
   h.lock(true);
@@ -129,13 +157,16 @@ test("closing a withdrawn session prevents focus from resurrecting it", async ()
   h.clearMediaControls();
   h.focus(true);
   await settle();
-  assert.deepEqual(h.calls.map(call => call.command), ["media_controls_update", "media_controls_clear"]);
+  assert.deepEqual(
+    h.calls.map((call) => call.command),
+    ["media_controls_update", "media_controls_clear"],
+  );
 });
 
 test("clear waits for an in-flight update and a rejected command does not block future updates", async () => {
   const first = deferred<void>();
   let count = 0;
-  const h = fixture({ invoke: () => ++count === 1 ? first.promise : Promise.resolve() });
+  const h = fixture({ invoke: () => (++count === 1 ? first.promise : Promise.resolve()) });
   h.startMediaSessionWindowTracking();
   await settle();
   h.updateMediaControls(false, "Old", "");
@@ -211,12 +242,22 @@ test("metadata/clock deduplication and media-key debounce survive focus handling
 
 test("terminal video snapshots clear the session and late clock ticks cannot reopen it", () => {
   const source = readFileSync(new URL("../src/views/player.tsx", import.meta.url), "utf8");
-  const tree = ts.createSourceFile("player.tsx", source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+  const tree = ts.createSourceFile(
+    "player.tsx",
+    source,
+    ts.ScriptTarget.Latest,
+    true,
+    ts.ScriptKind.TSX,
+  );
   let effect: ts.ArrowFunction | undefined;
   const visit = (node: ts.Node) => {
     if (ts.isCallExpression(node) && node.expression.getText(tree) === "useEffect") {
       const callback = node.arguments[0];
-      if (ts.isArrowFunction(callback) && callback.body.getText(tree).includes("updateMediaControls(")) effect = callback;
+      if (
+        ts.isArrowFunction(callback) &&
+        callback.body.getText(tree).includes("updateMediaControls(")
+      )
+        effect = callback;
     }
     ts.forEachChild(node, visit);
   };
@@ -226,16 +267,23 @@ test("terminal video snapshots clear the session and late clock ticks cannot reo
     compilerOptions: { target: ts.ScriptTarget.ES2022 },
   }).outputText;
   for (const status of ["idle", "ended", "error", "paused", "playing"]) {
-    const snap = { status, firstFrameReady: true, positionSec: 20, volume: .8, durationSec: 100 };
+    const snap = { status, firstFrameReady: true, positionSec: 20, volume: 0.8, durationSec: 100 };
     const updates: unknown[][] = [];
     let clears = 0;
     let tick: (() => void) | undefined;
     const scope = {
-      snap, snapRef: { current: snap }, src: { meta: { name: "Film" } },
-      clearMediaControls: () => { clears++; },
+      snap,
+      snapRef: { current: snap },
+      src: { meta: { name: "Film" } },
+      clearMediaControls: () => {
+        clears++;
+      },
       updateMediaControls: (...args: unknown[]) => updates.push(args),
       getPlaybackPosition: () => 20,
-      subscribePlaybackClock: (callback: () => void) => { tick = callback; return () => {}; },
+      subscribePlaybackClock: (callback: () => void) => {
+        tick = callback;
+        return () => {};
+      },
     };
     const exports = {} as { run: () => void };
     new Function(...Object.keys(scope), "exports", output)(...Object.values(scope), exports);

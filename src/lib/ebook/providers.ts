@@ -539,12 +539,13 @@ function pluginProvider(plugin: InstalledPlugin): Provider {
   const supportedTag = async (tagId?: string) => {
     if (!tagId) return undefined;
     supportedTags ??= call("tags", [])
-      .then((value) =>
-        new Set(
-          (Array.isArray(value) ? value : [])
-            .map((entry) => text(record(entry).id))
-            .filter((tag): tag is string => !!tag),
-        ),
+      .then(
+        (value) =>
+          new Set(
+            (Array.isArray(value) ? value : [])
+              .map((entry) => text(record(entry).id))
+              .filter((tag): tag is string => !!tag),
+          ),
       )
       .catch(() => new Set<string>());
     return (await supportedTags).has(tagId) ? tagId : undefined;
@@ -845,73 +846,75 @@ export async function loadSourceEBookPage(
   return {
     items: sourceItems,
     enriched: Promise.all(pages.map((page) => page.enriched)).then(async (selectedGroups) => {
-        const selected = selectedGroups.flat();
-        let selectedEntries = selected.flatMap((item) => item.books ?? [item]);
-        const authorKeys = (item: EBook) =>
-          item.authors
-            .map((author) => author.normalize("NFKD").toLocaleLowerCase().trim())
-            .filter(Boolean);
-        const candidateDetails = selectedEntries
-          .filter((item, index, entries) => {
-            const authors = new Set(authorKeys(item));
-            if (!authors.size) return false;
-            const arabic = /\p{Script=Arabic}/u.test(item.title);
-            return entries.some(
-              (other, otherIndex) =>
-                otherIndex !== index &&
-                /\p{Script=Arabic}/u.test(other.title) !== arabic &&
-                authorKeys(other).some((author) => authors.has(author)),
-            );
-          })
-          .slice(0, 24);
-        if (candidateDetails.length) {
-          const hydrated = await Promise.all(
-            candidateDetails.map((item) =>
-              sourceEBookDetail(item.id).then((detail) => detail ?? item).catch(() => item),
-            ),
+      const selected = selectedGroups.flat();
+      let selectedEntries = selected.flatMap((item) => item.books ?? [item]);
+      const authorKeys = (item: EBook) =>
+        item.authors
+          .map((author) => author.normalize("NFKD").toLocaleLowerCase().trim())
+          .filter(Boolean);
+      const candidateDetails = selectedEntries
+        .filter((item, index, entries) => {
+          const authors = new Set(authorKeys(item));
+          if (!authors.size) return false;
+          const arabic = /\p{Script=Arabic}/u.test(item.title);
+          return entries.some(
+            (other, otherIndex) =>
+              otherIndex !== index &&
+              /\p{Script=Arabic}/u.test(other.title) !== arabic &&
+              authorKeys(other).some((author) => authors.has(author)),
           );
-          const hydratedById = new Map(hydrated.map((item) => [item.id, item]));
-          selectedEntries = selectedEntries.map((item) => hydratedById.get(item.id) ?? item);
+        })
+        .slice(0, 24);
+      if (candidateDetails.length) {
+        const hydrated = await Promise.all(
+          candidateDetails.map((item) =>
+            sourceEBookDetail(item.id)
+              .then((detail) => detail ?? item)
+              .catch(() => item),
+          ),
+        );
+        const hydratedById = new Map(hydrated.map((item) => [item.id, item]));
+        selectedEntries = selectedEntries.map((item) => hydratedById.get(item.id) ?? item);
+      }
+      const searches = new Map<string, { provider: Provider; query: string }>();
+      for (const item of selectedEntries) {
+        const aliases = [
+          ...(item.sourceAliases ?? []),
+          ...(item.verifiedAliases ?? []),
+          ...(item.altTitle?.split("|") ?? []),
+          item.title,
+        ]
+          .map((title) => title.trim())
+          .filter(Boolean);
+        const crossScript = aliases.filter(
+          (title) => /\p{Script=Arabic}/u.test(title) !== /\p{Script=Arabic}/u.test(item.title),
+        );
+        const queries = (crossScript.length ? crossScript : aliases).slice(0, 2);
+        for (const provider of available) {
+          if (provider.id === item.providerId) continue;
+          for (const counterpartQuery of queries)
+            searches.set(`${provider.id}\0${counterpartQuery}`, {
+              provider,
+              query: counterpartQuery,
+            });
         }
-        const searches = new Map<string, { provider: Provider; query: string }>();
-        for (const item of selectedEntries) {
-          const aliases = [
-            ...(item.sourceAliases ?? []),
-            ...(item.verifiedAliases ?? []),
-            ...(item.altTitle?.split("|") ?? []),
-            item.title,
-          ]
-            .map((title) => title.trim())
-            .filter(Boolean);
-          const crossScript = aliases.filter(
-            (title) => /\p{Script=Arabic}/u.test(title) !== /\p{Script=Arabic}/u.test(item.title),
-          );
-          const queries = (crossScript.length ? crossScript : aliases).slice(0, 2);
-          for (const provider of available) {
-            if (provider.id === item.providerId) continue;
-            for (const counterpartQuery of queries)
-              searches.set(`${provider.id}\0${counterpartQuery}`, {
-                provider,
-                query: counterpartQuery,
-              });
-          }
+      }
+      const jobs = [...searches.values()];
+      const companions: EBook[] = [];
+      let next = 0;
+      const worker = async () => {
+        while (next < jobs.length) {
+          const job = jobs[next++];
+          const found = await job.provider.search(job.query, 0).catch(() => []);
+          companions.push(...(await withMetadata(found)));
         }
-        const jobs = [...searches.values()];
-        const companions: EBook[] = [];
-        let next = 0;
-        const worker = async () => {
-          while (next < jobs.length) {
-            const job = jobs[next++];
-            const found = await job.provider.search(job.query, 0).catch(() => []);
-            companions.push(...(await withMetadata(found)));
-          }
-        };
-        await Promise.all(Array.from({ length: Math.min(4, jobs.length) }, () => worker()));
-        const matchingCompanions = companions
-          .flatMap((item) => item.books ?? [item])
-          .filter((candidate) => selectedEntries.some((item) => eBooksMatch(item, candidate)));
-        return dedupeEBooks([...selectedEntries, ...matchingCompanions]);
-      }),
+      };
+      await Promise.all(Array.from({ length: Math.min(4, jobs.length) }, () => worker()));
+      const matchingCompanions = companions
+        .flatMap((item) => item.books ?? [item])
+        .filter((candidate) => selectedEntries.some((item) => eBooksMatch(item, candidate)));
+      return dedupeEBooks([...selectedEntries, ...matchingCompanions]);
+    }),
     cursor: Object.fromEntries(
       pages.map(({ provider, offset, items }) => [provider.id, offset + items.length]),
     ),
@@ -1051,10 +1054,7 @@ export async function sourceEBookContent(
   return content;
 }
 
-export async function prefetchSourceEBookContent(
-  route: string,
-  chapterId: string,
-): Promise<void> {
+export async function prefetchSourceEBookContent(route: string, chapterId: string): Promise<void> {
   const key = chapterCacheKey(route, chapterId);
   const cached = await ebookChapterCacheGet(key);
   if (cached && !cached.stale) return;

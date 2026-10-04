@@ -224,7 +224,11 @@ export function MangaView() {
         />
       );
     }
-    return <main className="media-start-scroll pt-24"><MediaStartPage kind="manga" onSetup={() => setMode({ screen: "sources" })}/></main>;
+    return (
+      <main className="media-start-scroll pt-24">
+        <MediaStartPage kind="manga" onSetup={() => setMode({ screen: "sources" })} />
+      </main>
+    );
   }
 
   const resume = async (entry: MangaProgressEntry) => {
@@ -234,19 +238,13 @@ export function MangaView() {
       const chs = await resumeChapters(entry.id);
       let i = chs.findIndex((c) => c.id === entry.chapterId);
       if (i < 0) {
-        const want =
-          chapterNumberKey(entry.chapterNumber) ?? chapterNumberKey(entry.chapterLabel);
+        const want = chapterNumberKey(entry.chapterNumber) ?? chapterNumberKey(entry.chapterLabel);
         if (want != null) {
-          i = chs.findIndex(
-            (c) => chapterNumberKey(c.chapter ?? c.title ?? "") === want,
-          );
+          i = chs.findIndex((c) => chapterNumberKey(c.chapter ?? c.title ?? "") === want);
         }
       }
       if (i < 0 && entry.chapterNumber != null) {
-        i = chs.findIndex(
-          (c) =>
-            c.chapter != null && c.chapter === entry.chapterNumber,
-        );
+        i = chs.findIndex((c) => c.chapter != null && c.chapter === entry.chapterNumber);
       }
       if (i >= 0) {
         setMode({
@@ -482,7 +480,11 @@ export function MangaView() {
 
 function EnableGate({ onEnable }: { onEnable: () => void }) {
   const t = useT();
-  return <main className="media-start-scroll pt-24"><MediaStartPage kind="manga" onSetup={onEnable} actionLabel={t("Enable manga sources")}/></main>;
+  return (
+    <main className="media-start-scroll pt-24">
+      <MediaStartPage kind="manga" onSetup={onEnable} actionLabel={t("Enable manga sources")} />
+    </main>
+  );
 }
 
 function LibraryCta({ onClick }: { onClick: () => void }) {

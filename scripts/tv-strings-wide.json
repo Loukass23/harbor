@@ -3,12 +3,8 @@
     "This addon provides streams only. It has no catalog to browse, ",
     "This catalog came back empty. Try another one from the strip above."
   ],
-  "AddonCollectionPage.kt": [
-    "No titles found in this collection."
-  ],
-  "AddonMeta.kt": [
-    "Episode $number"
-  ],
+  "AddonCollectionPage.kt": ["No titles found in this collection."],
+  "AddonMeta.kt": ["Episode $number"],
   "AddonStoreHealth.kt": [
     "Checking your addons",
     "It took too long to answer.",
@@ -17,12 +13,8 @@
     "Its server refused the connection.",
     "No addons to check"
   ],
-  "AddonUrl.kt": [
-    "That doesn't look like a valid URL."
-  ],
-  "AniListApi.kt": [
-    "Bearer $token"
-  ],
+  "AddonUrl.kt": ["That doesn't look like a valid URL."],
+  "AniListApi.kt": ["Bearer $token"],
   "AniListClient.kt": [
     "AniList is cooling down after a rate block.",
     "Bearer $token",
@@ -37,33 +29,17 @@
     "Could not reach Harbor to finish the sign in.",
     "Paste the code from AniList to continue."
   ],
-  "AnimeAddonBridge.kt": [
-    "From Your Addons"
-  ],
+  "AnimeAddonBridge.kt": ["From Your Addons"],
   "AnimeAwards.kt": [
     "Animation Kobe",
     "Crunchyroll Anime Awards",
     "Japan Media Arts Festival",
     "Tokyo Anime Award Festival"
   ],
-  "AnimeDetail.kt": [
-    "Parent Story",
-    "Side Story",
-    "TV Short"
-  ],
-  "AnimeExtras.kt": [
-    "Age rating",
-    "Episode length"
-  ],
-  "AnimeHero.kt": [
-    "More Info",
-    "Start Watching",
-    "Sub and Dub"
-  ],
-  "AnimeKitsu.kt": [
-    "Currently Airing",
-    "Finished Airing"
-  ],
+  "AnimeDetail.kt": ["Parent Story", "Side Story", "TV Short"],
+  "AnimeExtras.kt": ["Age rating", "Episode length"],
+  "AnimeHero.kt": ["More Info", "Start Watching", "Sub and Dub"],
+  "AnimeKitsu.kt": ["Currently Airing", "Finished Airing"],
   "AnimeTrackerPanel.kt": [
     "Anime does not go to Trakt. Connect Simkl or AniList and every anime episode you finish ",
     "Anime tracking",
@@ -111,17 +87,9 @@
     "Search channels",
     "This category has nothing right now"
   ],
-  "BpGuideBrowseSources.kt": [
-    "Add playlist"
-  ],
-  "BpGuideChrome.kt": [
-    "Live now",
-    "No schedule"
-  ],
-  "BpGuideScreen.kt": [
-    "No program info",
-    "Tuning the guide"
-  ],
+  "BpGuideBrowseSources.kt": ["Add playlist"],
+  "BpGuideChrome.kt": ["Live now", "No schedule"],
+  "BpGuideScreen.kt": ["No program info", "Tuning the guide"],
   "CalendarModel.kt": [
     "Episode $number",
     "Episode $number",
@@ -130,20 +98,14 @@
     "Episodes from the shows you follow on Trakt.",
     "Open settings"
   ],
-  "CalendarRow.kt": [
-    "Nothing airing"
-  ],
-  "CardRating.kt": [
-    "Score $value"
-  ],
+  "CalendarRow.kt": ["Nothing airing"],
+  "CardRating.kt": ["Score $value"],
   "CollectionPage.kt": [
     "Add a TMDB key in Settings to browse collections.",
     "Couldn't load this collection right now.",
     "No films found in this collection."
   ],
-  "CollectionsRow.kt": [
-    "All collections"
-  ],
+  "CollectionsRow.kt": ["All collections"],
   "CollectionsTab.kt": [
     "Collections come from TMDB. Add a TMDB key in Settings and every saga, ",
     "Nothing to show here yet.",
@@ -153,15 +115,9 @@
     "Still working. If it does not open soon, the source list opens instead.",
     "View sources"
   ],
-  "CwAhead.kt": [
-    "Episode $number"
-  ],
-  "CwLibrary.kt": [
-    "Episode ${at.second}"
-  ],
-  "CwRow.kt": [
-    "Your library"
-  ],
+  "CwAhead.kt": ["Episode $number"],
+  "CwLibrary.kt": ["Episode ${at.second}"],
+  "CwRow.kt": ["Your library"],
   "Data.kt": [
     "Airing Now",
     "Featured Movies",
@@ -183,23 +139,15 @@
     "Trending Anime",
     "Trending Anime"
   ],
-  "DebridOthers.kt": [
-    "Bearer $bearer",
-    "Bearer $bearer",
-    "Bearer $bearer"
-  ],
-  "DebridRealDebrid.kt": [
-    "Bearer $apiKey"
-  ],
+  "DebridOthers.kt": ["Bearer $bearer", "Bearer $bearer", "Bearer $bearer"],
+  "DebridRealDebrid.kt": ["Bearer $apiKey"],
   "DetailFacts.kt": [
     "Director of Photography",
     "Original Music Composer",
     "Original Series Creator",
     "Original Story"
   ],
-  "DetailHeroOrigin.kt": [
-    "Anime Kitsu"
-  ],
+  "DetailHeroOrigin.kt": ["Anime Kitsu"],
   "DiscoverCatalog.kt": [
     "Academy Awards",
     "Animation Kobe",
@@ -251,28 +199,12 @@
     "Tokyo Anime Award Festival",
     "Venice Film Festival"
   ],
-  "DiscoverCopy.kt": [
-    "Top Rated"
-  ],
-  "DiscoverData.kt": [
-    "Top $g",
-    "Top Movies",
-    "Top Series"
-  ],
-  "DiscoverQueueFeed.kt": [
-    "Top Rated"
-  ],
-  "DownloadsFormat.kt": [
-    "Saved movies and episodes for offline watching"
-  ],
-  "DownloadsModel.kt": [
-    "Failed: ",
-    "Interrupted, press resume to finish"
-  ],
-  "DownloadsNote.kt": [
-    "Downloads finished",
-    "Nothing left to download"
-  ],
+  "DiscoverCopy.kt": ["Top Rated"],
+  "DiscoverData.kt": ["Top $g", "Top Movies", "Top Series"],
+  "DiscoverQueueFeed.kt": ["Top Rated"],
+  "DownloadsFormat.kt": ["Saved movies and episodes for offline watching"],
+  "DownloadsModel.kt": ["Failed: ", "Interrupted, press resume to finish"],
+  "DownloadsNote.kt": ["Downloads finished", "Nothing left to download"],
   "DownloadsPage.kt": [
     "Nothing in this group yet.",
     "Open a title, pick a source, then press right on it to save that source here "
@@ -287,40 +219,16 @@
     "That source would not give a direct link",
     "This device has no writable storage"
   ],
-  "EpisodeChoice.kt": [
-    "Start from the beginning"
-  ],
-  "EpisodeFacts.kt": [
-    "Episode ${ep.number}"
-  ],
-  "EpisodeOrder.kt": [
-    "Aired Order",
-    "All Episodes",
-    "Episode Order"
-  ],
-  "EpisodePager.kt": [
-    "Season ${it.key}"
-  ],
-  "EpisodeSystem.kt": [
-    "Episode ${ep.number}",
-    "Episode ${ep.number}"
-  ],
-  "FriendsFeedNet.kt": [
-    "Bearer $token"
-  ],
-  "HandoffQr.kt": [
-    "Open on ${peer.label}",
-    "Opened on ${peer.label}"
-  ],
-  "HarborLan.kt": [
-    "Harbor TV"
-  ],
-  "HarborLanTrustWire.kt": [
-    "An unnamed Harbor"
-  ],
-  "Hero.kt": [
-    "More Info"
-  ],
+  "EpisodeChoice.kt": ["Start from the beginning"],
+  "EpisodeFacts.kt": ["Episode ${ep.number}"],
+  "EpisodeOrder.kt": ["Aired Order", "All Episodes", "Episode Order"],
+  "EpisodePager.kt": ["Season ${it.key}"],
+  "EpisodeSystem.kt": ["Episode ${ep.number}", "Episode ${ep.number}"],
+  "FriendsFeedNet.kt": ["Bearer $token"],
+  "HandoffQr.kt": ["Open on ${peer.label}", "Opened on ${peer.label}"],
+  "HarborLan.kt": ["Harbor TV"],
+  "HarborLanTrustWire.kt": ["An unnamed Harbor"],
+  "Hero.kt": ["More Info"],
   "HeroAwards.kt": [
     "Animation Kobe",
     "Animation Kobe",
@@ -331,11 +239,7 @@
     "Tokyo Anime",
     "Tokyo Anime"
   ],
-  "HeroExpand.kt": [
-    "Created by ",
-    "Directed by ",
-    "Written by "
-  ],
+  "HeroExpand.kt": ["Created by ", "Directed by ", "Written by "],
   "HomeCatalogs.kt": [
     "Action Hits",
     "Animated Movies",
@@ -350,14 +254,8 @@
     "Popular Series",
     "Sci-Fi and Fantasy"
   ],
-  "HomeFeed.kt": [
-    "All anime",
-    "All movies",
-    "All shows"
-  ],
-  "IptvFetch.kt": [
-    "Channel $autoIndex"
-  ],
+  "HomeFeed.kt": ["All anime", "All movies", "All shows"],
+  "IptvFetch.kt": ["Channel $autoIndex"],
   "IptvNetworksIntl.kt": [
     "BBC Four",
     "BBC One",
@@ -432,13 +330,8 @@
     "Universal Kids",
     "Weather Channel"
   ],
-  "IptvSetupFields.kt": [
-    "Guide address",
-    "Playlist address"
-  ],
-  "LibraryFilters.kt": [
-    "One list"
-  ],
+  "IptvSetupFields.kt": ["Guide address", "Playlist address"],
+  "LibraryFilters.kt": ["One list"],
   "LibraryModel.kt": [
     "A to Z",
     "Anything you save but have not started yet waits here, so you always have something queued.",
@@ -467,20 +360,14 @@
     "Your shelf lives here.",
     "Your watchlist is empty."
   ],
-  "LibraryRows.kt": [
-    "Delete list",
-    "Your year"
-  ],
+  "LibraryRows.kt": ["Delete list", "Your year"],
   "LibraryServices.kt": [
     "Connect Trakt in Settings and each custom list you keep there lands on its own shelf, ready to browse and edit from the couch.",
     "Every custom list on your Trakt account gets a shelf here. Build one on trakt.tv, or open any title and use Trakt lists to start filling it.",
     "No Trakt lists yet.",
     "Your Trakt lists live here."
   ],
-  "LibrarySheets.kt": [
-    "Delete $name",
-    "Keep list"
-  ],
+  "LibrarySheets.kt": ["Delete $name", "Keep list"],
   "LinkPanel.kt": [
     "Link MDBList",
     "Link Stremio",
@@ -489,12 +376,8 @@
     "Signed in as $it",
     "Signed in as $it"
   ],
-  "ListNameDialog.kt": [
-    "List name"
-  ],
-  "LiveIdent.kt": [
-    "Live TV"
-  ],
+  "ListNameDialog.kt": ["List name"],
+  "LiveIdent.kt": ["Live TV"],
   "MainScaffold.kt": [
     "This page is not built yet. Harbor shows ${tab.label} in a row on the Home page."
   ],
@@ -503,32 +386,18 @@
     "MyAnimeList is cooling down after a rate block.",
     "Not signed in to MyAnimeList."
   ],
-  "MalSignIn.kt": [
-    "Bearer $token"
-  ],
-  "MarqueeFeed.kt": [
-    "The collection"
-  ],
-  "MediaRows.kt": [
-    "Loading trailer..."
-  ],
-  "OnboardPhone.kt": [
-    "Signed in as $stremioName"
-  ],
+  "MalSignIn.kt": ["Bearer $token"],
+  "MarqueeFeed.kt": ["The collection"],
+  "MediaRows.kt": ["Loading trailer..."],
+  "OnboardPhone.kt": ["Signed in as $stremioName"],
   "OnboardStepsAccount.kt": [
     "David Corenswet",
     "Edi Gathegi",
     "Nicholas Hoult",
     "Rachel Brosnahan"
   ],
-  "OnboardStepsTaste.kt": [
-    "In order: ",
-    "Portuguese (Brazil)",
-    "Spanish (Latin America)"
-  ],
-  "Onboarding.kt": [
-    "Leave setup?"
-  ],
+  "OnboardStepsTaste.kt": ["In order: ", "Portuguese (Brazil)", "Spanish (Latin America)"],
+  "Onboarding.kt": ["Leave setup?"],
   "OptionsPanel.kt": [
     "Add to Watchlist",
     "Add to favorites",
@@ -540,14 +409,8 @@
     "Remove from Watchlist",
     "Remove from favorites"
   ],
-  "People.kt": [
-    "Director of",
-    "Executive Producer",
-    "Original Music Composer"
-  ],
-  "PersonCredits.kt": [
-    "Known For"
-  ],
+  "People.kt": ["Director of", "Executive Producer", "Original Music Composer"],
+  "PersonCredits.kt": ["Known For"],
   "PersonData.kt": [
     "Born $born",
     "Born $born  ·  $age",
@@ -558,21 +421,10 @@
     "Other Work",
     "TV Shows"
   ],
-  "PersonFilms.kt": [
-    "Nothing rated $minRating or higher.",
-    "Nothing to show."
-  ],
-  "PersonPage.kt": [
-    "Known For",
-    "Top Rated"
-  ],
-  "PersonRoute.kt": [
-    "Director of",
-    "Executive Producer"
-  ],
-  "PlayerAudio.kt": [
-    "PCM only"
-  ],
+  "PersonFilms.kt": ["Nothing rated $minRating or higher.", "Nothing to show."],
+  "PersonPage.kt": ["Known For", "Top Rated"],
+  "PersonRoute.kt": ["Director of", "Executive Producer"],
+  "PlayerAudio.kt": ["PCM only"],
   "PlayerAudioRow.kt": [
     "DTS Express",
     "Dolby AC-4",
@@ -616,41 +468,22 @@
     "Size: ",
     "Style: "
   ],
-  "PlayerEpisodes.kt": [
-    "Episode $number"
-  ],
-  "PlayerQuality.kt": [
-    "Dolby Vision",
-    "Dolby Vision",
-    "Option ",
-    "Playing ",
-    "Track "
-  ],
+  "PlayerEpisodes.kt": ["Episode $number"],
+  "PlayerQuality.kt": ["Dolby Vision", "Dolby Vision", "Option ", "Playing ", "Track "],
   "PlayerQualityPane.kt": [
     "Crop to the panel, shapes are kept.",
     "Dolby Vision",
     "Press right from any row",
     "Stretch to the panel, shapes are not kept."
   ],
-  "PlayerResume.kt": [
-    "Resume from ",
-    "Resuming in ",
-    "Start over"
-  ],
-  "PlayerSeekBar.kt": [
-    "Ends $endsText"
-  ],
+  "PlayerResume.kt": ["Resume from ", "Resuming in ", "Start over"],
+  "PlayerSeekBar.kt": ["Ends $endsText"],
   "PlayerSideSubHost.kt": [
     "Added subtitle",
     "Harbor could not read that file. Press OK to try again.",
     "Reading the file"
   ],
-  "PlayerSideSubModel.kt": [
-    "Styled, ASS",
-    "Text, SRT",
-    "Text, TTML",
-    "Text, WebVTT"
-  ],
+  "PlayerSideSubModel.kt": ["Styled, ASS", "Text, SRT", "Text, TTML", "Text, WebVTT"],
   "PlayerSkip.kt": [
     "Next Episode",
     "Skip Credits",
@@ -658,16 +491,8 @@
     "Skip Recap",
     "Skip injected ad?"
   ],
-  "PlayerSleep.kt": [
-    "End ep",
-    "End of episode",
-    "Pauses when this episode ends"
-  ],
-  "PlayerSpeed.kt": [
-    "Press right from any row",
-    "Press right from any row",
-    "Sleep timer"
-  ],
+  "PlayerSleep.kt": ["End ep", "End of episode", "Pauses when this episode ends"],
+  "PlayerSpeed.kt": ["Press right from any row", "Press right from any row", "Sleep timer"],
   "PlayerStallGuard.kt": [
     "Playback ran dry ${seconds}s ago and ",
     "Sound kept playing but no video frame has reached the screen in ${seconds}s. ",
@@ -679,13 +504,8 @@
     "Try again, or pick a source with a lower bitrate.",
     "Try another source, or press Back to leave."
   ],
-  "PlayerStats.kt": [
-    "Dolby Vision"
-  ],
-  "PlayerStatsModel.kt": [
-    "Link rate",
-    "Stream rate"
-  ],
+  "PlayerStats.kt": ["Dolby Vision"],
+  "PlayerStatsModel.kt": ["Link rate", "Stream rate"],
   "PlayerSubFind.kt": [
     "Adding subtitle",
     "Asking every source",
@@ -709,9 +529,7 @@
     "Text, tx3g",
     "Track ${ordinal + 1}"
   ],
-  "PlayerSubsHud.kt": [
-    "Subtitle sync"
-  ],
+  "PlayerSubsHud.kt": ["Subtitle sync"],
   "PlayerSubsModel.kt": [
     "Harbor cannot decode this one",
     "Harbor could not read that file. Press OK to try again.",
@@ -733,12 +551,7 @@
     "Did not start. Press OK to go back to ",
     "Did not start. Try another track."
   ],
-  "PlayerSubsSwitch.kt": [
-    "Subtitles off",
-    "This track did not start",
-    "Turning off",
-    "Turning on"
-  ],
+  "PlayerSubsSwitch.kt": ["Subtitles off", "This track did not start", "Turning off", "Turning on"],
   "PlayerSubsTune.kt": [
     "Back returns to the list.",
     "Late? Press Right. Early? Press Left. OK puts it back in sync.",
@@ -746,17 +559,12 @@
     "Subtitle size",
     "Subtitle timing"
   ],
-  "PlayerSwapHead.kt": [
-    "Keep watching",
-    "Switch source"
-  ],
+  "PlayerSwapHead.kt": ["Keep watching", "Switch source"],
   "PlayerSwapSheet.kt": [
     "No addon returned a source for this title.",
     "Nothing here fits the filters you set. Press up to widen them."
   ],
-  "PlayerTunePane.kt": [
-    "This stream reports a single audio track."
-  ],
+  "PlayerTunePane.kt": ["This stream reports a single audio track."],
   "PlayerUpNext.kt": [
     "Next episode",
     "OK plays it now, any other button keeps watching",
@@ -776,9 +584,7 @@
     "Still opening. Large files take a moment to start.",
     "Waiting for the first picture"
   ],
-  "PlaylistVodDetail.kt": [
-    "Season $number"
-  ],
+  "PlaylistVodDetail.kt": ["Season $number"],
   "PlaylistVodPage.kt": [
     "Add an IPTV playlist in Live TV and any movies or series ",
     "On Demand",
@@ -786,39 +592,16 @@
     "Reading your playlist.",
     "This playlist carries live channels only. Providers that include a "
   ],
-  "PlaylistVodRails.kt": [
-    "Nothing on demand in this playlist"
-  ],
-  "PlutoApi.kt": [
-    "Pluto TV"
-  ],
-  "PlutoStore.kt": [
-    "Bearer "
-  ],
-  "ProfileConfirm.kt": [
-    "Remove ${profileCleanName(name).ifEmpty { CONFIRM_ANON }}?"
-  ],
-  "ProfileEdit.kt": [
-    "Remove profile"
-  ],
-  "ProfilePinPad.kt": [
-    "Too many tries. Try again in ${seconds}s."
-  ],
-  "Progress.kt": [
-    "Episode ${e.number}",
-    "Episode ${slot.second}"
-  ],
-  "QrCode.kt": [
-    "Code unavailable",
-    "Setup QR code"
-  ],
-  "RankRow.kt": [
-    "Top Movies & TV"
-  ],
-  "RowMoreCell.kt": [
-    "Load more",
-    "Try again"
-  ],
+  "PlaylistVodRails.kt": ["Nothing on demand in this playlist"],
+  "PlutoApi.kt": ["Pluto TV"],
+  "PlutoStore.kt": ["Bearer "],
+  "ProfileConfirm.kt": ["Remove ${profileCleanName(name).ifEmpty { CONFIRM_ANON }}?"],
+  "ProfileEdit.kt": ["Remove profile"],
+  "ProfilePinPad.kt": ["Too many tries. Try again in ${seconds}s."],
+  "Progress.kt": ["Episode ${e.number}", "Episode ${slot.second}"],
+  "QrCode.kt": ["Code unavailable", "Setup QR code"],
+  "RankRow.kt": ["Top Movies & TV"],
+  "RowMoreCell.kt": ["Load more", "Try again"],
   "SearchAiModel.kt": [
     "AI picks",
     "That request was too big for this model. Pick a model with a larger context.",
@@ -832,15 +615,8 @@
     "Bearer $key",
     "The model replied with nothing usable. Try another model or rephrase."
   ],
-  "SearchIdle.kt": [
-    "On your list",
-    "Popular now",
-    "Search ",
-    "Two letters and the search begins."
-  ],
-  "SearchKeyboard.kt": [
-    "Voice search"
-  ],
+  "SearchIdle.kt": ["On your list", "Popular now", "Search ", "Two letters and the search begins."],
+  "SearchKeyboard.kt": ["Voice search"],
   "SearchOrder.kt": [
     "Live TV",
     "Live TV",
@@ -849,15 +625,9 @@
     "Your addons",
     "Your addons"
   ],
-  "SearchQueryLine.kt": [
-    "Search movies and series"
-  ],
-  "SearchRecallRail.kt": [
-    "Press again"
-  ],
-  "SearchRepair.kt": [
-    "Search again"
-  ],
+  "SearchQueryLine.kt": ["Search movies and series"],
+  "SearchRecallRail.kt": ["Press again"],
+  "SearchRepair.kt": ["Search again"],
   "SearchStates.kt": [
     "Cannot reach search.",
     "Everything this search found is under All.",
@@ -871,19 +641,13 @@
     "Try a different spelling, a person's name, a year like 1972, or a genre like Horror.",
     "Try again"
   ],
-  "SearchText.kt": [
-    "Action & Adventure",
-    "Sci-Fi & Fantasy"
-  ],
+  "SearchText.kt": ["Action & Adventure", "Sci-Fi & Fantasy"],
   "ServicePage.kt": [
     "Add a TMDB key in Settings to browse ${service.name}.",
     "Change your region in Settings.",
     "Nothing from ${service.name} is listed in $region right now. "
   ],
-  "ServicePageChrome.kt": [
-    "Hide watched",
-    "Open settings"
-  ],
+  "ServicePageChrome.kt": ["Hide watched", "Open settings"],
   "ServicePageRows.kt": [
     "Also on your services",
     "Highest rated",
@@ -899,32 +663,17 @@
     "The Roku Channel",
     "Your streaming"
   ],
-  "SettingsCatalog.kt": [
-    "Portuguese (Brazil)",
-    "Spanish (Latin America)"
-  ],
-  "SharedListNet.kt": [
-    "Bearer $it",
-    "Untitled list"
-  ],
-  "SimklClient.kt": [
-    "Bearer $token",
-    "Simkl is cooling down after a rate block."
-  ],
+  "SettingsCatalog.kt": ["Portuguese (Brazil)", "Spanish (Latin America)"],
+  "SharedListNet.kt": ["Bearer $it", "Untitled list"],
+  "SimklClient.kt": ["Bearer $token", "Simkl is cooling down after a rate block."],
   "SimklConfig.kt": [
     "Could not reach Simkl to start the sign in.",
     "Lost the connection while waiting for Simkl.",
     "Simkl sent something Harbor could not read.",
     "Simkl would not start the sign in."
   ],
-  "SimklCw.kt": [
-    "Episode ${row.number}"
-  ],
-  "Spoilers.kt": [
-    "Episode $number",
-    "Episode $number",
-    "Hidden so nothing is given away."
-  ],
+  "SimklCw.kt": ["Episode ${row.number}"],
+  "Spoilers.kt": ["Episode $number", "Episode $number", "Hidden so nothing is given away."],
   "StreamBadgePackImport.kt": [
     "All $unsafe patterns in that pack use regex Harbor will not run. Nothing was installed.",
     "Could not reach that link. Check the URL and try again.",
@@ -943,9 +692,7 @@
     "Reading the badge pack",
     "Remove a pack first. Harbor keeps up to 3."
   ],
-  "StreamBadgePackStore.kt": [
-    "Badge pack"
-  ],
+  "StreamBadgePackStore.kt": ["Badge pack"],
   "StreamBadgeSlots.kt": [
     "Audio format",
     "Cuts and repacks",
@@ -963,16 +710,8 @@
     "Plays instantly",
     "Show flagged"
   ],
-  "StreamFacetModel.kt": [
-    "Any HDR",
-    "Any audio",
-    "Any codec",
-    "Any source"
-  ],
-  "StreamFilterModel.kt": [
-    "Any addon",
-    "Any quality"
-  ],
+  "StreamFacetModel.kt": ["Any HDR", "Any audio", "Any codec", "Any source"],
+  "StreamFilterModel.kt": ["Any addon", "Any quality"],
   "StreamLanguages.kt": [
     "Portuguese (Brazil)",
     "Portuguese (Brazil)",
@@ -982,17 +721,8 @@
     "Spanish (Latin America)",
     "Spanish (Latin America)"
   ],
-  "StreamRow.kt": [
-    "In $cachedOnName",
-    "Now playing",
-    "On $cachedOnName",
-    "Played last"
-  ],
-  "StreamRowText.kt": [
-    "Director's Cut",
-    "No label",
-    "Open Matte"
-  ],
+  "StreamRow.kt": ["In $cachedOnName", "Now playing", "On $cachedOnName", "Played last"],
+  "StreamRowText.kt": ["Director's Cut", "No label", "Open Matte"],
   "StreamScore.kt": [
     "CAM penalty",
     "Cam Recording",
@@ -1005,12 +735,7 @@
     "Theater Capture",
     "Ultra HD"
   ],
-  "StreamTokenParse.kt": [
-    "Atmos 9.1.2",
-    "Dolby Vision",
-    "No Label",
-    "No Label"
-  ],
+  "StreamTokenParse.kt": ["Atmos 9.1.2", "Dolby Vision", "No Label", "No Label"],
   "Streams.kt": [
     "Loading sources",
     "No addon returned a source for this title.",
@@ -1026,46 +751,23 @@
     "That file is not a subtitle Harbor can read.",
     "That subtitle would not download. Try another."
   ],
-  "SubLangModel.kt": [
-    "Nothing found"
-  ],
-  "SyncNet.kt": [
-    "Bearer $next",
-    "Bearer $token"
-  ],
-  "SyncTvAdapters.kt": [
-    "Custom theme"
-  ],
+  "SubLangModel.kt": ["Nothing found"],
+  "SyncNet.kt": ["Bearer $next", "Bearer $token"],
+  "SyncTvAdapters.kt": ["Custom theme"],
   "ThemePickerPreview.kt": [
     "Every colour on this screen comes from the theme you are on.",
     "Light themes are not finished on TV yet."
   ],
-  "ThemeSync.kt": [
-    "Custom theme",
-    "Harbor default"
-  ],
-  "TitleExtras.kt": [
-    "Behind the Scenes",
-    "Opening Credits"
-  ],
+  "ThemeSync.kt": ["Custom theme", "Harbor default"],
+  "TitleExtras.kt": ["Behind the Scenes", "Opening Credits"],
   "TogetherCopy.kt": [
     "Read this out, or let them scan it.",
     "Your TV made the room. Everyone else joins from a phone or a computer, so nobody has "
   ],
-  "TogetherHost.kt": [
-    "Find something to watch",
-    "Or point a camera here",
-    "Watch party invite"
-  ],
-  "TogetherIdentity.kt": [
-    "Guest ${Random.nextInt(1000, 10000)}"
-  ],
-  "TogetherInbox.kt": [
-    "Watch Together"
-  ],
-  "TogetherLobby.kt": [
-    "Keep waiting"
-  ],
+  "TogetherHost.kt": ["Find something to watch", "Or point a camera here", "Watch party invite"],
+  "TogetherIdentity.kt": ["Guest ${Random.nextInt(1000, 10000)}"],
+  "TogetherInbox.kt": ["Watch Together"],
+  "TogetherLobby.kt": ["Keep waiting"],
   "TogetherOverlay.kt": [
     "Everyone is loaded in. Press play to start watching.",
     "Loading on ",
@@ -1089,10 +791,7 @@
     "You are in ",
     "You are in the room"
   ],
-  "TopNav.kt": [
-    "Live TV",
-    "On Demand"
-  ],
+  "TopNav.kt": ["Live TV", "On Demand"],
   "TraktAuth.kt": [
     "Bearer ${session.accessToken}",
     "Could not reach Trakt to start the sign in.",
@@ -1131,9 +830,7 @@
     "No lists on Trakt yet. Build one on trakt.tv and it shows up here.",
     "Reading your Trakt lists."
   ],
-  "TraktListsUi.kt": [
-    "Trakt lists"
-  ],
+  "TraktListsUi.kt": ["Trakt lists"],
   "Tvdb.kt": [
     "Absolute Order",
     "Aired Order",
@@ -1168,14 +865,7 @@
     "Counted from what this Harbor has played. ",
     "Play something, or connect Trakt in Settings, and this page fills in."
   ],
-  "XrayModel.kt": [
-    "Paused at "
-  ],
-  "XrayUiBand.kt": [
-    "Holding the frame"
-  ],
-  "YouTube.kt": [
-    "Loading trailer...",
-    "This trailer cannot be played here. Press Back."
-  ]
+  "XrayModel.kt": ["Paused at "],
+  "XrayUiBand.kt": ["Holding the frame"],
+  "YouTube.kt": ["Loading trailer...", "This trailer cannot be played here. Press Back."]
 }

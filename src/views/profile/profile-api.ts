@@ -63,9 +63,7 @@ export async function fetchSummary(handle: string, signal?: AbortSignal) {
 }
 
 export function fetchFriends(handle: string, signal?: AbortSignal) {
-  return getJson<Friend[]>(`/u/${encodeURIComponent(handle)}/friends`, signal).catch(
-    () => [],
-  );
+  return getJson<Friend[]>(`/u/${encodeURIComponent(handle)}/friends`, signal).catch(() => []);
 }
 
 export function fetchBadges(handle: string, signal?: AbortSignal) {

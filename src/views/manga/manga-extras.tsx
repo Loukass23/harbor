@@ -103,8 +103,7 @@ export function MangaAdaptationCard({
   const coverage = info && chapters ? coverageOf(info, chapters) : null;
   if (!adaptation && !coverage) return null;
 
-  const wideBg =
-    adaptation?.banner && adaptation.banner !== heroBg ? adaptation.banner : null;
+  const wideBg = adaptation?.banner && adaptation.banner !== heroBg ? adaptation.banner : null;
   const bg = wideBg ?? adaptation?.cover ?? adaptation?.banner;
   const portrait = !wideBg && Boolean(adaptation?.cover);
   const adaptationFacts = [

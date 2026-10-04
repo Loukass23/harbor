@@ -50,9 +50,7 @@ const BigPictureShell = lazy(() =>
   import("./bp-shell").then((m) => ({ default: m.BigPictureShell })),
 );
 
-const PlayerView = lazy(() =>
-  import("@/views/player").then((m) => ({ default: m.PlayerView })),
-);
+const PlayerView = lazy(() => import("@/views/player").then((m) => ({ default: m.PlayerView })));
 
 type BpTvProvider = ComponentType<{ children: ReactNode }>;
 
@@ -103,11 +101,16 @@ function SmartViewReceiverMount() {
     const connect = () => {
       if (cancelled) return;
       try {
-        ws = new WebSocket("ws://127.0.0.1:8001/api/v2/channels/samsung.smartview.harbor?name=HarborTV");
+        ws = new WebSocket(
+          "ws://127.0.0.1:8001/api/v2/channels/samsung.smartview.harbor?name=HarborTV",
+        );
         ws.onmessage = (evt) => {
           try {
             const parsed = JSON.parse(String(evt.data));
-            const data = (parsed && typeof parsed === "object" && "data" in parsed) ? (parsed as { data: any }).data : parsed;
+            const data =
+              parsed && typeof parsed === "object" && "data" in parsed
+                ? (parsed as { data: any }).data
+                : parsed;
             if (data && (data.action === "playMeta" || data.action === "openMeta")) {
               window.dispatchEvent(new CustomEvent("harbor:remote-open", { detail: data }));
             }
@@ -123,7 +126,9 @@ function SmartViewReceiverMount() {
     connect();
     return () => {
       cancelled = true;
-      try { ws?.close(); } catch {}
+      try {
+        ws?.close();
+      } catch {}
     };
   }, []);
 

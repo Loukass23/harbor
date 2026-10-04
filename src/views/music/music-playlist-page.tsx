@@ -153,7 +153,9 @@ export function MusicPlaylistPage({
       .finally(() => setWorking(false));
   };
 
-  const collection = usePlaylistFilters(playlistId, playlist?.tracks, { addedAt: playlist?.trackAddedAt });
+  const collection = usePlaylistFilters(playlistId, playlist?.tracks, {
+    addedAt: playlist?.trackAddedAt,
+  });
   const visibleTracks = collection.tracks;
 
   if (!loading && !playlist)
@@ -180,10 +182,15 @@ export function MusicPlaylistPage({
       )}
       {playlist && (
         <>
-          <MusicStickyTitle revealAfter={heading} title={playlist.name} tracks={visibleTracks} onPlay={(track, queue) => {
-            recordMusicPlaylistPlayback(playlist, queue);
-            openSourcePicker(track, queue);
-          }} />
+          <MusicStickyTitle
+            revealAfter={heading}
+            title={playlist.name}
+            tracks={visibleTracks}
+            onPlay={(track, queue) => {
+              recordMusicPlaylistPlayback(playlist, queue);
+              openSourcePicker(track, queue);
+            }}
+          />
           <div className="music-library-playlist-hero" ref={heading} tabIndex={-1}>
             <div className="music-library-playlist-art">
               <PlaylistArt playlist={playlist} />
@@ -213,7 +220,9 @@ export function MusicPlaylistPage({
             filterKey={collection.filters.query}
             likedIds={player.likedIds}
             onRemove={removeTrack}
-            onMove={collection.active || collection.filters.sort !== "default" ? undefined : moveTrack}
+            onMove={
+              collection.active || collection.filters.sort !== "default" ? undefined : moveTrack
+            }
             selectedPlaylist={playlist}
             emptyCopy={t(collection.active ? "music.searchEmpty" : "music.library.playlistEmpty")}
           />

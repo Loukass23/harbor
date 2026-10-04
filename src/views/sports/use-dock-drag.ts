@@ -21,16 +21,25 @@ function clamp(spot: Spot, box: DOMRect): Spot {
   };
 }
 
-export function useDockDrag(root: RefObject<HTMLElement | null>, enabled: boolean, onPositionChange?: () => void) {
+export function useDockDrag(
+  root: RefObject<HTMLElement | null>,
+  enabled: boolean,
+  onPositionChange?: () => void,
+) {
   const [spot, setSpot] = useState<Spot | null>(held);
   const grab = useRef<(Spot & { pointerId: number }) | null>(null);
   const frame = useRef<number | null>(null);
-  useLayoutEffect(() => { if (enabled) onPositionChange?.(); }, [enabled, spot, onPositionChange]);
-  useEffect(() => () => {
-    if (frame.current !== null) cancelAnimationFrame(frame.current);
-    frame.current = null;
-    grab.current = null;
-  }, [enabled]);
+  useLayoutEffect(() => {
+    if (enabled) onPositionChange?.();
+  }, [enabled, spot, onPositionChange]);
+  useEffect(
+    () => () => {
+      if (frame.current !== null) cancelAnimationFrame(frame.current);
+      frame.current = null;
+      grab.current = null;
+    },
+    [enabled],
+  );
   useEffect(() => {
     if (!enabled) return;
     const element = root.current;
@@ -57,7 +66,11 @@ export function useDockDrag(root: RefObject<HTMLElement | null>, enabled: boolea
       const box = root.current?.getBoundingClientRect();
       if (!box) return;
       event.preventDefault();
-      grab.current = { x: event.clientX - box.left, y: event.clientY - box.top, pointerId: event.pointerId };
+      grab.current = {
+        x: event.clientX - box.left,
+        y: event.clientY - box.top,
+        pointerId: event.pointerId,
+      };
       event.currentTarget.setPointerCapture(event.pointerId);
     },
     [enabled, root],
@@ -70,12 +83,18 @@ export function useDockDrag(root: RefObject<HTMLElement | null>, enabled: boolea
       event.preventDefault();
       held = clamp({ x: event.clientX - hold.x, y: event.clientY - hold.y }, box);
       // Move once per frame without rerendering the entire playback tree on every pointer event.
-      if (frame.current === null) frame.current = requestAnimationFrame(() => {
-        frame.current = null;
-        if (!root.current || !held) return;
-        Object.assign(root.current.style, { left: `${held.x}px`, right: "auto", top: `${held.y}px`, bottom: "auto" });
-        onPositionChange?.();
-      });
+      if (frame.current === null)
+        frame.current = requestAnimationFrame(() => {
+          frame.current = null;
+          if (!root.current || !held) return;
+          Object.assign(root.current.style, {
+            left: `${held.x}px`,
+            right: "auto",
+            top: `${held.y}px`,
+            bottom: "auto",
+          });
+          onPositionChange?.();
+        });
     },
     [enabled, root, onPositionChange],
   );
@@ -94,6 +113,12 @@ export function useDockDrag(root: RefObject<HTMLElement | null>, enabled: boolea
       : undefined;
   return {
     style,
-    handlers: { onPointerDown, onPointerMove, onPointerUp, onPointerCancel: onPointerUp, onLostPointerCapture: onPointerUp },
+    handlers: {
+      onPointerDown,
+      onPointerMove,
+      onPointerUp,
+      onPointerCancel: onPointerUp,
+      onLostPointerCapture: onPointerUp,
+    },
   };
 }

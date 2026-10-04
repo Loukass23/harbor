@@ -18,7 +18,8 @@ export class TvStreamSelector {
   private rankHandlers = new Set<RankedHandler>();
   private bufferHandlers = new Set<BufferHandler>();
   private lastBufferSentAt = 0;
-  private pendingBuffer: { bufferedSec: number; durationSec: number; positionSec: number } | null = null;
+  private pendingBuffer: { bufferedSec: number; durationSec: number; positionSec: number } | null =
+    null;
   private bufferTimer: number | null = null;
 
   private ensureWorker(): Worker | null {

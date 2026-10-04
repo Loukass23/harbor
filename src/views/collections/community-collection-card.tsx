@@ -42,7 +42,10 @@ export function CommunityCollectionCard({
             className="absolute inset-0 h-full w-full object-cover"
           />
         )}
-        <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent" />
+        <div
+          aria-hidden
+          className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent"
+        />
         <span className="absolute start-3.5 top-3 inline-flex items-center rounded-full bg-black/45 px-2.5 py-1 text-[10.5px] font-semibold uppercase tracking-[0.16em] text-white/85 backdrop-blur-md">
           {count === 1 ? t("{n} title", { n: count }) : t("{n} titles", { n: count })}
         </span>
@@ -84,9 +87,7 @@ export function CommunityCollectionCard({
           className="absolute inset-0 flex flex-col items-center justify-center gap-3 rounded-2xl bg-canvas/85 p-4 text-center backdrop-blur-md"
           onClick={(e) => e.stopPropagation()}
         >
-          <p className="text-[13.5px] font-medium text-ink">
-            {t("Delete this collection?")}
-          </p>
+          <p className="text-[13.5px] font-medium text-ink">{t("Delete this collection?")}</p>
           <div className="flex items-center gap-2">
             <button
               type="button"

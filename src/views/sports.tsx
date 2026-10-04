@@ -286,13 +286,11 @@ function SportsHubView({ active = false }: { active?: boolean }) {
             role="status"
             title={brokenLeagues.length ? brokenLeagues.join(", ") : undefined}
           >
-            {busy ? (
-              t("Updating schedules…")
-            ) : failures || statusStale ? (
-              t("Some schedules are unavailable")
-            ) : (
-              t("Up to date")
-            )}
+            {busy
+              ? t("Updating schedules…")
+              : failures || statusStale
+                ? t("Some schedules are unavailable")
+                : t("Up to date")}
           </span>
         )}
         <SportsRefreshButton busy={busy} onRefresh={() => setRefresh((n) => n + 1)} />

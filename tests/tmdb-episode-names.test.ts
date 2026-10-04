@@ -70,7 +70,10 @@ test("the overlay returns the same array when it changes nothing", () => {
 
 test("an addon still is never replaced by the tmdb still", () => {
   const eps = [{ episode: 1, name: "Episode 1", still: "https://addon/still.jpg" }];
-  const out = applyTmdbEpisodeNames(eps, new Map([[1, tmdb("Pilot", "", "https://img/w300/a.jpg")]]));
+  const out = applyTmdbEpisodeNames(
+    eps,
+    new Map([[1, tmdb("Pilot", "", "https://img/w300/a.jpg")]]),
+  );
   assert.equal(out[0].name, "Pilot");
   assert.equal(out[0].still, "https://addon/still.jpg");
 });

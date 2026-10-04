@@ -216,7 +216,10 @@ export async function searchAddonGroups(
   }
   const startedAt = Date.now();
   const remainingBudget = () => ALL_GROUPS_BUDGET_MS - (Date.now() - startedAt);
-  const groups = await mapLimit(entries, GROUP_CONCURRENCY, async ({ addon, targets }): Promise<AddonResultGroup> => {
+  const groups = await mapLimit(
+    entries,
+    GROUP_CONCURRENCY,
+    async ({ addon, targets }): Promise<AddonResultGroup> => {
       const origin = addonOrigin(addon);
       const base = origin.base;
       const settled = await Promise.allSettled(
@@ -277,6 +280,7 @@ export async function searchAddonGroups(
         metas,
       });
       return group;
-  });
+    },
+  );
   return groups.filter((g) => g.metas.length > 0);
 }

@@ -1,4 +1,14 @@
-import { AlertTriangle, CheckSquare, Download, Info, Layers, RefreshCw, Square, Trash2, Wand2 } from "lucide-react";
+import {
+  AlertTriangle,
+  CheckSquare,
+  Download,
+  Info,
+  Layers,
+  RefreshCw,
+  Square,
+  Trash2,
+  Wand2,
+} from "lucide-react";
 import { Play } from "@/components/icons/play-filled";
 import { memo, useCallback, useMemo, useState } from "react";
 import { Poster } from "@/components/poster";

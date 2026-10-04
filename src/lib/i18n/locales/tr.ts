@@ -31,7 +31,7 @@ import bpSports from "./tr/bp-sports";
 import nytTv from "./tr/nyt-tv";
 
 const tr: Record<string, string> = {
-  "Translations": "Çeviriler",
+  Translations: "Çeviriler",
   "Translating…": "Çevriliyor…",
   "Showing {lang}": "{lang} gösteriliyor",
   "Show all": "Tümünü göster",

@@ -67,7 +67,8 @@ function openDb(): Promise<IDBDatabase | null> {
     const request = indexedDB.open(DB_NAME, DB_VERSION);
     request.onupgradeneeded = () => {
       for (const store of [CHAPTERS, TRANSLATIONS, BOOK_PAGES])
-        if (!request.result.objectStoreNames.contains(store)) request.result.createObjectStore(store);
+        if (!request.result.objectStoreNames.contains(store))
+          request.result.createObjectStore(store);
     };
     request.onsuccess = () => resolve(request.result);
     request.onerror = () => resolve(null);

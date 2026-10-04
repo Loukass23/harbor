@@ -303,7 +303,7 @@ export function importBadgesJson(json: unknown): BadgeImportResult {
   };
 
   if (data && (data.overrides || (Array.isArray(data.rules) && !data.filters))) {
-    const overrides = { ...state.overrides, ...(data.overrides ?? {}) };
+    const overrides = { ...state.overrides, ...data.overrides };
     const incoming = Array.isArray(data.rules) ? data.rules : [];
     const keep = state.rules.filter((r) => !incoming.some((n) => n.id === r.id));
     state = { overrides, rules: [...keep, ...incoming] };

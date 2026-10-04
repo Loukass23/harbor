@@ -228,12 +228,17 @@ export async function gqlCategories(client: SuwayomiClient): Promise<any[]> {
 }
 
 export async function gqlCategoryManga(client: SuwayomiClient, id: string): Promise<any[]> {
-  const data = await gqlData(client, `query($id: Int!) {
+  const data = await gqlData(
+    client,
+    `query($id: Int!) {
     category(id: $id) { mangas { nodes {
       id title thumbnailUrl author artist status description sourceId
     } } }
-  }`, { id: Number(id) });
-  if (!Array.isArray(data?.category?.mangas?.nodes)) throw new Error("suwayomi_category_unavailable");
+  }`,
+    { id: Number(id) },
+  );
+  if (!Array.isArray(data?.category?.mangas?.nodes))
+    throw new Error("suwayomi_category_unavailable");
   return data.category.mangas.nodes;
 }
 

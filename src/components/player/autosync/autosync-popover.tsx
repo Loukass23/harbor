@@ -1,4 +1,13 @@
-import { Check, ChevronDown, Loader2, RotateCcw, ThumbsDown, ThumbsUp, Wand2, X } from "lucide-react";
+import {
+  Check,
+  ChevronDown,
+  Loader2,
+  RotateCcw,
+  ThumbsDown,
+  ThumbsUp,
+  Wand2,
+  X,
+} from "lucide-react";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useT } from "@/lib/i18n";
 import { openSyncBar } from "@/lib/player/sub-sync";
@@ -29,7 +38,9 @@ function phaseOf(h: AutoSyncHandle): Phase | null {
   }
 }
 
-function affineOf(t: SyncTransform | null | undefined): { offsetSec: number; ratio: number } | null {
+function affineOf(
+  t: SyncTransform | null | undefined,
+): { offsetSec: number; ratio: number } | null {
   if (!t) return null;
   if (t.kind === "affine") return { offsetSec: t.offsetSec, ratio: t.ratio };
   const s = t.segments[0];
@@ -127,7 +138,11 @@ export function AutosyncPopover({ handle }: { handle: AutoSyncHandle }) {
           className="flex h-9 items-center gap-2 rounded-full border border-edge bg-elevated/95 pe-2.5 ps-3 shadow-[0_16px_40px_-20px_rgba(0,0,0,0.85)] backdrop-blur-2xl transition-colors hover:bg-elevated aria-disabled:cursor-default motion-reduce:transition-none"
         >
           <Lead phase={phase} />
-          <span role="status" aria-live="polite" className="whitespace-nowrap text-[13px] font-semibold text-ink">
+          <span
+            role="status"
+            aria-live="polite"
+            className="whitespace-nowrap text-[13px] font-semibold text-ink"
+          >
             {phase === "analyzing" && modelDl.active
               ? modelDl.total > 0
                 ? t("Downloading speech model {pct}%", {
@@ -195,7 +210,13 @@ function chipLabel(t: (s: string) => string, phase: Phase): string {
 
 function Lead({ phase }: { phase: Phase }) {
   if (phase === "analyzing") {
-    return <Loader2 size={15} strokeWidth={2.4} className="shrink-0 animate-spin text-ink-muted motion-reduce:animate-none" />;
+    return (
+      <Loader2
+        size={15}
+        strokeWidth={2.4}
+        className="shrink-0 animate-spin text-ink-muted motion-reduce:animate-none"
+      />
+    );
   }
   if (phase === "synced") {
     return (
@@ -208,7 +229,9 @@ function Lead({ phase }: { phase: Phase }) {
     return <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-danger" />;
   }
   if (phase === "offer") {
-    return <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-accent animate-pulse motion-reduce:animate-none" />;
+    return (
+      <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-accent animate-pulse motion-reduce:animate-none" />
+    );
   }
   return <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-ink-subtle" />;
 }
@@ -237,9 +260,18 @@ function Body(props: {
         <div className="flex flex-col gap-2 pe-6">
           <p className="text-[13px] font-semibold text-ink">{t("Not right?")}</p>
           <div className="flex flex-wrap items-center gap-1.5">
-            <PrimaryBtn icon={<Wand2 size={14} strokeWidth={2.2} />} label={t("Try again")} onClick={props.onRetry} busy={acting === "retry"} />
+            <PrimaryBtn
+              icon={<Wand2 size={14} strokeWidth={2.2} />}
+              label={t("Try again")}
+              onClick={props.onRetry}
+              busy={acting === "retry"}
+            />
             <GhostBtn label={t("Sync manually")} onClick={props.onManual} />
-            <GhostBtn label={t("Undo")} icon={<RotateCcw size={13} strokeWidth={2.2} />} onClick={props.onRevert} />
+            <GhostBtn
+              label={t("Undo")}
+              icon={<RotateCcw size={13} strokeWidth={2.2} />}
+              onClick={props.onRevert}
+            />
           </div>
         </div>
       );
@@ -269,7 +301,12 @@ function Body(props: {
           {t("This subtitle looks like a different version of the video.")}
         </p>
         <div className="flex flex-wrap items-center gap-1.5">
-          <PrimaryBtn icon={<Wand2 size={14} strokeWidth={2.2} />} label={t("Use a better match")} onClick={props.onApplyOffer} busy={acting === "offer"} />
+          <PrimaryBtn
+            icon={<Wand2 size={14} strokeWidth={2.2} />}
+            label={t("Use a better match")}
+            onClick={props.onApplyOffer}
+            busy={acting === "offer"}
+          />
           <GhostBtn label={t("Keep anyway")} onClick={props.onKeep} />
         </div>
       </div>
@@ -286,7 +323,12 @@ function Body(props: {
           {t("Apply it, then nudge if it's off.")}
         </p>
         <div className="flex flex-wrap items-center gap-1.5">
-          <PrimaryBtn icon={<Wand2 size={14} strokeWidth={2.2} />} label={t("Sync")} onClick={props.onApplyOffer} busy={acting === "offer"} />
+          <PrimaryBtn
+            icon={<Wand2 size={14} strokeWidth={2.2} />}
+            label={t("Sync")}
+            onClick={props.onApplyOffer}
+            busy={acting === "offer"}
+          />
           <GhostBtn label={t("Sync manually")} onClick={props.onManual} />
         </div>
       </div>
@@ -296,10 +338,17 @@ function Body(props: {
   return (
     <div className="flex flex-col gap-2 pe-6">
       <p className="text-[13px] leading-snug text-ink-muted">
-        {phase === "error" ? t("Sync is unavailable right now.") : t("Couldn't line up these subtitles automatically.")}
+        {phase === "error"
+          ? t("Sync is unavailable right now.")
+          : t("Couldn't line up these subtitles automatically.")}
       </p>
       <div className="flex flex-wrap items-center gap-1.5">
-        <PrimaryBtn icon={<Wand2 size={14} strokeWidth={2.2} />} label={t("Try again")} onClick={props.onRetry} busy={acting === "retry"} />
+        <PrimaryBtn
+          icon={<Wand2 size={14} strokeWidth={2.2} />}
+          label={t("Try again")}
+          onClick={props.onRetry}
+          busy={acting === "retry"}
+        />
         <GhostBtn label={t("Sync manually")} onClick={props.onManual} />
       </div>
     </div>
@@ -308,14 +357,28 @@ function Body(props: {
 
 function Ack({ label }: { label: string }) {
   return (
-    <span role="status" aria-live="polite" className="flex items-center gap-1.5 pe-6 text-[13px] font-medium text-ink-muted">
+    <span
+      role="status"
+      aria-live="polite"
+      className="flex items-center gap-1.5 pe-6 text-[13px] font-medium text-ink-muted"
+    >
       <Check size={14} strokeWidth={2.4} className="text-success" />
       {label}
     </span>
   );
 }
 
-function PrimaryBtn({ icon, label, onClick, busy }: { icon: ReactNode; label: string; onClick: () => void; busy?: boolean }) {
+function PrimaryBtn({
+  icon,
+  label,
+  onClick,
+  busy,
+}: {
+  icon: ReactNode;
+  label: string;
+  onClick: () => void;
+  busy?: boolean;
+}) {
   return (
     <button
       type="button"
@@ -323,13 +386,25 @@ function PrimaryBtn({ icon, label, onClick, busy }: { icon: ReactNode; label: st
       disabled={busy}
       className="flex h-9 items-center gap-1.5 whitespace-nowrap rounded-md bg-accent px-3 text-[13px] font-semibold text-canvas transition-all hover:brightness-110 active:scale-95 disabled:opacity-70 motion-reduce:transition-none motion-reduce:active:scale-100"
     >
-      {busy ? <Loader2 size={14} strokeWidth={2.4} className="animate-spin motion-reduce:animate-none" /> : icon}
+      {busy ? (
+        <Loader2 size={14} strokeWidth={2.4} className="animate-spin motion-reduce:animate-none" />
+      ) : (
+        icon
+      )}
       {label}
     </button>
   );
 }
 
-function GhostBtn({ icon, label, onClick }: { icon?: ReactNode; label: string; onClick: () => void }) {
+function GhostBtn({
+  icon,
+  label,
+  onClick,
+}: {
+  icon?: ReactNode;
+  label: string;
+  onClick: () => void;
+}) {
   return (
     <button
       type="button"
@@ -342,7 +417,17 @@ function GhostBtn({ icon, label, onClick }: { icon?: ReactNode; label: string; o
   );
 }
 
-function IconBtn({ label, danger, onClick, children }: { label: string; danger?: boolean; onClick: () => void; children: ReactNode }) {
+function IconBtn({
+  label,
+  danger,
+  onClick,
+  children,
+}: {
+  label: string;
+  danger?: boolean;
+  onClick: () => void;
+  children: ReactNode;
+}) {
   return (
     <button
       type="button"

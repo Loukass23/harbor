@@ -1,4 +1,11 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import { useContextMenu } from "@/lib/context-menu";
 import { setPreviewTmdbKey } from "@/lib/hover-preview/preview-data";
 import {
@@ -69,7 +76,16 @@ export function HoverPreview() {
       searchClosed: !search.open,
       menuClosed: menu.state === null,
     });
-  }, [settings.hoverPreviewEnabled, settings.cardHoverStyle, finePointer, view.player, view.picker, view.chromeHidden, search.open, menu.state]);
+  }, [
+    settings.hoverPreviewEnabled,
+    settings.cardHoverStyle,
+    finePointer,
+    view.player,
+    view.picker,
+    view.chromeHidden,
+    search.open,
+    menu.state,
+  ]);
 
   const snap = useSyncExternalStore(subscribeHoverPreview, getHoverPreviewSnapshot);
 
@@ -212,10 +228,22 @@ export function HoverPreview() {
     const outEl = layerEls.current.get(scene.outgoing.key);
     const inEl = layerEls.current.get(currentKey);
     if (reduced) {
-      outEl?.animate([{ opacity: 1 }, { opacity: 0 }], { duration: REDUCED_MS, easing: "linear", fill: "forwards" });
-      inEl?.animate([{ opacity: 0 }, { opacity: 1 }], { duration: REDUCED_MS, easing: "linear", fill: "backwards" });
+      outEl?.animate([{ opacity: 1 }, { opacity: 0 }], {
+        duration: REDUCED_MS,
+        easing: "linear",
+        fill: "forwards",
+      });
+      inEl?.animate([{ opacity: 0 }, { opacity: 1 }], {
+        duration: REDUCED_MS,
+        easing: "linear",
+        fill: "backwards",
+      });
     } else {
-      outEl?.animate([{ opacity: 1 }, { opacity: 0 }], { duration: MORPH_FADE_OUT_MS, easing: "ease-in", fill: "forwards" });
+      outEl?.animate([{ opacity: 1 }, { opacity: 0 }], {
+        duration: MORPH_FADE_OUT_MS,
+        easing: "ease-in",
+        fill: "forwards",
+      });
       inEl?.animate(
         [
           { opacity: 0, transform: `translateY(${MORPH_RISE_PX}px)` },
@@ -226,9 +254,12 @@ export function HoverPreview() {
     }
     for (const t of morphTimersRef.current) window.clearTimeout(t);
     morphTimersRef.current = [
-      window.setTimeout(() => {
-        setScene((s) => (s && s.current.key === currentKey ? { ...s, height: s.nextHeight } : s));
-      }, reduced ? 0 : MORPH_FADE_OUT_MS),
+      window.setTimeout(
+        () => {
+          setScene((s) => (s && s.current.key === currentKey ? { ...s, height: s.nextHeight } : s));
+        },
+        reduced ? 0 : MORPH_FADE_OUT_MS,
+      ),
       window.setTimeout(
         () => {
           setScene((s) => (s && s.current.key === currentKey ? { ...s, outgoing: null } : s));
@@ -248,19 +279,34 @@ export function HoverPreview() {
     const seq = scene.seq;
     const done = () => setScene((s) => (s && s.seq === seq ? null : s));
     if (reduced) {
-      frame.animate([{ opacity: 1 }, { opacity: 0 }], { duration: REDUCED_MS, easing: "linear", fill: "forwards" }).onfinish = done;
+      frame.animate([{ opacity: 1 }, { opacity: 0 }], {
+        duration: REDUCED_MS,
+        easing: "linear",
+        fill: "forwards",
+      }).onfinish = done;
       return;
     }
     if (scene.exiting === "hard") {
-      frame.animate([{ opacity: 1 }, { opacity: 0 }], { duration: HARD_CLOSE_MS, easing: "linear", fill: "forwards" }).onfinish = done;
+      frame.animate([{ opacity: 1 }, { opacity: 0 }], {
+        duration: HARD_CLOSE_MS,
+        easing: "linear",
+        fill: "forwards",
+      }).onfinish = done;
       return;
     }
-    panelRef.current?.animate([{ transform: "scale(1)" }, { transform: `scale(${CLOSE_SCALE_TO})` }], {
+    panelRef.current?.animate(
+      [{ transform: "scale(1)" }, { transform: `scale(${CLOSE_SCALE_TO})` }],
+      {
+        duration: CLOSE_MS,
+        easing: CLOSE_EASE,
+        fill: "forwards",
+      },
+    );
+    frame.animate([{ opacity: 1 }, { opacity: 0 }], {
       duration: CLOSE_MS,
       easing: CLOSE_EASE,
       fill: "forwards",
-    });
-    frame.animate([{ opacity: 1 }, { opacity: 0 }], { duration: CLOSE_MS, easing: CLOSE_EASE, fill: "forwards" }).onfinish = done;
+    }).onfinish = done;
   }, [scene?.exiting, scene?.seq, reduced]);
 
   useLayoutEffect(() => {
@@ -293,7 +339,10 @@ export function HoverPreview() {
       resume && !resume.external && resume.season != null && resume.episode != null
         ? { season: resume.season, episode: resume.episode }
         : undefined;
-    viewRef.current.openPicker(payload.meta, episode, { autoPlay: settingsRef.current.instantPlay, resume: true });
+    viewRef.current.openPicker(payload.meta, episode, {
+      autoPlay: settingsRef.current.instantPlay,
+      resume: true,
+    });
   }, []);
 
   const onPanelPointerMove = useCallback((e: React.PointerEvent) => {
@@ -323,7 +372,10 @@ export function HoverPreview() {
         resume.season != null && resume.episode != null
           ? { season: resume.season, episode: resume.episode }
           : undefined;
-      viewRef.current.openPicker(payload.meta, episode, { autoPlay: settingsRef.current.instantPlay, resume: true });
+      viewRef.current.openPicker(payload.meta, episode, {
+        autoPlay: settingsRef.current.instantPlay,
+        resume: true,
+      });
     } else {
       viewRef.current.openMeta(payload.meta);
     }
@@ -352,7 +404,8 @@ export function HoverPreview() {
             ? `translate3d(${scene.pos.left}px, ${scene.pos.top}px, 0)`
             : "translate3d(0px, 0px, 0)",
           visibility: revealed ? "visible" : "hidden",
-          transition: scene.outgoing && !reduced ? `transform ${MORPH_MOVE_MS}ms ${OPEN_EASE}` : undefined,
+          transition:
+            scene.outgoing && !reduced ? `transform ${MORPH_MOVE_MS}ms ${OPEN_EASE}` : undefined,
         }}
       >
         <div
@@ -370,11 +423,17 @@ export function HoverPreview() {
           }`}
           style={{
             height: revealed ? scene.height : undefined,
-            transformOrigin: scene.pos ? `${scene.pos.originX}px ${scene.pos.originY}px` : undefined,
+            transformOrigin: scene.pos
+              ? `${scene.pos.originX}px ${scene.pos.originY}px`
+              : undefined,
           }}
         >
           {scene.outgoing && (
-            <div key={scene.outgoing.key} ref={setLayerEl(scene.outgoing.key)} className="absolute inset-x-0 top-0">
+            <div
+              key={scene.outgoing.key}
+              ref={setLayerEl(scene.outgoing.key)}
+              className="absolute inset-x-0 top-0"
+            >
               <PreviewBody
                 data={scene.outgoing.payload.data}
                 crownH={scene.crownH}

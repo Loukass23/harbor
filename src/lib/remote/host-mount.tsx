@@ -70,7 +70,10 @@ function broadcast(msg: RemoteServerMessage) {
 }
 
 function pushSnapshot(force = false) {
-  const snapshot = { ...buildRemoteSnapshot(getPlaybackPosition()), manga: buildRemoteMangaState() };
+  const snapshot = {
+    ...buildRemoteSnapshot(getPlaybackPosition()),
+    manga: buildRemoteMangaState(),
+  };
   if (!force) {
     const { updatedAt: _ignored, ...rest } = snapshot;
     void _ignored;
@@ -516,13 +519,19 @@ export function RemoteHostMount() {
           };
           ws.onmessage = (event) => {
             const raw = String(event.data);
-            window.dispatchEvent(new CustomEvent("harbor:remote-cmd", { detail: { clientId: 1, raw } }));
+            window.dispatchEvent(
+              new CustomEvent("harbor:remote-cmd", { detail: { clientId: 1, raw } }),
+            );
             const msg = parseClientMessage(raw);
             if (!msg) {
               try {
                 const action = JSON.parse(raw);
                 if (action.action === "client_join") {
-                  window.dispatchEvent(new CustomEvent("harbor:remote-client", { detail: { action: "join", clientId: 1 } }));
+                  window.dispatchEvent(
+                    new CustomEvent("harbor:remote-client", {
+                      detail: { action: "join", clientId: 1 },
+                    }),
+                  );
                   broadcast({ t: "hello", proto: REMOTE_PROTO, server: "harbor-remote" });
                   pushSnapshot(true);
                 }

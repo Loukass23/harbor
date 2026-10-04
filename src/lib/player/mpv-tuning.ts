@@ -56,7 +56,8 @@ export function mergeMpvOptions(s: Settings, svpActive: boolean): string | undef
   return merged.trim() ? merged : undefined;
 }
 
-const RISKY = /^(scripts?|load-script|input-ipc-server|input-conf|input-cmdlist|ytdl-raw-options)$/i;
+const RISKY =
+  /^(scripts?|load-script|input-ipc-server|input-conf|input-cmdlist|ytdl-raw-options)$/i;
 
 export type MpvLineCheck = { valid: number; skipped: number; risky: string[] };
 

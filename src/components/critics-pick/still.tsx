@@ -12,7 +12,12 @@ export function Still({
   if (!onClick) {
     return (
       <div className="relative aspect-[16/9] overflow-hidden rounded-md border border-edge-soft">
-        <img src={artAtWidth(src, 200)} alt={alt} loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
+        <img
+          src={artAtWidth(src, 200)}
+          alt={alt}
+          loading="lazy"
+          className="absolute inset-0 h-full w-full object-cover"
+        />
       </div>
     );
   }

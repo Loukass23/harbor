@@ -63,16 +63,17 @@ export function BpCollectionsRow({
             width={CELL_WIDTH}
           />
         ))}
-        {!settled && entries.length === 0 && (
-          // Six pulsing plates on the Home screen was six live render surfaces.
-          <div aria-hidden className="flex shrink-0 gap-[clamp(11px,1vw,20px)]">
-            {Array.from({ length: PLACEHOLDERS }).map((_, i) => (
-              <div key={i} className="shrink-0" style={{ width: CELL_WIDTH }}>
-                <BpCollectionCardSkeleton />
-              </div>
-            ))}
-          </div>
-        )}
+        {!settled &&
+          entries.length === 0 && (
+            // Six pulsing plates on the Home screen was six live render surfaces.
+            <div aria-hidden className="flex shrink-0 gap-[clamp(11px,1vw,20px)]">
+              {Array.from({ length: PLACEHOLDERS }).map((_, i) => (
+                <div key={i} className="shrink-0" style={{ width: CELL_WIDTH }}>
+                  <BpCollectionCardSkeleton />
+                </div>
+              ))}
+            </div>
+          )}
       </div>
     </section>
   );

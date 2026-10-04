@@ -12,7 +12,8 @@ export function AccountMenuFloating() {
   const ctrl = useAccountMenu();
   const { setView } = useView();
   const [anchor, setAnchor] = useState<AccountMenuAnchor>(null);
-  const { menuOpen, setMenuOpen, pendingSwitch, setPendingSwitch, selectProfile, activeProfile } = ctrl;
+  const { menuOpen, setMenuOpen, pendingSwitch, setPendingSwitch, selectProfile, activeProfile } =
+    ctrl;
   const panelRef = useRef<HTMLDivElement>(null);
 
   useEffect(
@@ -47,11 +48,7 @@ export function AccountMenuFloating() {
     <>
       {menuOpen &&
         createPortal(
-          <div
-            ref={panelRef}
-            className="fixed z-[160] w-64"
-            style={{ top, insetInlineEnd: end }}
-          >
+          <div ref={panelRef} className="fixed z-[160] w-64" style={{ top, insetInlineEnd: end }}>
             <div className="relative">
               <AccountMenuPanel
                 ctrl={ctrl}

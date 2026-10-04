@@ -40,7 +40,8 @@ export function makeMangayomiProvider(record: MangayomiSourceRecord): MangaProvi
     id: record.id,
     name: record.name,
     popular: (offset, tagId) => w.call("popular", [offset, tagId], 20_000).then(toSummaries),
-    search: (query, offset, tagId) => w.call("search", [query, offset, tagId], 20_000).then(toSummaries),
+    search: (query, offset, tagId) =>
+      w.call("search", [query, offset, tagId], 20_000).then(toSummaries),
     detail: (id) => w.call("detail", [id], 20_000).then(toSummary),
     chapters: (id) => w.call("chapters", [id], 25_000).then(toChapters),
     pageUrls: (chapterId) =>

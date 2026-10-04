@@ -97,12 +97,7 @@ import {
   library,
   type LibraryItem,
 } from "@/lib/stremio";
-import {
-  clearLocalCw,
-  listLocalCw,
-  localCwVersion,
-  subscribeLocalCw,
-} from "@/lib/local-cw";
+import { clearLocalCw, listLocalCw, localCwVersion, subscribeLocalCw } from "@/lib/local-cw";
 import {
   dismissManualWatched,
   manualWatchedLibraryItems,
@@ -1025,32 +1020,33 @@ export function AnimeView({ active = true }: { active?: boolean }) {
               rd.push({
                 key: spec.key,
                 name: spec.rank ? rankName : specName,
-                node: !r.ready || settling ? (
-                  <RowSkeleton title={spec.rank ? rankName : specName} />
-                ) : spec.rank && r.metas.length >= 10 ? (
-                  <Row
-                    title={rankName}
-                    min={180}
-                    shape="rank"
-                    scrollKey={`anime:${spec.key}`}
-                    onViewAll={viewAll}
-                  >
-                    {r.metas.slice(0, 10).map((m, i) => (
-                      <AnimeRankCard key={m.id} meta={m} rank={i + 1} />
-                    ))}
-                  </Row>
-                ) : (
-                  <Row
-                    title={specName}
-                    scrollKey={`anime:${spec.key}`}
-                    onEndReached={r.hasMore ? () => loadMore(spec.key) : undefined}
-                    onViewAll={viewAll}
-                  >
-                    {r.metas.map((m, i) => (
-                      <PickCard key={`${m.id}-${i}`} meta={m} />
-                    ))}
-                  </Row>
-                ),
+                node:
+                  !r.ready || settling ? (
+                    <RowSkeleton title={spec.rank ? rankName : specName} />
+                  ) : spec.rank && r.metas.length >= 10 ? (
+                    <Row
+                      title={rankName}
+                      min={180}
+                      shape="rank"
+                      scrollKey={`anime:${spec.key}`}
+                      onViewAll={viewAll}
+                    >
+                      {r.metas.slice(0, 10).map((m, i) => (
+                        <AnimeRankCard key={m.id} meta={m} rank={i + 1} />
+                      ))}
+                    </Row>
+                  ) : (
+                    <Row
+                      title={specName}
+                      scrollKey={`anime:${spec.key}`}
+                      onEndReached={r.hasMore ? () => loadMore(spec.key) : undefined}
+                      onViewAll={viewAll}
+                    >
+                      {r.metas.map((m, i) => (
+                        <PickCard key={`${m.id}-${i}`} meta={m} />
+                      ))}
+                    </Row>
+                  ),
               });
             }
             for (const row of dedupedAddonRows) {

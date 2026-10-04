@@ -156,7 +156,7 @@ export function useBpCardBadges(
   // Resolved even when no badge wants it: the watchlist, watched and local
   // library marks all match on the alternate id too.
   const resolved = useTmdbImdbId(meta.id);
-  const imdbId = (imdbHint ?? resolved) ?? undefined;
+  const imdbId = imdbHint ?? resolved ?? undefined;
   const scoreId = want ? imdbId : undefined;
 
   const visible = useBpCardVisible(ref);
@@ -293,7 +293,8 @@ export function useBpCardBadges(
       out.push({ kind: "letterboxd", value: cardScores.letterboxd });
     if (gate.mdblist && cardScores?.score != null)
       out.push({ kind: "mdblist", value: cardScores.score });
-    if (gate.trakt && cardScores?.trakt != null) out.push({ kind: "trakt", value: cardScores.trakt });
+    if (gate.trakt && cardScores?.trakt != null)
+      out.push({ kind: "trakt", value: cardScores.trakt });
     return out.length > 0 ? out : NO_BADGES;
   }, [
     want,

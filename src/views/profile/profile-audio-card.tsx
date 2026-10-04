@@ -43,7 +43,9 @@ export function ProfileAudioCard({ audioUrl }: { audioUrl?: string }) {
   const [mountMuted, setMountMuted] = useState(false);
   const frameRef = useRef<HTMLIFrameElement>(null);
 
-  const audio = audioUrl ? parseProfileAudio(audioUrl, { autoplay: true, muted: mountMuted }) : null;
+  const audio = audioUrl
+    ? parseProfileAudio(audioUrl, { autoplay: true, muted: mountMuted })
+    : null;
 
   useEffect(() => {
     setStarted(false);
@@ -124,12 +126,21 @@ export function ProfileAudioCard({ audioUrl }: { audioUrl?: string }) {
               className="relative grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-md bg-elevated ring-1 ring-edge-soft"
             >
               {meta?.thumbnail ? (
-                <img src={meta.thumbnail} alt="" draggable={false} className="h-full w-full object-cover" />
+                <img
+                  src={meta.thumbnail}
+                  alt=""
+                  draggable={false}
+                  className="h-full w-full object-cover"
+                />
               ) : (
                 <Music2 size={18} className="text-ink-subtle" />
               )}
               <span className="absolute inset-0 grid place-items-center bg-canvas/55 opacity-0 transition-opacity hover:opacity-100">
-                {playing ? <Pause size={16} className="text-ink" /> : <Play size={16} className="text-ink" />}
+                {playing ? (
+                  <Pause size={16} className="text-ink" />
+                ) : (
+                  <Play size={16} className="text-ink" />
+                )}
               </span>
             </button>
 
@@ -246,7 +257,11 @@ function VolumeBar({ value, onChange }: { value: number; onChange: (v: number) =
         />
         <div
           className="pointer-events-none absolute left-1/2 -translate-x-1/2 translate-y-1/2 rounded-full bg-ink shadow-[0_2px_6px_rgba(0,0,0,0.5)] transition-[width,height] duration-150 ease-out"
-          style={{ width: wide ? "15px" : "11px", height: wide ? "15px" : "11px", bottom: value + "%" }}
+          style={{
+            width: wide ? "15px" : "11px",
+            height: wide ? "15px" : "11px",
+            bottom: value + "%",
+          }}
         />
       </div>
     </div>

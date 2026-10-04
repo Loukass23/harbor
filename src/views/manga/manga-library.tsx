@@ -29,7 +29,8 @@ function useOpenTitle() {
       const results = await searchManga(name);
       const match =
         results.find(
-          (r) => norm(r.title) === norm(name) || (r.altTitle != null && norm(r.altTitle) === norm(name)),
+          (r) =>
+            norm(r.title) === norm(name) || (r.altTitle != null && norm(r.altTitle) === norm(name)),
         ) ?? results[0];
       openManga(match ? match.id : id);
     } catch {
@@ -69,7 +70,10 @@ function FavCell({ m, onOpen }: { m: MangaSummary; onOpen: (item: MangaSummary) 
       }
       className="group flex w-full flex-col gap-2 text-start"
     >
-      <div ref={ref} className="relative aspect-[2/3] w-full overflow-hidden rounded-xl bg-elevated/60">
+      <div
+        ref={ref}
+        className="relative aspect-[2/3] w-full overflow-hidden rounded-xl bg-elevated/60"
+      >
         {!loaded && <span aria-hidden className="harbor-shimmer absolute inset-0" />}
         {near && src && (
           <img
@@ -94,12 +98,12 @@ export function MangaLibrary({ scrollRef }: { scrollRef: React.RefObject<HTMLEle
   const openTitle = useOpenTitle();
   const openRef = useRef(openTitle);
   openRef.current = openTitle;
-  const openRailTitle = useCallback(
-    (m: MangaSummary) => void openRef.current(m.id, m.title),
-    [],
-  );
+  const openRailTitle = useCallback((m: MangaSummary) => void openRef.current(m.id, m.title), []);
   const { items } = useMangaFavorites();
-  const favs = useMemo((): MangaSummary[] => [...items.values()].sort((a, b) => b.addedAt - a.addedAt), [items]);
+  const favs = useMemo(
+    (): MangaSummary[] => [...items.values()].sort((a, b) => b.addedAt - a.addedAt),
+    [items],
+  );
   const [active, setActive] = useState<LibrarySection>("favorites");
   const swapRef = useRef<HTMLDivElement | null>(null);
 
@@ -143,8 +147,7 @@ export function MangaLibrary({ scrollRef }: { scrollRef: React.RefObject<HTMLEle
       }
       const scroller = scrollerOf(lists);
       const maxed =
-        scroller != null &&
-        scroller.scrollHeight - scroller.scrollTop - scroller.clientHeight <= 8;
+        scroller != null && scroller.scrollHeight - scroller.scrollTop - scroller.clientHeight <= 8;
       if (maxed && rect.bottom > 160) {
         setActive("lists");
         return;

@@ -236,7 +236,9 @@ export function removeLocalEntry(id: string): void {
 
 export function removeLocalFolder(folder: string): void {
   write((entries) => {
-    rememberLocalRemovals(entries.filter((entry) => entry.folder === folder).map((entry) => entry.path));
+    rememberLocalRemovals(
+      entries.filter((entry) => entry.folder === folder).map((entry) => entry.path),
+    );
     return entries.filter((entry) => entry.folder !== folder);
   });
 }

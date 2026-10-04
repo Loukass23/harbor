@@ -11,7 +11,13 @@ import { useSelfAvatar } from "./use-self-avatar";
 import type { Comment } from "./profile-types";
 import { VerifiedBadge } from "@/views/account/verified-badge";
 
-function SafeBody({ body, onOpenAuthor }: { body: string; onOpenAuthor?: (handle: string) => void }) {
+function SafeBody({
+  body,
+  onOpenAuthor,
+}: {
+  body: string;
+  onOpenAuthor?: (handle: string) => void;
+}) {
   const t = useT();
   return (
     <p className="mt-1 whitespace-pre-wrap break-words text-[14px] leading-relaxed text-ink-muted">
@@ -66,7 +72,7 @@ export function CommentItem({
   const [replying, setReplying] = useState(false);
   const [showReplies, setShowReplies] = useState(false);
   const mine = !!self.handle && self.handle.toLowerCase() === c.authorHandle.toLowerCase();
-  const avatarSrc = mine ? self.avatar ?? c.authorAvatarUrl : c.authorAvatarUrl;
+  const avatarSrc = mine ? (self.avatar ?? c.authorAvatarUrl) : c.authorAvatarUrl;
   const avatarFallback = mine ? c.authorAvatarUrl : undefined;
   const canReply = !!onReply && !!signedIn && !!replyToId;
   return (
@@ -109,7 +115,9 @@ export function CommentItem({
               aria-pressed={!!c.liked}
               aria-label={c.liked ? t("Unlike comment") : t("Like comment")}
               className={`-ml-2 inline-flex h-8 items-center gap-1.5 rounded-[8px] px-2 text-[12px] tabular-nums transition-colors disabled:cursor-default ${
-                c.liked ? "text-danger" : `text-ink-subtle ${signedIn ? "hover:text-ink-muted" : ""}`
+                c.liked
+                  ? "text-danger"
+                  : `text-ink-subtle ${signedIn ? "hover:text-ink-muted" : ""}`
               } ${signedIn ? "hover:bg-elevated/70" : ""}`}
             >
               <Heart size={15} className={c.liked ? "fill-current" : ""} />

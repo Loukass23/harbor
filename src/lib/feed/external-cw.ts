@@ -86,8 +86,10 @@ export function setExternalCwSources(mask: { trakt: boolean; simkl: boolean }): 
 
 async function runRefresh(gen: number): Promise<boolean> {
   const enabled: Array<{ source: "simkl" | "trakt"; fetch: () => Promise<LibraryItem[]> }> = [];
-  if (getSimklSession() && sourceMask.simkl) enabled.push({ source: "simkl", fetch: fetchSimklPlaybackItems });
-  if (getTraktSession() && sourceMask.trakt) enabled.push({ source: "trakt", fetch: fetchTraktPlaybackItems });
+  if (getSimklSession() && sourceMask.simkl)
+    enabled.push({ source: "simkl", fetch: fetchSimklPlaybackItems });
+  if (getTraktSession() && sourceMask.trakt)
+    enabled.push({ source: "trakt", fetch: fetchTraktPlaybackItems });
   const results = await Promise.all(
     enabled.map(async ({ fetch }) => {
       try {
@@ -103,7 +105,9 @@ async function runRefresh(gen: number): Promise<boolean> {
   fetchedAt = complete ? Date.now() : 0;
   const succeeded = results.filter((r): r is LibraryItem[] => r !== null);
   if (succeeded.length === 0) return false;
-  const failedSources = new Set(enabled.filter((_, index) => results[index] === null).map(({ source }) => source));
+  const failedSources = new Set(
+    enabled.filter((_, index) => results[index] === null).map(({ source }) => source),
+  );
   const retained = items.filter((i) => i.external && failedSources.has(i.external));
   setItems(merge([...succeeded, retained]));
   if (complete) retryAttempt = 0;
@@ -133,11 +137,13 @@ function scheduleRetry(): void {
 }
 
 function startRefresh(gen: number): Promise<void> {
-  inflight = runRefresh(gen).then((ok) => {
-    if (gen === refreshGen && !ok) scheduleRetry();
-  }).finally(() => {
-    inflight = null;
-  });
+  inflight = runRefresh(gen)
+    .then((ok) => {
+      if (gen === refreshGen && !ok) scheduleRetry();
+    })
+    .finally(() => {
+      inflight = null;
+    });
   return inflight;
 }
 

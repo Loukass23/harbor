@@ -118,7 +118,9 @@ export class TizenAVPlayEngine implements PlayerBridge {
         rootEl.style.backgroundColor = "transparent";
       }
 
-      const bpRoots = document.querySelectorAll<HTMLElement>("[data-bp-root], [data-bp-tv], [data-bp-shell]");
+      const bpRoots = document.querySelectorAll<HTMLElement>(
+        "[data-bp-root], [data-bp-tv], [data-bp-shell]",
+      );
       bpRoots.forEach((el) => {
         el.style.backgroundColor = "transparent";
       });
@@ -172,7 +174,9 @@ export class TizenAVPlayEngine implements PlayerBridge {
       if (rootEl && this.prevRootBg !== null) {
         rootEl.style.backgroundColor = this.prevRootBg;
       }
-      const bpRoots = document.querySelectorAll<HTMLElement>("[data-bp-root], [data-bp-tv], [data-bp-shell]");
+      const bpRoots = document.querySelectorAll<HTMLElement>(
+        "[data-bp-root], [data-bp-tv], [data-bp-shell]",
+      );
       bpRoots.forEach((el) => {
         el.style.backgroundColor = "";
       });
@@ -197,10 +201,7 @@ export class TizenAVPlayEngine implements PlayerBridge {
 
     // Check if host covers the full viewport (full-screen stage)
     const isFullscreen =
-      rect.left <= 2 &&
-      rect.top <= 2 &&
-      rect.width >= clientW - 4 &&
-      rect.height >= clientH - 4;
+      rect.left <= 2 && rect.top <= 2 && rect.width >= clientW - 4 && rect.height >= clientH - 4;
 
     if (isFullscreen) {
       this.setDisplayRect(0, 0, 1920, 1080);

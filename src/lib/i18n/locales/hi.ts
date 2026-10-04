@@ -26,7 +26,7 @@ import bpSports from "./hi/bp-sports";
 import nytTv from "./hi/nyt-tv";
 
 const hi: Record<string, string> = {
-  "Translations": "अनुवाद",
+  Translations: "अनुवाद",
   "Translating…": "अनुवाद हो रहा है…",
   "Showing {lang}": "{lang} दिखाया जा रहा है",
   "Show all": "सभी दिखाएँ",

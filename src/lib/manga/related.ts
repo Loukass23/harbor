@@ -101,7 +101,12 @@ export async function mangaAdaptation(title: string): Promise<MangaAdaptation | 
   if (!key) return null;
   if (adaptationCache.has(key)) return adaptationCache.get(key) ?? null;
   try {
-    const data = await anilistRequest<AdaptationResp>(ADAPTATION_QUERY, { s: title }, undefined, true);
+    const data = await anilistRequest<AdaptationResp>(
+      ADAPTATION_QUERY,
+      { s: title },
+      undefined,
+      true,
+    );
     const edges = data?.Page?.media?.[0]?.relations?.edges ?? [];
     const anime = edges.filter((e) => e.node?.type === "ANIME");
     const rank = (e: RelationEdge): number => {
@@ -109,7 +114,9 @@ export async function mangaAdaptation(title: string): Promise<MangaAdaptation | 
       const name = (pickTitle(e.node.title) ?? "").toLowerCase();
       const junk = /\b(cm|pv|commercial|promo|promotion|trailer|teaser|recap|special)\b/.test(name);
       const sequel =
-        /season\s*[2-9]|[2-9](nd|rd|th)\s*season|part\s*[2-9]|final season|\bii+\b|arise from/.test(name);
+        /season\s*[2-9]|[2-9](nd|rd|th)\s*season|part\s*[2-9]|final season|\bii+\b|arise from/.test(
+          name,
+        );
       let base: number;
       if (f === "TV") base = 0;
       else if (f === "TV_SHORT") base = 1;

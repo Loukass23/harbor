@@ -32,7 +32,12 @@ function loadNegatives(): Set<string> {
   try {
     const raw = localStorage.getItem(NEGATIVE_KEY);
     const c = raw ? (JSON.parse(raw) as { t?: number; ids?: string[] } | null) : null;
-    if (c && typeof c.t === "number" && Date.now() - c.t < NEGATIVE_TTL_MS && Array.isArray(c.ids)) {
+    if (
+      c &&
+      typeof c.t === "number" &&
+      Date.now() - c.t < NEGATIVE_TTL_MS &&
+      Array.isArray(c.ids)
+    ) {
       negativesSince = c.t;
       return new Set(c.ids);
     }
@@ -123,7 +128,11 @@ function primaryCountry(m: { country?: string }): string {
   return (m.country ?? "").split(",")[0].trim().toLowerCase();
 }
 
-function isJapaneseAnime(m: { genres?: string[]; country?: string; originalLanguage?: string }): boolean {
+function isJapaneseAnime(m: {
+  genres?: string[];
+  country?: string;
+  originalLanguage?: string;
+}): boolean {
   if ((m.genres ?? []).some((g) => g.toLowerCase() === "anime")) return true;
   if (!hasAnimationGenre(m)) return false;
   const c = primaryCountry(m);
@@ -138,15 +147,17 @@ function settled(id: string): boolean {
 async function checkOne(it: DetectItem): Promise<void> {
   const id = it._id;
   try {
-    const m = (await fetchMeta(it.type === "movie" ? "movie" : "series", id)) as
-      | { genres?: string[]; country?: string }
-      | null;
+    const m = (await fetchMeta(it.type === "movie" ? "movie" : "series", id)) as {
+      genres?: string[];
+      country?: string;
+    } | null;
     checked.add(id);
     let anime = !!m && isJapaneseAnime(m);
     const originUnknown = !m || !primaryCountry(m);
     // Donghua and other mapped animation can have a known non-Japanese origin.
     // Require an exact anime mapping rather than treating all animation as anime.
-    const needsMapping = !m || hasAnimationGenre(m) || (originUnknown && (m.genres ?? []).length === 0);
+    const needsMapping =
+      !m || hasAnimationGenre(m) || (originUnknown && (m.genres ?? []).length === 0);
     if (!anime && needsMapping) {
       anime = (await imdbToKitsu(id).catch(() => null)) != null;
     }

@@ -43,7 +43,8 @@ const API = "https://api.adoptium.net/v3";
 const DEFAULT_FEATURE = 17;
 
 const exe = (name) => (process.platform === "win32" ? `${name}.exe` : name);
-const cacheRoot = () => process.env.HARBOR_CAPSTAN_CACHE ?? join(homedir(), ".harbor", "capstan-jdk");
+const cacheRoot = () =>
+  process.env.HARBOR_CAPSTAN_CACHE ?? join(homedir(), ".harbor", "capstan-jdk");
 
 export function hostTriple() {
   const arch = process.arch === "arm64" ? "aarch64" : "x86_64";
@@ -62,7 +63,12 @@ export function releaseLabel(dir) {
   try {
     const text = readFileSync(join(dir, "release"), "utf8");
     const pick = (key) => text.match(new RegExp(`^${key}="([^"]+)"`, "m"))?.[1];
-    return pick("IMPLEMENTOR_VERSION") ?? pick("JAVA_RUNTIME_VERSION") ?? pick("JAVA_VERSION") ?? "unknown";
+    return (
+      pick("IMPLEMENTOR_VERSION") ??
+      pick("JAVA_RUNTIME_VERSION") ??
+      pick("JAVA_VERSION") ??
+      "unknown"
+    );
   } catch {
     return "unknown";
   }
@@ -70,7 +76,9 @@ export function releaseLabel(dir) {
 
 export function featureOf(jdk) {
   try {
-    const printed = execFileSync(join(jdk, "bin", exe("jlink")), ["--version"], { encoding: "utf8" });
+    const printed = execFileSync(join(jdk, "bin", exe("jlink")), ["--version"], {
+      encoding: "utf8",
+    });
     return Number.parseInt(printed.trim().split(".")[0], 10) || DEFAULT_FEATURE;
   } catch {
     return DEFAULT_FEATURE;
@@ -80,8 +88,13 @@ export function featureOf(jdk) {
 async function releaseName(feature) {
   if (process.env.HARBOR_CAPSTAN_JDK_VERSION) return process.env.HARBOR_CAPSTAN_JDK_VERSION;
   const range = `%5B${feature}%2C${feature + 1}%29`;
-  const res = await fetch(`${API}/info/release_names?release_type=ga&page_size=1&sort_order=DESC&version=${range}`);
-  if (!res.ok) throw new Error(`Adoptium would not list a JDK ${feature} release (${res.status} ${res.statusText})`);
+  const res = await fetch(
+    `${API}/info/release_names?release_type=ga&page_size=1&sort_order=DESC&version=${range}`,
+  );
+  if (!res.ok)
+    throw new Error(
+      `Adoptium would not list a JDK ${feature} release (${res.status} ${res.statusText})`,
+    );
   const name = (await res.json()).releases?.[0];
   if (!name) throw new Error(`Adoptium listed no JDK ${feature} release`);
   return name;
@@ -97,7 +110,9 @@ function unpack(buf, kind, into) {
   try {
     if (kind === "zip" && process.platform === "win32") {
       const command = `Expand-Archive -LiteralPath "${archive}" -DestinationPath "${into}" -Force`;
-      execFileSync("powershell", ["-NoProfile", "-NonInteractive", "-Command", command], { stdio: "inherit" });
+      execFileSync("powershell", ["-NoProfile", "-NonInteractive", "-Command", command], {
+        stdio: "inherit",
+      });
     } else if (kind === "zip") {
       execFileSync("unzip", ["-oq", name], { cwd: into, stdio: "inherit" });
     } else {
@@ -127,11 +142,13 @@ async function fetchJdk(triple, feature, log) {
   log(`fetching ${name} for ${os}/${arch}, once, into ${into}`);
   const url = `${API}/binary/version/${encodeURIComponent(name)}/${os}/${arch}/jdk/hotspot/normal/eclipse`;
   const res = await fetch(url, { redirect: "follow" });
-  if (!res.ok) throw new Error(`no Temurin ${name} for ${os}/${arch} (${res.status} ${res.statusText})`);
+  if (!res.ok)
+    throw new Error(`no Temurin ${name} for ${os}/${arch} (${res.status} ${res.statusText})`);
   rmSync(into, { recursive: true, force: true });
   unpack(Buffer.from(await res.arrayBuffer()), os === "windows" ? "zip" : "tar.gz", into);
   const home = jdkHome(onlyChild(into));
-  if (!hasJmods(home)) throw new Error(`${name} for ${os}/${arch} unpacked without a jmods/ directory`);
+  if (!hasJmods(home))
+    throw new Error(`${name} for ${os}/${arch} unpacked without a jmods/ directory`);
   return home;
 }
 
@@ -180,7 +197,8 @@ export const FIX = [
  * which is every build that is not cross staging.
  */
 export async function resolveJdks(target, log) {
-  if (!TARGETS[target]) throw new Error(`unknown target ${target}, known: ${Object.keys(TARGETS).join(", ")}`);
+  if (!TARGETS[target])
+    throw new Error(`unknown target ${target}, known: ${Object.keys(TARGETS).join(", ")}`);
   const named = jdkHome(process.env.HARBOR_CAPSTAN_JDK ?? process.env.JAVA_HOME ?? "");
   const host = hostTriple();
   const hostJdk =
@@ -190,7 +208,9 @@ export async function resolveJdks(target, log) {
   if (target === host) return { hostJdk, targetJdk: hostJdk };
 
   const forTarget = jdkHome(process.env.HARBOR_CAPSTAN_JDK_TARGET ?? "");
-  const targetJdk = hasJmods(forTarget) ? forTarget : await fetchJdk(target, featureOf(hostJdk), log);
+  const targetJdk = hasJmods(forTarget)
+    ? forTarget
+    : await fetchJdk(target, featureOf(hostJdk), log);
   checkPlatform(targetJdk, target);
   return { hostJdk, targetJdk };
 }

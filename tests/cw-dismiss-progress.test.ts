@@ -140,8 +140,13 @@ function advanceHarness(
   advanced: Map<string, LibraryItem>,
   extra: LibraryItem[],
 ) {
-  const state = [{ privacyOwner: null, profileId: null, simklSession: null, simklEnabled: false },
-    advanced, extra, new Set<string>(), 0];
+  const state = [
+    { privacyOwner: null, profileId: null, simklSession: null, simklEnabled: false },
+    advanced,
+    extra,
+    new Set<string>(),
+    0,
+  ];
   let slot = 0;
   const mocks: Record<string, unknown> = {
     "@/lib/profiles": { useProfiles: () => ({ activeProfile: null, profiles: [] }) },
@@ -152,7 +157,9 @@ function advanceHarness(
       useSyncExternalStore: () => null,
     },
     "@/lib/cw-dismiss": api,
-    "@/lib/settings": { useSettings: () => ({ settings: { cwHideCaughtUp: false, cwSources: { simkl: false } } }) },
+    "@/lib/settings": {
+      useSettings: () => ({ settings: { cwHideCaughtUp: false, cwSources: { simkl: false } } }),
+    },
     "@/lib/providers/jikan": { franchiseDedupKey: (name: string) => name.toLowerCase() },
   };
   const output = ts.transpileModule(read("src/views/home/hooks/use-cw-advance.ts"), {

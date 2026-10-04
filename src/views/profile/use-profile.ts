@@ -1,7 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { authToken, currentAuthor, refreshToken, subscribeAuthor } from "@/lib/theme-auth";
-import { fetchActivity, fetchBadges, fetchFriends, fetchSummary, ProfileNotFound } from "./profile-api";
+import {
+  fetchActivity,
+  fetchBadges,
+  fetchFriends,
+  fetchSummary,
+  ProfileNotFound,
+} from "./profile-api";
 import type { ActivityItem, Badge, Friend, LoadState, ProfileSummary } from "./profile-types";
 
 const LIVE_INTERVAL_MS = 25000;
@@ -34,7 +40,6 @@ function mergeLive(prev: ProfileSummary, next: ProfileSummary): ProfileSummary {
   }
   return changed ? out : prev;
 }
-
 
 export type ProfileBundle = {
   state: LoadState;
@@ -76,15 +81,28 @@ export function useProfile(handle: string): ProfileBundle {
         setSummary(s);
         setState("ready");
         const mine = currentAuthor()?.handle;
-        if (mine && s.handle && s.handle.toLowerCase() === mine.toLowerCase() && !s.isOwner && authToken() && healedForRef.current !== handle) {
+        if (
+          mine &&
+          s.handle &&
+          s.handle.toLowerCase() === mine.toLowerCase() &&
+          !s.isOwner &&
+          authToken() &&
+          healedForRef.current !== handle
+        ) {
           healedForRef.current = handle;
           void refreshToken().then((ok) => {
             if (ok && !ac.signal.aborted) reload();
           });
         }
-        void fetchFriends(handle, ac.signal).then((f) => !ac.signal.aborted && setFriends(f)).catch(() => {});
-        void fetchBadges(handle, ac.signal).then((b) => !ac.signal.aborted && setBadges(b)).catch(() => {});
-        void fetchActivity(handle, ac.signal).then((a) => !ac.signal.aborted && setActivity(a)).catch(() => {});
+        void fetchFriends(handle, ac.signal)
+          .then((f) => !ac.signal.aborted && setFriends(f))
+          .catch(() => {});
+        void fetchBadges(handle, ac.signal)
+          .then((b) => !ac.signal.aborted && setBadges(b))
+          .catch(() => {});
+        void fetchActivity(handle, ac.signal)
+          .then((a) => !ac.signal.aborted && setActivity(a))
+          .catch(() => {});
       })
       .catch((e) => {
         if (ac.signal.aborted) return;
@@ -101,8 +119,12 @@ export function useProfile(handle: string): ProfileBundle {
       void fetchSummary(handle, ac.signal)
         .then((s) => !ac.signal.aborted && setSummary((prev) => (prev ? mergeLive(prev, s) : s)))
         .catch(() => {});
-      void fetchFriends(handle, ac.signal).then((f) => !ac.signal.aborted && setFriends(f)).catch(() => {});
-      void fetchBadges(handle, ac.signal).then((b) => !ac.signal.aborted && setBadges(b)).catch(() => {});
+      void fetchFriends(handle, ac.signal)
+        .then((f) => !ac.signal.aborted && setFriends(f))
+        .catch(() => {});
+      void fetchBadges(handle, ac.signal)
+        .then((b) => !ac.signal.aborted && setBadges(b))
+        .catch(() => {});
     };
     const id = window.setInterval(sync, LIVE_INTERVAL_MS);
     const onVisible = () => {

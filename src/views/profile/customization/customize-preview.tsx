@@ -35,7 +35,11 @@ export function CustomizePreview({
   useFontLink(c.fontHref);
 
   const ownerAvatar =
-    activeProfile?.avatar || settings.harborAvatar || user?.avatar || currentAuthor()?.avatar || undefined;
+    activeProfile?.avatar ||
+    settings.harborAvatar ||
+    user?.avatar ||
+    currentAuthor()?.avatar ||
+    undefined;
   const heroAvatar = ownerAvatar || summary.avatarUrl;
   const heroAvatarFallback = summary.avatarUrl || undefined;
 
@@ -52,7 +56,12 @@ export function CustomizePreview({
       <div className="mx-auto w-full max-w-6xl space-y-6 px-6 pb-28 lg:px-10">
         <AboutCard description={preview.description} isOwner userFont={c.font} />
         {c.hasCanvas && (
-          <CanvasCard html={c.html} css={c.css} height={c.height} hiddenFromVisitors={c.hiddenFromVisitors} />
+          <CanvasCard
+            html={c.html}
+            css={c.css}
+            height={c.height}
+            hiddenFromVisitors={c.hiddenFromVisitors}
+          />
         )}
       </div>
     </div>

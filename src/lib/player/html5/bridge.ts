@@ -551,9 +551,7 @@ export function createHtml5Bridge(): PlayerBridge {
         bare.endsWith(".ts") ||
         (src.notWebReady === true && !isHls && !/\.(mp4|webm|mov|mkv|mpd)$/.test(bare));
       if (isHls) {
-        const [{ default: Hls }] = await Promise.all([
-          import("hls.js"),
-        ]);
+        const [{ default: Hls }] = await Promise.all([import("hls.js")]);
         if (!Hls.isSupported()) return;
         hls = new Hls(
           src.notWebReady === true || src.isLive === true
@@ -570,9 +568,7 @@ export function createHtml5Bridge(): PlayerBridge {
         hls.on(Hls.Events.AUDIO_TRACKS_UPDATED, refreshSnapshot);
         hls.on(Hls.Events.AUDIO_TRACK_SWITCHED, refreshSnapshot);
       } else if (isTs) {
-        const [{ default: mpegts }] = await Promise.all([
-          import("mpegts.js"),
-        ]);
+        const [{ default: mpegts }] = await Promise.all([import("mpegts.js")]);
         if (!mpegts.isSupported()) return;
         tsPlayer = mpegts.createPlayer(
           { type: "mpegts", url: src.url, isLive: true, cors: true },

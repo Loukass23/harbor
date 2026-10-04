@@ -106,7 +106,9 @@ export function CinemetaEpisodes({
 
   const watchedAt = (season: number, number: number): boolean => {
     const st = manualWatchedState(meta.id, season, number);
-    return st === true || (st === undefined && (stremioWatched?.has(`${season}:${number}`) ?? false));
+    return (
+      st === true || (st === undefined && (stremioWatched?.has(`${season}:${number}`) ?? false))
+    );
   };
 
   const progressFor = (g: GridEpisode): Progress => ({
@@ -155,14 +157,7 @@ export function CinemetaEpisodes({
             }),
         };
       }),
-    [
-      activeEps,
-      meta,
-      t,
-      playLocalAware,
-      settings.instantPlay,
-      settings.seasonSourceLock,
-    ],
+    [activeEps, meta, t, playLocalAware, settings.instantPlay, settings.seasonSourceLock],
   );
 
   if (grouped.length === 0) return null;

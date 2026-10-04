@@ -10,8 +10,16 @@ import type { KitsuEpisode } from "../src/lib/providers/kitsu.ts";
 
 function episode(overrides: Partial<KitsuEpisode> = {}): KitsuEpisode {
   return {
-    id: 1, number: 1, seasonNumber: 1, imdbSeason: 3, imdbEpisode: 1,
-    title: "Episode 1", synopsis: "", thumbnail: null, airdate: null, length: 24,
+    id: 1,
+    number: 1,
+    seasonNumber: 1,
+    imdbSeason: 3,
+    imdbEpisode: 1,
+    title: "Episode 1",
+    synopsis: "",
+    thumbnail: null,
+    airdate: null,
+    length: 24,
     ...overrides,
   };
 }
@@ -29,8 +37,14 @@ function load(path: string, mocks: Record<string, unknown>) {
   return exports;
 }
 
-function enrichment({ videos = [], ratings = new Map(), thumbs = null }: {
-  videos?: any[]; ratings?: Map<string, number>; thumbs?: any;
+function enrichment({
+  videos = [],
+  ratings = new Map(),
+  thumbs = null,
+}: {
+  videos?: any[];
+  ratings?: Map<string, number>;
+  thumbs?: any;
 } = {}) {
   return load("src/lib/providers/anime-episode-enrich.ts", {
     "@/lib/providers/anime-mapping": { kitsuToMal: async () => null, kitsuToTvdb: async () => 1 },
@@ -43,7 +57,10 @@ function enrichment({ videos = [], ratings = new Map(), thumbs = null }: {
 
 test("TVDB does not replace a mapped later cour with season-one metadata", () => {
   const ep = episode({ thumbnail: "cour-three.jpg" });
-  mergeTvdbEpisodes([ep], [{ id: 11, number: 1, seasonNumber: 1, name: "Wrong pilot", image: "pilot.jpg" }]);
+  mergeTvdbEpisodes(
+    [ep],
+    [{ id: 11, number: 1, seasonNumber: 1, name: "Wrong pilot", image: "pilot.jpg" }],
+  );
   assert.equal(ep.thumbnail, "cour-three.jpg");
   assert.equal(ep.title, "Episode 1");
 });
@@ -51,7 +68,19 @@ test("TVDB does not replace a mapped later cour with season-one metadata", () =>
 test("TVDB still uses exact episode ID, absolute number and provider coordinates", () => {
   for (const mapping of [{ tvdbEpisodeId: 31 }, { absoluteNumber: 25 }, {}]) {
     const ep = episode(mapping);
-    mergeTvdbEpisodes([ep], [{ id: 31, number: 1, seasonNumber: 3, absoluteNumber: 25, name: "The return", image: "correct.jpg" }]);
+    mergeTvdbEpisodes(
+      [ep],
+      [
+        {
+          id: 31,
+          number: 1,
+          seasonNumber: 3,
+          absoluteNumber: 25,
+          name: "The return",
+          image: "correct.jpg",
+        },
+      ],
+    );
     assert.equal(ep.thumbnail, "correct.jpg");
     assert.equal(ep.title, "The return");
   }
@@ -59,7 +88,18 @@ test("TVDB still uses exact episode ID, absolute number and provider coordinates
 
 test("TMDB never borrows a repeated episode number after a mapped season misses", () => {
   const ep = episode();
-  mergeTmdbEpisodes([ep], [{ id: 11, seasonNumber: 1, episodeNumber: 1, name: "Wrong pilot", overview: "Wrong story" } as any]);
+  mergeTmdbEpisodes(
+    [ep],
+    [
+      {
+        id: 11,
+        seasonNumber: 1,
+        episodeNumber: 1,
+        name: "Wrong pilot",
+        overview: "Wrong story",
+      } as any,
+    ],
+  );
   assert.equal(ep.title, "Episode 1");
   assert.equal(ep.synopsis, "");
 });
@@ -83,34 +123,46 @@ test("unmapped episodes retain exact native season/episode enrichment", () => {
 
 test("Cinemeta cannot fill a missing later-season thumbnail with the pilot", async () => {
   const ep = episode();
-  await enrichment({ videos: [{ season: 1, episode: 1, thumbnail: "pilot.jpg" }] })([ep], {}, 1, "tt1");
+  await enrichment({ videos: [{ season: 1, episode: 1, thumbnail: "pilot.jpg" }] })(
+    [ep],
+    {},
+    1,
+    "tt1",
+  );
   assert.equal(ep.thumbnail, null);
 });
 
 test("missing Cinemeta artwork does not shift absolute episode positions", async () => {
   const ep = episode({ absoluteNumber: 2 });
-  await enrichment({ videos: [
-    { season: 0, episode: 1, thumbnail: "special.jpg" },
-    { season: 1, episode: 1 },
-    { season: 1, episode: 2, thumbnail: "second.jpg" },
-    { season: 1, episode: 3, thumbnail: "third.jpg" },
-  ] })([ep], {}, 1, "tt1");
+  await enrichment({
+    videos: [
+      { season: 0, episode: 1, thumbnail: "special.jpg" },
+      { season: 1, episode: 1 },
+      { season: 1, episode: 2, thumbnail: "second.jpg" },
+      { season: 1, episode: 3, thumbnail: "third.jpg" },
+    ],
+  })([ep], {}, 1, "tt1");
   assert.equal(ep.thumbnail, "second.jpg");
 });
 
 test("TVDB thumbnail fallback requires a known absolute episode number", async () => {
   const ep = episode();
-  await enrichment({ thumbs: { bySeasonEpisode: new Map(), byAbsolute: new Map([[1, "pilot.jpg"]]) } })([ep], { tvdbKey: "fixture" }, 1, "tt1");
+  await enrichment({
+    thumbs: { bySeasonEpisode: new Map(), byAbsolute: new Map([[1, "pilot.jpg"]]) },
+  })([ep], { tvdbKey: "fixture" }, 1, "tt1");
   assert.equal(ep.thumbnail, null);
 });
 
 test("duplicate Cinemeta coordinates can fill art without shifting later episodes", async () => {
-  const first = episode({ absoluteNumber: 1 }), second = episode({ absoluteNumber: 2 });
-  await enrichment({ videos: [
-    { season: 1, episode: 1 },
-    { season: 1, episode: 1, thumbnail: "first.jpg" },
-    { season: 1, episode: 2, thumbnail: "second.jpg" },
-  ] })([first, second], {}, 1, "tt1");
+  const first = episode({ absoluteNumber: 1 }),
+    second = episode({ absoluteNumber: 2 });
+  await enrichment({
+    videos: [
+      { season: 1, episode: 1 },
+      { season: 1, episode: 1, thumbnail: "first.jpg" },
+      { season: 1, episode: 2, thumbnail: "second.jpg" },
+    ],
+  })([first, second], {}, 1, "tt1");
   assert.equal(first.thumbnail, "first.jpg");
   assert.equal(second.thumbnail, "second.jpg");
 });
@@ -123,10 +175,14 @@ test("ratings cannot fall back to episode one of another season", async () => {
 });
 
 test("exact provider matches and known absolute fallback remain usable", async () => {
-  const exact = episode(), absolute = episode({ number: 2, imdbEpisode: 2, absoluteNumber: 26 });
+  const exact = episode(),
+    absolute = episode({ number: 2, imdbEpisode: 2, absoluteNumber: 26 });
   await enrichment({
     videos: [{ season: 3, episode: 1, thumbnail: "exact.jpg" }],
-    ratings: new Map([["3:1", 8.1], ["1:26", 8.2]]),
+    ratings: new Map([
+      ["3:1", 8.1],
+      ["1:26", 8.2],
+    ]),
     thumbs: { bySeasonEpisode: new Map(), byAbsolute: new Map([[26, "absolute.jpg"]]) },
   })([exact, absolute], { tvdbKey: "fixture" }, 1, "tt1");
   assert.equal(exact.thumbnail, "exact.jpg");

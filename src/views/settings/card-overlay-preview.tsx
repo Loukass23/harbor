@@ -11,7 +11,8 @@ export function CardOverlayPreview() {
   const art = useSampleArtwork(9);
   const ribbonSide = settings.top10RibbonSide;
   const watchlist = settings.watchlistBadge;
-  const sharesRibbonCorner = settings.top10Ribbon &&
+  const sharesRibbonCorner =
+    settings.top10Ribbon &&
     ((watchlist === "topStart" && ribbonSide === "left") ||
       (watchlist === "topEnd" && ribbonSide === "right"));
   const markCorner = {
@@ -57,7 +58,9 @@ export function CardOverlayPreview() {
           </span>
         )}
       </div>
-      <span className="text-center text-[14px] leading-5 text-ink-muted">{t("Ribbon, award and bookmark preview")}</span>
+      <span className="text-center text-[14px] leading-5 text-ink-muted">
+        {t("Ribbon, award and bookmark preview")}
+      </span>
     </div>
   );
 }

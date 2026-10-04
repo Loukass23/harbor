@@ -37,7 +37,8 @@ const musicTaste: Record<string, string> = {
   "music.explore.performance": "Vale la pena verlo",
   "music.explore.stage": "Escenarios y sesiones",
   "music.explore.liveFrom": "{artist} en directo",
-  "music.explore.performanceHint": "Grandes escenarios, sesiones íntimas y actuaciones para revivir.",
+  "music.explore.performanceHint":
+    "Grandes escenarios, sesiones íntimas y actuaciones para revivir.",
   "music.explore.watchPerformance": "Ver actuación",
   "music.explore.events": "Festivales en primera fila",
   "music.explore.eventHint": "Primero los sets recientes. Elige un evento y explora sus años.",

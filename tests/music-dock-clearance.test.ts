@@ -27,7 +27,10 @@ test("settings content, rail and footer all clear the dock", () => {
   for (const selector of [".hset-main", ".hset-rail", ".hset-main:has(.hset-footer)"]) {
     assert.ok(topLevelBlock(css, selector).includes(GAP), selector + " sits under the music dock");
   }
-  assert.ok(topLevelBlock(css, ".hset-footer").includes("inset-block-end: 0"), "footer must not count the dock clearance twice");
+  assert.ok(
+    topLevelBlock(css, ".hset-footer").includes("inset-block-end: 0"),
+    "footer must not count the dock clearance twice",
+  );
 });
 
 test("the composite gap covers both the dock and any viewport lift", () => {

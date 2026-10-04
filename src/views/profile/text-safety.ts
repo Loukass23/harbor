@@ -1,4 +1,5 @@
-const URL_RE = /\b((https?:\/\/|www\.)[^\s]+|[a-z0-9-]+\.(com|net|org|io|gg|xyz|link|ru|tv)\b[^\s]*)/gi;
+const URL_RE =
+  /\b((https?:\/\/|www\.)[^\s]+|[a-z0-9-]+\.(com|net|org|io|gg|xyz|link|ru|tv)\b[^\s]*)/gi;
 
 const MASK_WORDS = [
   "fuck",
@@ -21,7 +22,10 @@ export function containsUrl(text: string): boolean {
 }
 
 export function stripUrls(text: string): string {
-  return text.replace(URL_RE, "link removed").replace(/\s{2,}/g, " ").trim();
+  return text
+    .replace(URL_RE, "link removed")
+    .replace(/\s{2,}/g, " ")
+    .trim();
 }
 
 export type TextSegment = { text: string; masked: boolean };

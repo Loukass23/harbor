@@ -7,17 +7,13 @@
     "Harbor plays what your addons find. Browse the public directory, add one by URL, sign in ",
     "No addons yet"
   ],
-  "AddonCollectionPage.kt": [
-    "No titles found in this collection."
-  ],
+  "AddonCollectionPage.kt": ["No titles found in this collection."],
   "AddonManifestFetch.kt": [
     "Couldn't reach the addon. Check the URL and your connection.",
     "Manifest fetch failed (HTTP ${res.code}). Check the URL.",
     "Response wasn't valid JSON. The URL may not be a Stremio manifest."
   ],
-  "AddonModel.kt": [
-    "Manifest is not a JSON object."
-  ],
+  "AddonModel.kt": ["Manifest is not a JSON object."],
   "AddonStoreHealth.kt": [
     "All $count addons answering",
     "Checking your addons",
@@ -27,9 +23,7 @@
     "Its server refused the connection.",
     "No addons to check"
   ],
-  "AddonUrl.kt": [
-    "That doesn't look like a valid URL."
-  ],
+  "AddonUrl.kt": ["That doesn't look like a valid URL."],
   "AddonsAdd.kt": [
     "If you do not have a URL, press Back and use Browse addons instead.",
     "Nothing on this TV's clipboard. Type the URL, or press Back and use Browse addons.",
@@ -57,10 +51,7 @@
     "Synced. Added ${outcome.added}, removed ${outcome.removed}.",
     "Syncing with Stremio"
   ],
-  "AniListClient.kt": [
-    "AniList is cooling down after a rate block.",
-    "Not signed in to AniList."
-  ],
+  "AniListClient.kt": ["AniList is cooling down after a rate block.", "Not signed in to AniList."],
   "AniListConfig.kt": [
     "AniList did not hand back a token. Try authorizing again.",
     "AniList sent something Harbor could not read.",
@@ -99,10 +90,7 @@
     "Pick another category, the grid kept your channels",
     "This category has nothing right now"
   ],
-  "BpGuideScreen.kt": [
-    "No program info",
-    "Tuning the guide"
-  ],
+  "BpGuideScreen.kt": ["No program info", "Tuning the guide"],
   "CalendarModel.kt": [
     "Episodes from the anime you follow on AniList.",
     "Episodes from the shows saved in your library.",
@@ -117,9 +105,7 @@
     "Collections come from TMDB. Add a TMDB key in Settings and every saga, ",
     "Nothing to show here yet."
   ],
-  "ConnectScreen.kt": [
-    "Still working. If it does not open soon, the source list opens instead."
-  ],
+  "ConnectScreen.kt": ["Still working. If it does not open soon, the source list opens instead."],
   "DetailChrome.kt": [
     "Couldn't load this title",
     "Harbor could not reach the catalog servers. Check the connection and open it again."
@@ -137,19 +123,13 @@
     "Press OK to write one",
     "Press to reveal"
   ],
-  "DetailDialogs.kt": [
-    "Plan to Watch"
-  ],
-  "DetailFacts.kt": [
-    "Director of Photography"
-  ],
+  "DetailDialogs.kt": ["Plan to Watch"],
+  "DetailFacts.kt": ["Director of Photography"],
   "DiscoverAffinity.kt": [
     "Features $loved, someone you watch a lot",
     "Features ${faces[0]} and ${faces[1]}"
   ],
-  "DiscoverAwardSheet.kt": [
-    "Reading the award book"
-  ],
+  "DiscoverAwardSheet.kt": ["Reading the award book"],
   "DiscoverCatalog.kt": [
     "Animation of the Year",
     "Anime of the Year",
@@ -162,15 +142,8 @@
     "One pick at a time, full screen, until something lands.",
     "Ranked by the work they left behind"
   ],
-  "DiscoverHeroQueueCopy.kt": [
-    "Cinemeta is unreachable",
-    "Nothing left tonight"
-  ],
-  "DiscoverQueueBand.kt": [
-    "Leading with ${peek.shelf}",
-    "Start the run",
-    "Start the run"
-  ],
+  "DiscoverHeroQueueCopy.kt": ["Cinemeta is unreachable", "Nothing left tonight"],
+  "DiscoverQueueBand.kt": ["Leading with ${peek.shelf}", "Start the run", "Start the run"],
   "DiscoverQueueCall.kt": [
     "Bring back $snoozed skipped",
     "Discovery Queue is offline",
@@ -180,18 +153,10 @@
     "You have cleared the run. Bring back what you skipped, or come back tomorrow.",
     "You have cleared the run. Come back tomorrow for a fresh set."
   ],
-  "DiscoverQueueRail.kt": [
-    "Skip for now"
-  ],
-  "DownloadsFormat.kt": [
-    "Saved movies and episodes for offline watching"
-  ],
-  "DownloadsModel.kt": [
-    "Interrupted, press resume to finish"
-  ],
-  "DownloadsNote.kt": [
-    "Nothing left to download"
-  ],
+  "DiscoverQueueRail.kt": ["Skip for now"],
+  "DownloadsFormat.kt": ["Saved movies and episodes for offline watching"],
+  "DownloadsModel.kt": ["Interrupted, press resume to finish"],
+  "DownloadsNote.kt": ["Nothing left to download"],
   "DownloadsPage.kt": [
     "Nothing in this group yet.",
     "Open a title, pick a source, then press right on it to save that source here "
@@ -206,22 +171,11 @@
     "That source would not give a direct link",
     "This device has no writable storage"
   ],
-  "EpisodeChoice.kt": [
-    "Start from the beginning"
-  ],
-  "HandoffQr.kt": [
-    "Open on ${peer.label}",
-    "Opened on ${peer.label}"
-  ],
-  "HarborLanTrustWire.kt": [
-    "An unnamed Harbor"
-  ],
-  "HeroExpand.kt": [
-    "Directed by "
-  ],
-  "HomeCatalogs.kt": [
-    "Sci-Fi and Fantasy"
-  ],
+  "EpisodeChoice.kt": ["Start from the beginning"],
+  "HandoffQr.kt": ["Open on ${peer.label}", "Opened on ${peer.label}"],
+  "HarborLanTrustWire.kt": ["An unnamed Harbor"],
+  "HeroExpand.kt": ["Directed by "],
+  "HomeCatalogs.kt": ["Sci-Fi and Fantasy"],
   "LibraryModel.kt": [
     "Anything you save but have not started yet waits here, so you always have something queued.",
     "Connect Trakt in Settings and everything on your watchlist there lands on this shelf, newest first.",
@@ -250,10 +204,7 @@
   "LibrarySheets.kt": [
     "The list goes away on this device. The $count titles in it stay in your library, "
   ],
-  "LinkPanel.kt": [
-    "Link a debrid service",
-    "Signed in as $it"
-  ],
+  "LinkPanel.kt": ["Link a debrid service", "Signed in as $it"],
   "LiveShell.kt": [
     "Couldn't load this playlist",
     "Harbor could not reach $provider.",
@@ -269,9 +220,7 @@
     "MyAnimeList is cooling down after a rate block.",
     "Not signed in to MyAnimeList."
   ],
-  "OnboardPhone.kt": [
-    "Signed in as $stremioName"
-  ],
+  "OnboardPhone.kt": ["Signed in as $stremioName"],
   "OnboardStepsAccount.kt": [
     "An auth key from a Stremio session on another device. Harbor stores the key, ",
     "Could not reach TMDB from this TV. You can save the key without checking it.",
@@ -305,10 +254,7 @@
     "Remove from Watchlist",
     "Remove from favorites"
   ],
-  "PersonFilms.kt": [
-    "Nothing rated $minRating or higher.",
-    "Nothing to show."
-  ],
+  "PersonFilms.kt": ["Nothing rated $minRating or higher.", "Nothing to show."],
   "PlayerAudio.kt": [
     "Audio output failed. Try Decode on device. ($text)",
     "Every audio track here is a format your receiver claims, so Harbor cannot stop the bitstream on this file.",
@@ -322,9 +268,7 @@
     "Sound is off so the picture keeps playing. Pick a track to try again.",
     "This output takes plain PCM only, so Harbor decodes every track on this device."
   ],
-  "PlayerAudioRow.kt": [
-    "Bluetooth cannot carry "
-  ],
+  "PlayerAudioRow.kt": ["Bluetooth cannot carry "],
   "PlayerAudioTracks.kt": [
     "DTS-HD bitstream. DTS:X, when the track carries it, is an extension inside this stream that the receiver decodes.",
     "Decode here, and hold the mix to two channels.",
@@ -340,13 +284,8 @@
     "Your receiver did not report DTS-HD, so this drops to the ${encodingName(encoding)} encoding. Switch to Decode on device if it drops out.",
     "Your receiver did not report DTS:X, so this drops to the ${encodingName(encoding)} core. Switch to Decode on device if it drops out."
   ],
-  "PlayerBinge.kt": [
-    "Your place is kept in Continue Watching either way."
-  ],
-  "PlayerCwPill.kt": [
-    "Kept in Continue Watching",
-    "Nothing further in this series yet"
-  ],
+  "PlayerBinge.kt": ["Your place is kept in Continue Watching either way."],
+  "PlayerCwPill.kt": ["Kept in Continue Watching", "Nothing further in this series yet"],
   "PlayerEndHost.kt": [
     "Press Back to stay on this screen",
     "That source stopped. Moving to the next one."
@@ -375,25 +314,14 @@
     "Press right from any row",
     "Stretch to the panel, shapes are not kept."
   ],
-  "PlayerResume.kt": [
-    "Resume from ",
-    "Resuming in "
-  ],
+  "PlayerResume.kt": ["Resume from ", "Resuming in "],
   "PlayerSideSubHost.kt": [
     "Harbor could not read that file. Press OK to try again.",
     "Reading the file"
   ],
-  "PlayerSkip.kt": [
-    "Skip injected ad?"
-  ],
-  "PlayerSleep.kt": [
-    "End of episode",
-    "Pauses when this episode ends"
-  ],
-  "PlayerSpeed.kt": [
-    "Press right from any row",
-    "Press right from any row"
-  ],
+  "PlayerSkip.kt": ["Skip injected ad?"],
+  "PlayerSleep.kt": ["End of episode", "Pauses when this episode ends"],
+  "PlayerSpeed.kt": ["Press right from any row", "Press right from any row"],
   "PlayerStallGuard.kt": [
     "Playback ran dry ${seconds}s ago and ",
     "Sound kept playing but no video frame has reached the screen in ${seconds}s. ",
@@ -481,9 +409,7 @@
     "Sooner by 1s",
     "This stream has no picture, so there is nothing to hold the sound against."
   ],
-  "PlayerSubs.kt": [
-    "Image, VobSub, not decodable"
-  ],
+  "PlayerSubs.kt": ["Image, VobSub, not decodable"],
   "PlayerSubsModel.kt": [
     "Harbor cannot decode this one",
     "Harbor could not read that file. Press OK to try again.",
@@ -504,9 +430,7 @@
     "Did not start. Press OK to go back to ",
     "Did not start. Try another track."
   ],
-  "PlayerSubsSwitch.kt": [
-    "This track did not start"
-  ],
+  "PlayerSubsSwitch.kt": ["This track did not start"],
   "PlayerSubsTune.kt": [
     "Back returns to the list.",
     "Late? Press Right. Early? Press Left. OK puts it back in sync.",
@@ -549,9 +473,7 @@
     "Resuming from ${playerClockText(startPositionMs)}",
     "Try another source"
   ],
-  "PlayerUpNext.kt": [
-    "OK plays it now, any other button keeps watching"
-  ],
+  "PlayerUpNext.kt": ["OK plays it now, any other button keeps watching"],
   "PlayerVideo.kt": [
     "Choose an HDR10 source.",
     "Confirming the source rate before asking for ${formatHz(candidate.hz)}.",
@@ -583,12 +505,8 @@
     "Reading your playlist.",
     "This playlist carries live channels only. Providers that include a "
   ],
-  "PlaylistVodRails.kt": [
-    "Nothing on demand in this playlist"
-  ],
-  "ProfilePinPad.kt": [
-    "Too many tries. Try again in ${seconds}s."
-  ],
+  "PlaylistVodRails.kt": ["Nothing on demand in this playlist"],
+  "ProfilePinPad.kt": ["Too many tries. Try again in ${seconds}s."],
   "SearchAiModel.kt": [
     "That request was too big for this model. Pick a model with a larger context.",
     "The model is rate-limited right now. Try again in a moment or switch models.",
@@ -597,16 +515,9 @@
     "Your API key was rejected. Check it in Settings, AI search.",
     "Your account is out of credits for this model. Pick a free model or top up."
   ],
-  "SearchAiSource.kt": [
-    "The model replied with nothing usable. Try another model or rephrase."
-  ],
-  "SearchIdle.kt": [
-    "On your list",
-    "Two letters and the search begins."
-  ],
-  "SearchQueryLine.kt": [
-    "Search movies and series"
-  ],
+  "SearchAiSource.kt": ["The model replied with nothing usable. Try another model or rephrase."],
+  "SearchIdle.kt": ["On your list", "Two letters and the search begins."],
+  "SearchQueryLine.kt": ["Search movies and series"],
   "SearchStates.kt": [
     "Cannot reach search.",
     "Everything this search found is under All.",
@@ -623,10 +534,7 @@
     "Change your region in Settings.",
     "Nothing from ${service.name} is listed in $region right now. "
   ],
-  "ServicePageRows.kt": [
-    "Also on your services",
-    "Trending on ${service.name}"
-  ],
+  "ServicePageRows.kt": ["Also on your services", "Trending on ${service.name}"],
   "SettingsPage.kt": [
     "Accounts and TMDB",
     "Add a profile for everyone who watches",
@@ -661,18 +569,14 @@
     "Turn off what you do not have",
     "Turn off what you do not have"
   ],
-  "SimklClient.kt": [
-    "Simkl is cooling down after a rate block."
-  ],
+  "SimklClient.kt": ["Simkl is cooling down after a rate block."],
   "SimklConfig.kt": [
     "Could not reach Simkl to start the sign in.",
     "Lost the connection while waiting for Simkl.",
     "Simkl sent something Harbor could not read.",
     "Simkl would not start the sign in."
   ],
-  "Spoilers.kt": [
-    "Hidden so nothing is given away."
-  ],
+  "Spoilers.kt": ["Hidden so nothing is given away."],
   "StreamBadgePackImport.kt": [
     "All $unsafe patterns in that pack use regex Harbor will not run. Nothing was installed.",
     "Could not reach that link. Check the URL and try again.",
@@ -692,11 +596,7 @@
     "Reading the badge pack",
     "Remove a pack first. Harbor keeps up to 3."
   ],
-  "StreamBadgeSlots.kt": [
-    "Cuts and repacks",
-    "Dolby Vision and HDR",
-    "Dubbed and subbed"
-  ],
+  "StreamBadgeSlots.kt": ["Cuts and repacks", "Dolby Vision and HDR", "Dubbed and subbed"],
   "StreamDialogs.kt": [
     "Harbor could not get a working stream for $what.",
     "Harbor could not reach your debrid service. Check the network and try again.",
@@ -733,18 +633,12 @@
     "Every colour on this screen comes from the theme you are on.",
     "Light themes are not finished on TV yet."
   ],
-  "TitleExtras.kt": [
-    "Behind the Scenes"
-  ],
+  "TitleExtras.kt": ["Behind the Scenes"],
   "TogetherCopy.kt": [
     "Read this out, or let them scan it.",
     "Your TV made the room. Everyone else joins from a phone or a computer, so nobody has "
   ],
-  "TogetherHost.kt": [
-    "Find something to watch",
-    "Or point a camera here",
-    "Watch party invite"
-  ],
+  "TogetherHost.kt": ["Find something to watch", "Or point a camera here", "Watch party invite"],
   "TogetherOverlay.kt": [
     "Everyone is loaded in. Press play to start watching.",
     "Nobody sees a frame until you start.",
@@ -792,9 +686,7 @@
     "Trakt turned the comment down. Code $status.",
     "Trakt would not accept the sign in. Connect Trakt again."
   ],
-  "TraktLinkBus.kt": [
-    "Watchlist, lists, history and scrobbling"
-  ],
+  "TraktLinkBus.kt": ["Watchlist, lists, history and scrobbling"],
   "TraktLists.kt": [
     "No lists on Trakt yet. Build one on trakt.tv and it shows up here.",
     "Reading your Trakt lists."
@@ -809,21 +701,13 @@
     "Voice needs a connection",
     "Voice needs a connection"
   ],
-  "VoiceSearchUi.kt": [
-    "Back to cancel",
-    "Select to finish",
-    "Voice did not work"
-  ],
+  "VoiceSearchUi.kt": ["Back to cancel", "Select to finish", "Voice did not work"],
   "WrappedPanels.kt": [
     "Busiest day ",
     "Connect Trakt for the whole picture.",
     "Counted from what this Harbor has played. ",
     "Play something, or connect Trakt in Settings, and this page fills in."
   ],
-  "XrayUiBand.kt": [
-    "Holding the frame"
-  ],
-  "YouTube.kt": [
-    "This trailer cannot be played here. Press Back."
-  ]
+  "XrayUiBand.kt": ["Holding the frame"],
+  "YouTube.kt": ["This trailer cannot be played here. Press Back."]
 }

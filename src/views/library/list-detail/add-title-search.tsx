@@ -19,7 +19,13 @@ function animeToMeta(a: AnimeHit): Meta {
   };
 }
 
-export function AddTitleSearch({ list, store = sharedLists }: { list: CustomList; store?: ListStore }) {
+export function AddTitleSearch({
+  list,
+  store = sharedLists,
+}: {
+  list: CustomList;
+  store?: ListStore;
+}) {
   const t = useT();
   const { settings } = useSettings();
   const [query, setQuery] = useState("");

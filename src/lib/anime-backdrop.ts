@@ -49,7 +49,10 @@ export async function resolveHeroArt(tmdbKey: string, meta: Meta): Promise<HeroA
   return p;
 }
 
-export async function resolveHeroBackdrop(tmdbKey: string, meta: Meta): Promise<string | undefined> {
+export async function resolveHeroBackdrop(
+  tmdbKey: string,
+  meta: Meta,
+): Promise<string | undefined> {
   return (await resolveHeroArt(tmdbKey, meta)).background;
 }
 
@@ -59,12 +62,16 @@ async function computeArt(tmdbKey: string, meta: Meta): Promise<HeroArt> {
   const year = akm?.releaseInfo ?? meta.releaseInfo;
   const names = [
     ...new Set(
-      [stripFranchiseSuffix(meta.name ?? ""), stripFranchiseSuffix(akm?.name ?? ""), akm?.name ?? ""].filter(
-        Boolean,
-      ),
+      [
+        stripFranchiseSuffix(meta.name ?? ""),
+        stripFranchiseSuffix(akm?.name ?? ""),
+        akm?.name ?? "",
+      ].filter(Boolean),
     ),
   ];
-  const malId = meta.id.startsWith("mal:") ? Number(meta.id.split(":")[1]) || null : (meta.malId ?? null);
+  const malId = meta.id.startsWith("mal:")
+    ? Number(meta.id.split(":")[1]) || null
+    : (meta.malId ?? null);
   let kitsuId = parseKitsuId(meta.id);
   if (kitsuId == null && malId != null) {
     kitsuId = await externalToKitsu("myanimelist", malId).catch(() => null);
@@ -109,7 +116,9 @@ async function computeArt(tmdbKey: string, meta: Meta): Promise<HeroArt> {
       const art = await anilistArtById(anilistId).catch(() => null);
       if (art?.banner) return art.banner;
       const fam = await anilistFranchise(anilistId).catch(() => []);
-      const rooted = fam.filter((n) => !n.upcoming).sort((a, b) => (a.year ?? 9999) - (b.year ?? 9999));
+      const rooted = fam
+        .filter((n) => !n.upcoming)
+        .sort((a, b) => (a.year ?? 9999) - (b.year ?? 9999));
       const rootBanner = rooted.find((n) => n.banner)?.banner;
       if (rootBanner) return rootBanner;
       for (const n of rooted.slice(0, 2)) {

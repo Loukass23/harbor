@@ -34,7 +34,7 @@ import bpSports from "./pl/bp-sports";
 import nytTv from "./pl/nyt-tv";
 
 const pl: Record<string, string> = {
-  "Translations": "Tłumaczenia",
+  Translations: "Tłumaczenia",
   "Translating…": "Tłumaczenie…",
   "Showing {lang}": "Wyświetlanie: {lang}",
   "Show all": "Pokaż wszystkie",

@@ -306,10 +306,7 @@ async function overlayPreferredEpisodes(id: string, eps: PlayEpisode[]): Promise
     const v = byKey.get(`${ep.season}:${ep.episode}`);
     if (!v) continue;
     const name = pickLocalizedText(
-      [
-        { text: preferredVideoName(v), score: PREFERRED_TEXT_SCORE },
-        { text: ep.name ?? "" },
-      ],
+      [{ text: preferredVideoName(v), score: PREFERRED_TEXT_SCORE }, { text: ep.name ?? "" }],
       { forName: true, lang },
     );
     if (name) ep.name = name;

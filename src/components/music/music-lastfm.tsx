@@ -1,5 +1,12 @@
 import { useEffect, useState } from "react";
-import { ArrowUpRight, Check, ChevronDown, LoaderCircle, Radio, Unplug } from "@/components/icons/music-icons";
+import {
+  ArrowUpRight,
+  Check,
+  ChevronDown,
+  LoaderCircle,
+  Radio,
+  Unplug,
+} from "@/components/icons/music-icons";
 import { useT } from "@/lib/i18n";
 import {
   completeLastFmAuth,
@@ -159,9 +166,7 @@ export function MusicLastFm() {
       ) : (
         expanded && (
           <div className="space-y-3 border-t border-edge-soft p-3">
-            <p className="text-[9px] leading-4 text-ink-muted">
-              {t("music.lastfm.keyHelp")}
-            </p>
+            <p className="text-[9px] leading-4 text-ink-muted">{t("music.lastfm.keyHelp")}</p>
 
             <div className="flex flex-wrap gap-2">
               <button

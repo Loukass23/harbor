@@ -209,9 +209,32 @@ export function MultiPlayer({
         video.removeEventListener("error", handleError);
         video.removeEventListener("stalled", handleStalled);
         video.removeEventListener("waiting", handleStalled);
-        if (hls) { try { (hls as { destroy(): void }).destroy(); } catch { /* ignore */ } }
-        if (ts) { try { (ts as { pause(): void; unload(): void; detachMediaElement(): void; destroy(): void }).pause(); (ts as { unload(): void }).unload(); (ts as { detachMediaElement(): void }).detachMediaElement(); (ts as { destroy(): void }).destroy(); } catch { /* ignore */ } }
-        try { video.pause(); video.removeAttribute("src"); video.load(); } catch { /* ignore */ }
+        if (hls) {
+          try {
+            (hls as { destroy(): void }).destroy();
+          } catch {
+            /* ignore */
+          }
+        }
+        if (ts) {
+          try {
+            (
+              ts as { pause(): void; unload(): void; detachMediaElement(): void; destroy(): void }
+            ).pause();
+            (ts as { unload(): void }).unload();
+            (ts as { detachMediaElement(): void }).detachMediaElement();
+            (ts as { destroy(): void }).destroy();
+          } catch {
+            /* ignore */
+          }
+        }
+        try {
+          video.pause();
+          video.removeAttribute("src");
+          video.load();
+        } catch {
+          /* ignore */
+        }
       };
     };
 

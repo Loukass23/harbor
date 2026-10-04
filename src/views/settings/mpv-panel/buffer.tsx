@@ -20,12 +20,9 @@ const LABELS: Record<BufferSizeId, string> = {
 
 const DESCRIPTIONS: Record<BufferSizeId, string> = {
   auto: "Adjusts buffering to the video and available resources. Recommended for most connections.",
-  small:
-    "Uses less memory and starts quickly. Best for a stable connection.",
-  medium:
-    "Reads up to two minutes ahead to cover brief connection drops.",
-  large:
-    "Reads up to ten minutes ahead. Uses more memory to help with an unstable connection.",
+  small: "Uses less memory and starts quickly. Best for a stable connection.",
+  medium: "Reads up to two minutes ahead to cover brief connection drops.",
+  large: "Reads up to ten minutes ahead. Uses more memory to help with an unstable connection.",
   max: "Reads up to thirty minutes ahead. Uses the most memory and may take longer to start.",
 };
 
@@ -50,7 +47,9 @@ export function BufferSizeSection() {
     },
     {
       caption: t("Wait before playing"),
-      desc: t("Amount of video buffered before playback starts. This is not a fixed loading delay."),
+      desc: t(
+        "Amount of video buffered before playback starts. This is not a fixed loading delay.",
+      ),
       readout: !profile
         ? adaptive
         : profile.pauseWaitSecs > 0
@@ -62,7 +61,9 @@ export function BufferSizeSection() {
   return (
     <Section
       title={t("Slow or unstable connection")}
-      subtitle={t("Download more of a video ahead of playback to help prevent pauses on an unstable connection.")}
+      subtitle={t(
+        "Download more of a video ahead of playback to help prevent pauses on an unstable connection.",
+      )}
       newId="mpv:buffer-size"
     >
       <SettingRow

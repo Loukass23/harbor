@@ -838,7 +838,11 @@ export function MangaReader({
         followTarget.current = null;
         return;
       }
-      node.scrollTo({ top: node.scrollTop + dy * 0.5, left: node.scrollLeft + dx * 0.5, behavior: "auto" });
+      node.scrollTo({
+        top: node.scrollTop + dy * 0.5,
+        left: node.scrollLeft + dx * 0.5,
+        behavior: "auto",
+      });
       followRaf.current = requestAnimationFrame(step);
     };
     followRaf.current = requestAnimationFrame(step);

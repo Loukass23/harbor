@@ -141,7 +141,9 @@ export function CollectionPane({
         <span className="text-[10.5px] font-semibold uppercase tracking-[0.22em] text-white/60">
           {t("Collection")}
         </span>
-        <h2 className="text-[30px] font-semibold leading-[1.08] text-white">{coll?.name ?? name}</h2>
+        <h2 className="text-[30px] font-semibold leading-[1.08] text-white">
+          {coll?.name ?? name}
+        </h2>
         {coll?.overview && (
           <p className="line-clamp-3 max-w-[70ch] text-[14px] leading-relaxed text-white/72">
             {coll.overview}

@@ -21,7 +21,8 @@ function loadMap(): Map<string, TmdbRef | null> {
   try {
     const raw = localStorage.getItem(MAP_KEY);
     if (raw) {
-      for (const [k, v] of Object.entries(JSON.parse(raw) as Record<string, TmdbRef | null>)) if (v) map.set(k, v);
+      for (const [k, v] of Object.entries(JSON.parse(raw) as Record<string, TmdbRef | null>))
+        if (v) map.set(k, v);
     }
   } catch {
     /* ignore */

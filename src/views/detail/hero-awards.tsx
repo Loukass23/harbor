@@ -37,8 +37,7 @@ export function HeroAwardsCorner({
   const top = summary[0];
   if (!top || tier === "hidden") return null;
   const compact = tier === "compact";
-  const nominationsLabel = (n: number) =>
-    n === 1 ? t("nomination") : t("nominations");
+  const nominationsLabel = (n: number) => (n === 1 ? t("nomination") : t("nominations"));
   const lines: string[] = [];
   for (const item of summary) {
     if (item.wins > 0) {

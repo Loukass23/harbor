@@ -23,8 +23,7 @@ export function useStubDetection(params: {
     if (snap.status !== "playing") return;
     stubCheckedRef.current = src.url;
     const runtimeMin = src.meta.runtime ? parseInt(src.meta.runtime, 10) : null;
-    const isAnime =
-      src.meta.id?.startsWith("kitsu:") || src.meta.id?.startsWith("mal:");
+    const isAnime = src.meta.id?.startsWith("kitsu:") || src.meta.id?.startsWith("mal:");
     void import("@/lib/dead-streams").then(
       ({ shouldFlagAsStub, markStreamDead, recordStubEvent, STUB_TTL_MS }) => {
         const flag = shouldFlagAsStub({
@@ -44,7 +43,9 @@ export function useStubDetection(params: {
         const reason = `stub_${Math.round(snap.durationSec)}s`;
         markStreamDead(sf, reason, STUB_TTL_MS);
         recordStubEvent(reason);
-        console.warn(`[player] stub detected (${Math.round(snap.durationSec)}s); returning to picker`);
+        console.warn(
+          `[player] stub detected (${Math.round(snap.durationSec)}s); returning to picker`,
+        );
         onStub();
       },
     );

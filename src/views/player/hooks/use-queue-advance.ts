@@ -51,5 +51,15 @@ export function useQueueAdvance(params: {
       setSleepAtEnd(false);
       exitPlayer();
     }
-  }, [snap.status, snap.errorCode, snap.durationSec, src.url, isLive, queue, startedNearEndRef, openPicker, exitPlayer]);
+  }, [
+    snap.status,
+    snap.errorCode,
+    snap.durationSec,
+    src.url,
+    isLive,
+    queue,
+    startedNearEndRef,
+    openPicker,
+    exitPlayer,
+  ]);
 }

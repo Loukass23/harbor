@@ -21,7 +21,11 @@ import {
 
 export { ROW_DESC, ROW_TITLE };
 
-export function SettingsWorkbench({ preview, children, compact = false }: {
+export function SettingsWorkbench({
+  preview,
+  children,
+  compact = false,
+}: {
   preview: ReactNode;
   children: ReactNode;
   compact?: boolean;
@@ -72,10 +76,7 @@ export function SettingRow({
   useRegisterRowTitle(label);
 
   return (
-    <div
-      className={`hset-row ${locked ? "opacity-60" : ""}`}
-      data-span={wide ? "" : undefined}
-    >
+    <div className={`hset-row ${locked ? "opacity-60" : ""}`} data-span={wide ? "" : undefined}>
       <RowText lead={icon}>
         <RowTitle>
           <span className="min-w-0">{label}</span>
@@ -110,11 +111,7 @@ export function OptionScale<T extends string | number>({
   const btnRefs = useRef<(HTMLButtonElement | null)[]>([]);
   return (
     <span className="flex min-w-0 flex-wrap items-center gap-2.5">
-      {caption && (
-        <span className="harbor-settings-label shrink-0">
-          {caption}
-        </span>
-      )}
+      {caption && <span className="harbor-settings-label shrink-0">{caption}</span>}
       <span
         onKeyDown={stripArrowKeys(btnRefs, (i) => onChange(options[i]))}
         className="flex min-w-0 items-center gap-0.5 rounded-[10px] bg-canvas p-1"
@@ -175,7 +172,14 @@ export function SettingsModal({
 }) {
   if (!open) return null;
   return (
-    <SettingsModalBody onClose={onClose} dismissible={dismissible} title={title} sub={sub} actions={actions} width={width}>
+    <SettingsModalBody
+      onClose={onClose}
+      dismissible={dismissible}
+      title={title}
+      sub={sub}
+      actions={actions}
+      width={width}
+    >
       {children}
     </SettingsModalBody>
   );
@@ -200,7 +204,9 @@ function SettingsModalBody({
 }) {
   const t = useT();
   const { closing, close } = useModalExit(onClose);
-  const dismiss = () => { if (dismissible) close(); };
+  const dismiss = () => {
+    if (dismissible) close();
+  };
   const titleId = useId();
   const titleRef = useRef<HTMLHeadingElement>(null);
   useEffect(() => captureFocusReturn(), []);
@@ -210,25 +216,50 @@ function SettingsModalBody({
     titleRef.current?.focus({ preventScroll: true });
     const keepFocus = (event: KeyboardEvent) => {
       if (event.key !== "Tab" || event.defaultPrevented) return;
-      const candidates = [...dialog.querySelectorAll<HTMLElement>('button:not(:disabled), input:not(:disabled):not([type="hidden"]), select:not(:disabled), textarea:not(:disabled), a[href], [tabindex]:not([tabindex="-1"])')]
-        .filter((el) => el.getClientRects().length > 0 && !el.closest('[inert]') && el.tabIndex >= 0);
+      const candidates = [
+        ...dialog.querySelectorAll<HTMLElement>(
+          'button:not(:disabled), input:not(:disabled):not([type="hidden"]), select:not(:disabled), textarea:not(:disabled), a[href], [tabindex]:not([tabindex="-1"])',
+        ),
+      ].filter(
+        (el) => el.getClientRects().length > 0 && !el.closest("[inert]") && el.tabIndex >= 0,
+      );
       const first = candidates[0];
       const last = candidates[candidates.length - 1];
-      if (!first) { event.preventDefault(); titleRef.current?.focus(); return; }
-      if (event.shiftKey && (document.activeElement === first || document.activeElement === titleRef.current)) {
-        event.preventDefault(); last.focus();
+      if (!first) {
+        event.preventDefault();
+        titleRef.current?.focus();
+        return;
+      }
+      if (
+        event.shiftKey &&
+        (document.activeElement === first || document.activeElement === titleRef.current)
+      ) {
+        event.preventDefault();
+        last.focus();
       } else if (!event.shiftKey && document.activeElement === last) {
-        event.preventDefault(); first.focus();
+        event.preventDefault();
+        first.focus();
       }
     };
     dialog.addEventListener("keydown", keepFocus);
     return () => dialog.removeEventListener("keydown", keepFocus);
   }, []);
   return (
-    <ModalShell closing={closing} onDismiss={dismiss} width={width} labelledBy={titleId} backdropClassName="bg-black/60">
+    <ModalShell
+      closing={closing}
+      onDismiss={dismiss}
+      width={width}
+      labelledBy={titleId}
+      backdropClassName="bg-black/60"
+    >
       <div className="flex items-start gap-4 px-6 pt-6">
         <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-          <h2 id={titleId} ref={titleRef} tabIndex={-1} className="text-[19px] font-semibold leading-[26px] tracking-tight text-ink outline-none">
+          <h2
+            id={titleId}
+            ref={titleRef}
+            tabIndex={-1}
+            className="text-[19px] font-semibold leading-[26px] tracking-tight text-ink outline-none"
+          >
             {title}
           </h2>
           {sub && <p className={`max-w-[66ch] ${ROW_DESC}`}>{sub}</p>}
@@ -244,9 +275,7 @@ function SettingsModalBody({
         </button>
       </div>
       <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto p-6">{children}</div>
-      {actions && (
-        <div className="flex items-center justify-end gap-2.5 px-6 pb-6">{actions}</div>
-      )}
+      {actions && <div className="flex items-center justify-end gap-2.5 px-6 pb-6">{actions}</div>}
     </ModalShell>
   );
 }

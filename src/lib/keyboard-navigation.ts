@@ -70,7 +70,7 @@ const BACK_KEYS = new Set(["Escape", "Esc", "BrowserBack", "GoBack", "Back"]);
 const MODAL_SELECTOR = '[role="dialog"], [aria-modal="true"]';
 const LOCAL_KEYBOARD_SELECTOR = [
   // Embedded surfaces handle their own keys; shadow DOM retargets events to their host.
-  '[data-local-keyboard]',
+  "[data-local-keyboard]",
   '[role="listbox"]',
   '[role="menu"]',
   '[role="grid"]',
@@ -704,10 +704,7 @@ function scrollNavItemIntoView(el: HTMLElement, mode: "center" | "nearest" = "ce
 function getSearchFocusVisual(el: HTMLElement): HTMLElement | null {
   if (!isSearchLikeField(el)) return null;
 
-  return (
-    el.closest<HTMLElement>("label, [data-tv-text-field], [data-tv-focus-container]") ??
-    el
-  );
+  return el.closest<HTMLElement>("label, [data-tv-text-field], [data-tv-focus-container]") ?? el;
 }
 
 function clearSearchVisualFocus() {

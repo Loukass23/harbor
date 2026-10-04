@@ -3,14 +3,8 @@
     "id": "party",
     "title": "Halloween party",
     "description": "Classic Halloween favorites.",
-    "art": [
-      "pumpkin-mischief",
-      "pumpkin-grin"
-    ],
-    "coverIds": [
-      "music-269573303",
-      "music-1127014316"
-    ],
+    "art": ["pumpkin-mischief", "pumpkin-grin"],
+    "coverIds": ["music-269573303", "music-1127014316"],
     "songIds": [
       "music-269573303",
       "music-1589119250",
@@ -98,14 +92,8 @@
     "id": "dark",
     "title": "After dark",
     "description": "Emo rap and horror trap.",
-    "art": [
-      "foreground-tree",
-      "grass-clump"
-    ],
-    "coverIds": [
-      "music-1485823641",
-      "music-1537011906"
-    ],
+    "art": ["foreground-tree", "grass-clump"],
+    "coverIds": ["music-1485823641", "music-1537011906"],
     "songIds": [
       "music-1637405726",
       "music-1684638689",
@@ -196,16 +184,8 @@
     "id": "scores",
     "title": "Horror soundtracks",
     "description": "Music from horror films.",
-    "art": [
-      "shudder-figure",
-      "grass-clump",
-      "shudder-knife-sleeve",
-      "shudder-knife-grip"
-    ],
-    "coverIds": [
-      "music-1426559304",
-      "music-385900860"
-    ],
+    "art": ["shudder-figure", "grass-clump", "shudder-knife-sleeve", "shudder-knife-grip"],
+    "coverIds": ["music-1426559304", "music-385900860"],
     "songIds": [
       "music-1426559304",
       "music-332679742",
@@ -289,14 +269,8 @@
     "id": "goth",
     "title": "Goth night",
     "description": "Goth and darkwave essentials.",
-    "art": [
-      "headstone-ornate",
-      "ghost-float"
-    ],
-    "coverIds": [
-      "music-1477878203",
-      "music-792078914"
-    ],
+    "art": ["headstone-ornate", "ghost-float"],
+    "coverIds": ["music-1477878203", "music-792078914"],
     "songIds": [
       "music-254878572",
       "music-371772244",
@@ -386,14 +360,8 @@
     "id": "emo",
     "title": "Dead romantic",
     "description": "Scene era emo and rock.",
-    "art": [
-      "headstone-cross",
-      "grass-clump"
-    ],
-    "coverIds": [
-      "music-1156311432",
-      "music-1522741540"
-    ],
+    "art": ["headstone-cross", "grass-clump"],
+    "coverIds": ["music-1156311432", "music-1522741540"],
     "songIds": [
       "music-1156311432",
       "music-1440785289",
@@ -502,14 +470,8 @@
     "id": "darkpop",
     "title": "Dark pop",
     "description": "Gothic pop and hyperpop.",
-    "art": [
-      "witch-hat",
-      "ghost-peek"
-    ],
-    "coverIds": [
-      "music-1051023735",
-      "music-1800831598"
-    ],
+    "art": ["witch-hat", "ghost-peek"],
+    "coverIds": ["music-1051023735", "music-1800831598"],
     "songIds": [
       "music-1800831598",
       "music-1614668020",

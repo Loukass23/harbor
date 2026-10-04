@@ -27,7 +27,7 @@ export function stripAwardSequelNumber(base: string): string {
   if (!m || m.index === undefined) return base;
   const n = Number(m[1]);
   if (n < 2 || n > 20) return base;
-  const head = base.slice(0, m.index).replace(/[\s:.\-]+$/, "");
+  const head = base.slice(0, m.index).replace(/[\s:.-]+$/, "");
   if (!/[A-Za-z]/.test(head)) return base;
   if (/\b(?:No|Vol|Ver|Chapter|Part|Cour|Ep|Episode)\.?$/i.test(head)) return base;
   return head;
@@ -132,7 +132,7 @@ export type AnimeAwardCategory = {
 };
 
 export function readAnimeAwardSource(source: AwardSourceId): {
-  meta: typeof SOURCE_META[AwardSourceId];
+  meta: (typeof SOURCE_META)[AwardSourceId];
   categories: AnimeAwardCategory[];
   years: number[];
 } {
@@ -305,10 +305,7 @@ export function groupWinsBySource(
   }
   return Array.from(map.entries())
     .map(([source, w]) => ({ source, wins: w }))
-    .sort(
-      (a, b) =>
-        SOURCE_META[b.source].prestige - SOURCE_META[a.source].prestige,
-    );
+    .sort((a, b) => SOURCE_META[b.source].prestige - SOURCE_META[a.source].prestige);
 }
 
 export function uniqueWinnerFranchisesAcrossSources(): Map<string, AwardWin> {

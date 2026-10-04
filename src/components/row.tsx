@@ -32,14 +32,7 @@ const EAGER_COUNT = 6;
 const NEAR_MARGIN = "300px";
 const FAR_RELEASE_MS = 15000;
 
-export type RowShape =
-  | "portrait"
-  | "landscape"
-  | "service"
-  | "rank"
-  | "tile"
-  | "square"
-  | "cta";
+export type RowShape = "portrait" | "landscape" | "service" | "rank" | "tile" | "square" | "cta";
 
 export const TV_CARD_MIN = 318;
 

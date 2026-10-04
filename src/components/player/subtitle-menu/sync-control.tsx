@@ -78,7 +78,11 @@ export function SyncControl({
         }`}
       >
         {busy && (
-          <Loader2 size={13} strokeWidth={2.4} className="animate-spin motion-reduce:animate-none" />
+          <Loader2
+            size={13}
+            strokeWidth={2.4}
+            className="animate-spin motion-reduce:animate-none"
+          />
         )}
         <span>{label}</span>
         <ChevronDown
@@ -86,9 +90,7 @@ export function SyncControl({
           strokeWidth={2.4}
           className={`-me-0.5 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
         />
-        {delayNonZero && !autoSyncOn && (
-          <span className="h-1.5 w-1.5 rounded-full bg-accent" />
-        )}
+        {delayNonZero && !autoSyncOn && <span className="h-1.5 w-1.5 rounded-full bg-accent" />}
       </button>
 
       {open && (

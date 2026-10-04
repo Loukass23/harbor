@@ -23,14 +23,10 @@ export function isFinaleEpisode(
   videos: { season?: number | null; episode?: number | null }[] | null | undefined,
   cur: { season: number; episode: number },
 ): boolean {
-  const vids = (videos ?? []).filter(
-    (v) => typeof v.episode === "number" && (v.season ?? 0) >= 1,
-  );
+  const vids = (videos ?? []).filter((v) => typeof v.episode === "number" && (v.season ?? 0) >= 1);
   if (vids.length === 0) return false;
   const key = (s: number, e: number) => s * 100000 + e;
-  const covered = vids.some(
-    (v) => (v.season ?? 1) === cur.season && v.episode === cur.episode,
-  );
+  const covered = vids.some((v) => (v.season ?? 1) === cur.season && v.episode === cur.episode);
   if (!covered) return false;
   const maxKey = vids.reduce((m, v) => Math.max(m, key(v.season ?? 1, v.episode ?? 0)), 0);
   return key(cur.season, cur.episode) >= maxKey;
@@ -92,7 +88,12 @@ export function useStremioSync(params: {
   const ourVideoId = videoIdFor(src, canonicalId);
   // Preserve the outgoing playback's data through effect cleanup. latestRef
   // already describes the incoming episode by the time that cleanup runs.
-  const sourceIdentity = playerLoadIdentity(src, src.url, src.episode?.season, src.episode?.episode);
+  const sourceIdentity = playerLoadIdentity(
+    src,
+    src.url,
+    src.episode?.season,
+    src.episode?.episode,
+  );
   const progress = useMemo(
     () => ({ latest: null as typeof latestRef.current | null, position: 0 }),
     [sourceIdentity],

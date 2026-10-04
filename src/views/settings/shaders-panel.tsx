@@ -60,7 +60,9 @@ export function ShadersPanel() {
     return (
       <Section
         title={t("Desktop only")}
-        subtitle={t("Picture shaders run on the bundled mpv engine in the Harbor desktop app. They have no effect in the browser.")}
+        subtitle={t(
+          "Picture shaders run on the bundled mpv engine in the Harbor desktop app. They have no effect in the browser.",
+        )}
       >
         <div className="flex items-start gap-2.5 rounded-[10px] bg-elevated px-4 py-3">
           <Info size={18} strokeWidth={2.2} className="mt-[2px] shrink-0 text-ink-subtle" />
@@ -78,7 +80,9 @@ export function ShadersPanel() {
         <>
           <Section
             title={t("Anime4K upscaling")}
-            subtitle={t("Sharpen lines and clean up color gradients in anime. Enable Anime4K to download its shader pack and choose a preset.")}
+            subtitle={t(
+              "Sharpen lines and clean up color gradients in anime. Enable Anime4K to download its shader pack and choose a preset.",
+            )}
           >
             <ToggleRow
               label={t("Enable Anime4K")}
@@ -89,9 +93,7 @@ export function ShadersPanel() {
             {settings.playerAnime4k && (
               <ToggleRow
                 label={t("Only on anime")}
-                sub={t(
-                  "Skip live-action video. Turn this off to apply Anime4K to all videos.",
-                )}
+                sub={t("Skip live-action video. Turn this off to apply Anime4K to all videos.")}
                 value={settings.playerAnime4kAnimeOnly}
                 onChange={(v) => update({ playerAnime4kAnimeOnly: v })}
               />
@@ -119,7 +121,9 @@ export function ShadersPanel() {
       {tab === "more" && (
         <Section
           title={t("More picture shaders")}
-          subtitle={t("Optional video effects downloaded from their authors. Harbor applies enabled shaders in the order shown below.")}
+          subtitle={t(
+            "Optional video effects downloaded from their authors. Harbor applies enabled shaders in the order shown below.",
+          )}
         >
           {STAGE_SEQUENCE.map((stage) => {
             const items = SHADER_CATALOG.filter((e) => e.stage === stage && !ANIME_IDS.has(e.id));

@@ -133,7 +133,9 @@ function ContinueCard({
               <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-edge-soft/60">
                 <div className="h-full rounded-full bg-accent" style={{ width: `${pct}%` }} />
               </div>
-              <span className="text-[11.5px] font-semibold tabular-nums text-ink-subtle">{pct}%</span>
+              <span className="text-[11.5px] font-semibold tabular-nums text-ink-subtle">
+                {pct}%
+              </span>
             </div>
           )}
         </div>

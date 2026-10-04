@@ -1,9 +1,4 @@
-import {
-  createListStore,
-  readLists,
-  removeFromList,
-  type ListStore,
-} from "./custom-lists";
+import { createListStore, readLists, removeFromList, type ListStore } from "./custom-lists";
 
 export const mangaLists: ListStore = createListStore("harbor.mangalists.v1");
 

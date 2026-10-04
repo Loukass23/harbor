@@ -301,8 +301,7 @@ export function useAvailableNavItems(): NavItem[] {
   const sportsEnabled = useSportsEnabled();
   const pluginCatalogs = usePluginCataloguesAvailable();
   return NAV_ITEMS.filter(
-    (item) =>
-      (item.id !== "sports" || sportsEnabled) && (item.id !== "plugins" || pluginCatalogs),
+    (item) => (item.id !== "sports" || sportsEnabled) && (item.id !== "plugins" || pluginCatalogs),
   );
 }
 

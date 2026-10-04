@@ -30,24 +30,24 @@ repository = "https://github.com/librespot-org/librespot"
 __rustls = []
 default = ["native-tls"]
 native-tls = [
-    "dep:hyper-tls",
-    "hyper-proxy2/tls",
-    "librespot-oauth/native-tls",
-    "tokio-tungstenite/native-tls",
+  "dep:hyper-tls",
+  "hyper-proxy2/tls",
+  "librespot-oauth/native-tls",
+  "tokio-tungstenite/native-tls",
 ]
 rustls-tls-native-roots = [
-    "__rustls",
-    "hyper-proxy2/rustls",
-    "hyper-rustls/native-tokio",
-    "librespot-oauth/rustls-tls-native-roots",
-    "tokio-tungstenite/rustls-tls-native-roots",
+  "__rustls",
+  "hyper-proxy2/rustls",
+  "hyper-rustls/native-tokio",
+  "librespot-oauth/rustls-tls-native-roots",
+  "tokio-tungstenite/rustls-tls-native-roots",
 ]
 rustls-tls-webpki-roots = [
-    "__rustls",
-    "hyper-proxy2/rustls-webpki",
-    "hyper-rustls/webpki-tokio",
-    "librespot-oauth/rustls-tls-webpki-roots",
-    "tokio-tungstenite/rustls-tls-webpki-roots",
+  "__rustls",
+  "hyper-proxy2/rustls-webpki",
+  "hyper-rustls/webpki-tokio",
+  "librespot-oauth/rustls-tls-webpki-roots",
+  "tokio-tungstenite/rustls-tls-webpki-roots",
 ]
 
 [lib]
@@ -84,11 +84,7 @@ version = "0.3"
 
 [dependencies.futures-util]
 version = "0.3"
-features = [
-    "alloc",
-    "bilock",
-    "unstable",
-]
+features = ["alloc", "bilock", "unstable"]
 default-features = false
 
 [dependencies.governor]
@@ -110,10 +106,7 @@ version = "1.10"
 
 [dependencies.hyper]
 version = "1.6"
-features = [
-    "http1",
-    "http2",
-]
+features = ["http1", "http2"]
 
 [dependencies.hyper-proxy2]
 version = "0.1"
@@ -121,11 +114,7 @@ default-features = false
 
 [dependencies.hyper-rustls]
 version = "0.27"
-features = [
-    "http1",
-    "http2",
-    "ring",
-]
+features = ["http1", "http2", "ring"]
 optional = true
 default-features = false
 
@@ -135,11 +124,7 @@ optional = true
 
 [dependencies.hyper-util]
 version = "0.1"
-features = [
-    "client",
-    "http1",
-    "http2",
-]
+features = ["client", "http1", "http2"]
 default-features = false
 
 [dependencies.librespot-oauth]
@@ -221,21 +206,11 @@ version = "2"
 
 [dependencies.time]
 version = "0.3"
-features = [
-    "formatting",
-    "parsing",
-]
+features = ["formatting", "parsing"]
 
 [dependencies.tokio]
 version = "1"
-features = [
-    "io-util",
-    "macros",
-    "net",
-    "rt",
-    "sync",
-    "time",
-]
+features = ["io-util", "macros", "net", "rt", "sync", "time"]
 
 [dependencies.tokio-stream]
 version = "0.1"

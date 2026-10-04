@@ -87,7 +87,11 @@ export function MusicLocalCollection({
     return () => window.removeEventListener("harbor:music-library-changed", changed);
   }, []);
   return (
-    <section className="music-library-local" aria-label={t("music.connections.local")} aria-busy={loading}>
+    <section
+      className="music-library-local"
+      aria-label={t("music.connections.local")}
+      aria-busy={loading}
+    >
       {kind === "tracks" && items.length > 0 && (
         <div className="mb-5">
           <MusicCollectionControls
@@ -109,7 +113,12 @@ export function MusicLocalCollection({
                 track={item}
                 showDuration
                 index={index + 1}
-                onPlay={() => openSourcePicker(item, items.filter((entry) => entry.kind === "track"))}
+                onPlay={() =>
+                  openSourcePicker(
+                    item,
+                    items.filter((entry) => entry.kind === "track"),
+                  )
+                }
                 onOpen={() => onOpen(item, items)}
                 onAddToQueue={() => enqueueMusic(item)}
                 onAddToPlaylist={() => openPlaylistPicker(item)}
@@ -121,7 +130,9 @@ export function MusicLocalCollection({
                 key={item.id}
                 item={item}
                 onOpen={() => onOpen(item, items)}
-                onPlay={() => { void playback.play(item, items); }}
+                onPlay={() => {
+                  void playback.play(item, items);
+                }}
                 playing={playback.pending === item}
                 onMenu={itemMenu.openFor(item, index)}
               />
@@ -129,10 +140,12 @@ export function MusicLocalCollection({
           )}
         </div>
       ) : (
-        !error && (
-          query ? <p className="music-library-empty">{t("music.library.noMatches")}</p> :
-            <MusicLibraryEmptyState kind={kind} onConnect={onConnect} onTastes={onTastes} />
-        )
+        !error &&
+        (query ? (
+          <p className="music-library-empty">{t("music.library.noMatches")}</p>
+        ) : (
+          <MusicLibraryEmptyState kind={kind} onConnect={onConnect} onTastes={onTastes} />
+        ))
       )}
       {error && (
         <div role="alert" className="music-library-empty">
@@ -142,7 +155,11 @@ export function MusicLocalCollection({
           </button>
         </div>
       )}
-      {playback.error && <p role="alert" className="text-[13px] text-ink-muted">{playback.error}</p>}
+      {playback.error && (
+        <p role="alert" className="text-[13px] text-ink-muted">
+          {playback.error}
+        </p>
+      )}
       {next !== null && !error && (
         <button
           type="button"
@@ -172,17 +189,24 @@ function LocalCollectionLoading({ kind }: { kind: Kind }) {
 
   return (
     <div className="min-h-64">
-      {visible && (kind === "tracks" ? <MusicTrackRowsSkeleton rows={5} /> : (
-        <div className="music-library-cover-grid" role="status" aria-label={t("music.loading")}>
-          {Array.from({ length: 5 }, (_, index) => (
-            <div key={index} className={`music-skeleton-card${kind === "artists" ? " is-round" : ""}`} aria-hidden="true">
-              <span className="music-skeleton-fill music-skeleton-art" />
-              <span className="music-skeleton-fill music-skeleton-title" />
-              <span className="music-skeleton-fill music-skeleton-subtitle" />
-            </div>
-          ))}
-        </div>
-      ))}
+      {visible &&
+        (kind === "tracks" ? (
+          <MusicTrackRowsSkeleton rows={5} />
+        ) : (
+          <div className="music-library-cover-grid" role="status" aria-label={t("music.loading")}>
+            {Array.from({ length: 5 }, (_, index) => (
+              <div
+                key={index}
+                className={`music-skeleton-card${kind === "artists" ? " is-round" : ""}`}
+                aria-hidden="true"
+              >
+                <span className="music-skeleton-fill music-skeleton-art" />
+                <span className="music-skeleton-fill music-skeleton-title" />
+                <span className="music-skeleton-fill music-skeleton-subtitle" />
+              </div>
+            ))}
+          </div>
+        ))}
     </div>
   );
 }

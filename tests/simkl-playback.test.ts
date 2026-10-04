@@ -52,7 +52,10 @@ test("Simkl paused episodes retain timestamp, episode identity and resume progre
   ]);
   const items = await h.api.fetchSimklPlaybackItems();
   assert.equal(items.length, 2, "distinct episodes must not collapse into one session");
-  assert.deepEqual(items.map((item) => item.state?.video_id), ["tt1234567:1:5", "tt1234567:1:6"]);
+  assert.deepEqual(
+    items.map((item) => item.state?.video_id),
+    ["tt1234567:1:5", "tt1234567:1:6"],
+  );
   assert.equal(items[0].state?.lastWatched, pausedAt);
   assert.equal(items[0]._mtime, pausedAt);
   assert.equal(items[0].state?.timeOffset, 1_201_200);
@@ -63,20 +66,33 @@ test("Simkl prefers paused_at while retaining legacy watched_at compatibility", 
   const pausedAt = "2026-09-29T10:30:00.000Z";
   const watchedAt = "2026-09-28T10:30:00.000Z";
   const h = playback([
-    { progress: 25, paused_at: pausedAt, watched_at: watchedAt, movie: { ids: { imdb: "tt1234567" } } },
+    {
+      progress: 25,
+      paused_at: pausedAt,
+      watched_at: watchedAt,
+      movie: { ids: { imdb: "tt1234567" } },
+    },
     { progress: 30, watched_at: watchedAt, movie: { ids: { imdb: "tt2345678" } } },
   ]);
   const items = await h.api.fetchSimklPlaybackItems();
-  assert.deepEqual(items.map((item) => item.state?.lastWatched), [pausedAt, watchedAt]);
+  assert.deepEqual(
+    items.map((item) => item.state?.lastWatched),
+    [pausedAt, watchedAt],
+  );
 });
 
 test("Simkl still excludes unstarted and finished sessions", async () => {
-  const h = playback([0, 45, 99, 100].map((progress, index) => ({
-    progress,
-    paused_at: "2026-09-29T10:30:00.000Z",
-    movie: { ids: { imdb: `tt123456${index}` } },
-  })));
+  const h = playback(
+    [0, 45, 99, 100].map((progress, index) => ({
+      progress,
+      paused_at: "2026-09-29T10:30:00.000Z",
+      movie: { ids: { imdb: `tt123456${index}` } },
+    })),
+  );
   const items = await h.api.fetchSimklPlaybackItems();
-  assert.deepEqual(items.map((item) => item._id), ["tt1234561"]);
+  assert.deepEqual(
+    items.map((item) => item._id),
+    ["tt1234561"],
+  );
   assert.equal(h.writes.length, 1);
 });

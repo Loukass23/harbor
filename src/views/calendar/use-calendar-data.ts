@@ -93,9 +93,7 @@ export function useCalendarData({
       }
       if (source === "anime") {
         return run(
-          animeDub
-            ? fetchAnimeDubCalendar(year, month)
-            : fetchAniListAiringCalendar(year, month),
+          animeDub ? fetchAnimeDubCalendar(year, month) : fetchAniListAiringCalendar(year, month),
         );
       }
       if (source === "anticipated") {

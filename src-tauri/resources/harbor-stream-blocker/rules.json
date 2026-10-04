@@ -7,13 +7,8 @@
     },
     "condition": {
       "urlFilter": "||ad-maven.com^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -24,13 +19,8 @@
     },
     "condition": {
       "urlFilter": "||ad.doubleclick.net^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -41,13 +31,8 @@
     },
     "condition": {
       "urlFilter": "||adcash.com^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -58,13 +43,8 @@
     },
     "condition": {
       "urlFilter": "||adnxs.com^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -75,13 +55,8 @@
     },
     "condition": {
       "urlFilter": "||adsafeprotected.com^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -92,13 +67,8 @@
     },
     "condition": {
       "urlFilter": "||adservice.google.com^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -109,13 +79,8 @@
     },
     "condition": {
       "urlFilter": "||adskeeper.com^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -126,13 +91,8 @@
     },
     "condition": {
       "urlFilter": "||adsrvr.org^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -143,13 +103,8 @@
     },
     "condition": {
       "urlFilter": "||adsterra.com^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -160,13 +115,8 @@
     },
     "condition": {
       "urlFilter": "||adsystem.google.com^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -177,13 +127,8 @@
     },
     "condition": {
       "urlFilter": "||amazon-adsystem.com^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -194,13 +139,8 @@
     },
     "condition": {
       "urlFilter": "||amplitude.com^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -211,13 +151,8 @@
     },
     "condition": {
       "urlFilter": "||an.yandex.ru^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -228,13 +163,8 @@
     },
     "condition": {
       "urlFilter": "||analytics.google.com^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -245,13 +175,8 @@
     },
     "condition": {
       "urlFilter": "||analytics.tiktok.com^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -262,13 +187,8 @@
     },
     "condition": {
       "urlFilter": "||analytics.twitter.com^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -279,13 +199,8 @@
     },
     "condition": {
       "urlFilter": "||api.amplitude.com^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -296,13 +211,8 @@
     },
     "condition": {
       "urlFilter": "||api.mixpanel.com^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -313,13 +223,8 @@
     },
     "condition": {
       "urlFilter": "||api.segment.io^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -330,13 +235,8 @@
     },
     "condition": {
       "urlFilter": "||app.link^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -347,13 +247,8 @@
     },
     "condition": {
       "urlFilter": "||bat.bing.com^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -364,13 +259,8 @@
     },
     "condition": {
       "urlFilter": "||branch.io^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -381,13 +271,8 @@
     },
     "condition": {
       "urlFilter": "||casalemedia.com^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -398,13 +283,8 @@
     },
     "condition": {
       "urlFilter": "||cdn.amplitude.com^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -415,13 +295,8 @@
     },
     "condition": {
       "urlFilter": "||cdn.mxpnl.com^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -432,13 +307,8 @@
     },
     "condition": {
       "urlFilter": "||cdn.segment.com^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -449,13 +319,8 @@
     },
     "condition": {
       "urlFilter": "||clarity.ms^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -466,13 +331,8 @@
     },
     "condition": {
       "urlFilter": "||clickadu.com^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -483,13 +343,8 @@
     },
     "condition": {
       "urlFilter": "||connect.facebook.net^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -500,13 +355,8 @@
     },
     "condition": {
       "urlFilter": "||criteo.com^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -517,13 +367,8 @@
     },
     "condition": {
       "urlFilter": "||criteo.net^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -534,13 +379,8 @@
     },
     "condition": {
       "urlFilter": "||doubleclick.net^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -551,13 +391,8 @@
     },
     "condition": {
       "urlFilter": "||exoclick.com^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -568,13 +403,8 @@
     },
     "condition": {
       "urlFilter": "||exosrv.com^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -585,13 +415,8 @@
     },
     "condition": {
       "urlFilter": "||fullstory.com^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -602,13 +427,8 @@
     },
     "condition": {
       "urlFilter": "||google-analytics.com^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -619,13 +439,8 @@
     },
     "condition": {
       "urlFilter": "||googleads.g.doubleclick.net^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -636,13 +451,8 @@
     },
     "condition": {
       "urlFilter": "||googlesyndication.com^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -653,13 +463,8 @@
     },
     "condition": {
       "urlFilter": "||googletagmanager.com^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -670,13 +475,8 @@
     },
     "condition": {
       "urlFilter": "||googletagservices.com^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -687,13 +487,8 @@
     },
     "condition": {
       "urlFilter": "||hilltopads.net^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -704,13 +499,8 @@
     },
     "condition": {
       "urlFilter": "||histats.com^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -721,13 +511,8 @@
     },
     "condition": {
       "urlFilter": "||hotjar.com^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -738,13 +523,8 @@
     },
     "condition": {
       "urlFilter": "||ib.adnxs.com^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -755,13 +535,8 @@
     },
     "condition": {
       "urlFilter": "||juicyads.com^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -772,13 +547,8 @@
     },
     "condition": {
       "urlFilter": "||kettledroopingcontinuation.com^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -789,13 +559,8 @@
     },
     "condition": {
       "urlFilter": "||matomo.org^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -806,13 +571,8 @@
     },
     "condition": {
       "urlFilter": "||mc.yandex.com^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -823,13 +583,8 @@
     },
     "condition": {
       "urlFilter": "||mc.yandex.ru^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -840,13 +595,8 @@
     },
     "condition": {
       "urlFilter": "||metrika.yandex.ru^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -857,13 +607,8 @@
     },
     "condition": {
       "urlFilter": "||mgid.com^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -874,13 +619,8 @@
     },
     "condition": {
       "urlFilter": "||mixpanel.com^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -891,13 +631,8 @@
     },
     "condition": {
       "urlFilter": "||moatads.com^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -908,13 +643,8 @@
     },
     "condition": {
       "urlFilter": "||onclickads.net^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -925,13 +655,8 @@
     },
     "condition": {
       "urlFilter": "||onclkds.com^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -942,13 +667,8 @@
     },
     "condition": {
       "urlFilter": "||outbrain.com^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -959,13 +679,8 @@
     },
     "condition": {
       "urlFilter": "||pagead2.googlesyndication.com^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -976,13 +691,8 @@
     },
     "condition": {
       "urlFilter": "||pixel.facebook.com^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -993,13 +703,8 @@
     },
     "condition": {
       "urlFilter": "||pixel.wp.com^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -1010,13 +715,8 @@
     },
     "condition": {
       "urlFilter": "||popads.net^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -1027,13 +727,8 @@
     },
     "condition": {
       "urlFilter": "||popcash.net^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -1044,13 +739,8 @@
     },
     "condition": {
       "urlFilter": "||propellerads.com^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -1061,13 +751,8 @@
     },
     "condition": {
       "urlFilter": "||pubmatic.com^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -1078,13 +763,8 @@
     },
     "condition": {
       "urlFilter": "||quantserve.com^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -1095,13 +775,8 @@
     },
     "condition": {
       "urlFilter": "||revcontent.com^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -1112,13 +787,8 @@
     },
     "condition": {
       "urlFilter": "||rs.fullstory.com^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -1129,13 +799,8 @@
     },
     "condition": {
       "urlFilter": "||rubiconproject.com^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -1146,13 +811,8 @@
     },
     "condition": {
       "urlFilter": "||s10.histats.com^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -1163,13 +823,8 @@
     },
     "condition": {
       "urlFilter": "||s4.histats.com^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -1180,13 +835,8 @@
     },
     "condition": {
       "urlFilter": "||sb.scorecardresearch.com^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -1197,13 +847,8 @@
     },
     "condition": {
       "urlFilter": "||scorecardresearch.com^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -1214,13 +859,8 @@
     },
     "condition": {
       "urlFilter": "||script.hotjar.com^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -1231,13 +871,8 @@
     },
     "condition": {
       "urlFilter": "||secure.quantserve.com^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -1248,13 +883,8 @@
     },
     "condition": {
       "urlFilter": "||segment.com^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -1265,13 +895,8 @@
     },
     "condition": {
       "urlFilter": "||segment.io^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -1282,13 +907,8 @@
     },
     "condition": {
       "urlFilter": "||serving-sys.com^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -1299,13 +919,8 @@
     },
     "condition": {
       "urlFilter": "||ssl.google-analytics.com^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -1316,13 +931,8 @@
     },
     "condition": {
       "urlFilter": "||static.ads-twitter.com^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -1333,13 +943,8 @@
     },
     "condition": {
       "urlFilter": "||static.hotjar.com^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -1350,13 +955,8 @@
     },
     "condition": {
       "urlFilter": "||stats.g.doubleclick.net^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -1367,13 +967,8 @@
     },
     "condition": {
       "urlFilter": "||stats.wp.com^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -1384,13 +979,8 @@
     },
     "condition": {
       "urlFilter": "||taboola.com^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -1401,13 +991,8 @@
     },
     "condition": {
       "urlFilter": "||tpc.googlesyndication.com^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -1418,13 +1003,8 @@
     },
     "condition": {
       "urlFilter": "||trafficjunky.com^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -1435,13 +1015,8 @@
     },
     "condition": {
       "urlFilter": "||trafficjunky.net^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -1452,13 +1027,8 @@
     },
     "condition": {
       "urlFilter": "||vidoomy.com^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -1469,13 +1039,8 @@
     },
     "condition": {
       "urlFilter": "||www.clarity.ms^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -1486,13 +1051,8 @@
     },
     "condition": {
       "urlFilter": "||www.google-analytics.com^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -1503,13 +1063,8 @@
     },
     "condition": {
       "urlFilter": "||www.googletagmanager.com^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   },
   {
@@ -1520,13 +1075,8 @@
     },
     "condition": {
       "urlFilter": "||www.googletagservices.com^",
-      "initiatorDomains": [
-        "twitch.tv",
-        "kick.com"
-      ],
-      "excludedResourceTypes": [
-        "main_frame"
-      ]
+      "initiatorDomains": ["twitch.tv", "kick.com"],
+      "excludedResourceTypes": ["main_frame"]
     }
   }
 ]

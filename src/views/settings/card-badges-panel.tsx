@@ -189,8 +189,16 @@ function PreviewCard({
           phase === "anime" ? "opacity-100" : "opacity-0"
         }`}
       />
-      <PreviewBadgeRow nodes={normal.slice(0, cap)} badgePos={badgePos} visible={phase === "normal"} />
-      <PreviewBadgeRow nodes={anime.slice(0, cap)} badgePos={badgePos} visible={phase === "anime"} />
+      <PreviewBadgeRow
+        nodes={normal.slice(0, cap)}
+        badgePos={badgePos}
+        visible={phase === "normal"}
+      />
+      <PreviewBadgeRow
+        nodes={anime.slice(0, cap)}
+        badgePos={badgePos}
+        visible={phase === "anime"}
+      />
       {watchlistBadge !== "off" && (
         <span
           className={`absolute z-10 flex h-[22px] w-[22px] items-center justify-center rounded-full bg-canvas text-ink ${WL_PREVIEW_POS[watchlistBadge]}`}
@@ -249,7 +257,9 @@ export function WatchlistControl({
   const t = useT();
   const rtl = useIsRtl();
   const on = value !== "off";
-  const [last, setLast] = useState<Exclude<WatchlistPos, "off">>(value !== "off" ? value : "topEnd");
+  const [last, setLast] = useState<Exclude<WatchlistPos, "off">>(
+    value !== "off" ? value : "topEnd",
+  );
   const corners: Array<{ value: Exclude<WatchlistPos, "off">; label: string }> = [
     { value: "topStart", label: rtl ? t("Top right") : t("Top left") },
     { value: "topEnd", label: rtl ? t("Top left") : t("Top right") },
@@ -303,7 +313,10 @@ export function CardScoresPreview({
     <div className="flex flex-col items-center gap-4 rounded-[12px] bg-elevated p-4">
       <Segmented
         value={phase}
-        options={[{ value: "normal", label: t("Movies") }, { value: "anime", label: t("Anime") }]}
+        options={[
+          { value: "normal", label: t("Movies") },
+          { value: "anime", label: t("Anime") },
+        ]}
         onChange={(v) => setPhase(v as "normal" | "anime")}
       />
       <div className="w-[184px] max-w-full">
@@ -315,7 +328,9 @@ export function CardScoresPreview({
           limit={Math.min(settings.cardBadgeLimit, Math.max(2, enabledBadgeCount))}
         />
       </div>
-      <p className="text-center text-[14px] leading-5 text-ink-muted">{t("Example scores with your settings.")}</p>
+      <p className="text-center text-[14px] leading-5 text-ink-muted">
+        {t("Example scores with your settings.")}
+      </p>
     </div>
   );
 }

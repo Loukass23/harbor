@@ -113,17 +113,11 @@ export function HubPitchSpotlight({
 
       <SoccerPreview
         key={`${game.league}:${game.id}`}
-
         game={score}
-
         detail={detail}
-
         loading={loading}
-
         failed={failed}
-
         hideScore
-
         defaultOpen
       />
 

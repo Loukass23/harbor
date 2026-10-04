@@ -56,8 +56,7 @@ function StandardHubEventDialog({
     .sort((a, b) => Number(b.id === game.id) - Number(a.id === game.id) || b.startMs - a.startMs);
   const combat = hubLeague(game.league)?.group === "combat" && game.id.includes("|");
   const field = ["cycling", "athletics", "winter"].includes(hubLeague(game.league)?.group || "");
-  const competition =
-    field || ["motorsport", "golf"].includes(hubLeague(game.league)?.group || "");
+  const competition = field || ["motorsport", "golf"].includes(hubLeague(game.league)?.group || "");
   const fieldArt = field ? game.artwork || game.poster || "" : "";
   if (watch && broadcast)
     return <BroadcastPlayer broadcast={broadcast} onClose={() => setWatch(false)} />;

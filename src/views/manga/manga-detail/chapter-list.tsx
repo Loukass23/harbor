@@ -1,4 +1,11 @@
-import { useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent, type RefObject } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type MouseEvent as ReactMouseEvent,
+  type RefObject,
+} from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import {
   BookOpen,
@@ -871,7 +878,9 @@ export function ChapterList({
               })}
             </div>
           ) : (
-            renderSource.map((c, i) => renderListRow(c, i, renderSource, i === renderSource.length - 1))
+            renderSource.map((c, i) =>
+              renderListRow(c, i, renderSource, i === renderSource.length - 1),
+            )
           )}
         </div>
       ) : (

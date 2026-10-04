@@ -74,17 +74,23 @@ export function useNotificationCenter() {
     await markAllNotificationsRead();
   }, [unread]);
 
-  const accept = useCallback(async (edgeId: string) => {
-    setPending((prev) => prev.filter((p) => p.edgeId !== edgeId));
-    await acceptFriend(edgeId).catch(() => {});
-    void refresh();
-  }, [refresh]);
+  const accept = useCallback(
+    async (edgeId: string) => {
+      setPending((prev) => prev.filter((p) => p.edgeId !== edgeId));
+      await acceptFriend(edgeId).catch(() => {});
+      void refresh();
+    },
+    [refresh],
+  );
 
-  const decline = useCallback(async (edgeId: string) => {
-    setPending((prev) => prev.filter((p) => p.edgeId !== edgeId));
-    await declineFriend(edgeId).catch(() => {});
-    void refresh();
-  }, [refresh]);
+  const decline = useCallback(
+    async (edgeId: string) => {
+      setPending((prev) => prev.filter((p) => p.edgeId !== edgeId));
+      await declineFriend(edgeId).catch(() => {});
+      void refresh();
+    },
+    [refresh],
+  );
 
   const dismiss = useCallback((id: string) => dismissNotifs([id]), []);
 

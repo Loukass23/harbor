@@ -19,8 +19,7 @@ const IS_TAURI = typeof window !== "undefined" && "__TAURI_INTERNALS__" in windo
 // The TV widget ships no face models (publicDir is off for the tizen build)
 // and the engine is stubbed out there — never trigger a scan, but keep the
 // metadata cast rail working.
-const IS_TV =
-  typeof window !== "undefined" && ("tizen" in window || "webapis" in window);
+const IS_TV = typeof window !== "undefined" && ("tizen" in window || "webapis" in window);
 const NO_CAST: CastEntry[] = [];
 
 async function loadBitmap(url: string, signal?: AbortSignal): Promise<ImageBitmap> {

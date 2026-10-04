@@ -8,7 +8,12 @@ import { SongCardStylePicker } from "../song-card-style-picker";
 import { HoverStyleGallery } from "../hover-style-preview";
 import { CardOverlayPreview } from "../card-overlay-preview";
 import { RatingsMatrix } from "../ratings-matrix";
-import { CardBadgesPanel, CardScoresPreview, WatchlistControl, type PreviewFlags } from "../card-badges-panel";
+import {
+  CardBadgesPanel,
+  CardScoresPreview,
+  WatchlistControl,
+  type PreviewFlags,
+} from "../card-badges-panel";
 
 export function CardsTab() {
   const { settings, update } = useSettings();
@@ -63,9 +68,7 @@ export function CardsTab() {
             label={t("Award tab on cards")}
             newId="library:award-tab"
             leading={<Award size={18} strokeWidth={2} />}
-            sub={t(
-              "Show a laurel tab on award-winning titles. Choose its position below.",
-            )}
+            sub={t("Show a laurel tab on award-winning titles. Choose its position below.")}
             value={settings.awardTabs}
             onChange={(v) => update({ awardTabs: v })}
           />
@@ -147,30 +150,39 @@ export function CardsTab() {
       </Section>
 
       <Section title={t("Scores")}>
-        <SettingsWorkbench compact preview={<CardScoresPreview settings={settings} flags={badgeFlags} enabledBadgeCount={enabledBadgeCount} />}>
-        <RatingsMatrix settings={settings} update={update} />
-        <CardBadgesPanel
-          settings={settings}
-          update={update}
-          enabledBadgeCount={enabledBadgeCount}
-        />
-        {settings.showMalBadge && (
-          <SettingRow
-            label={t("Anime card rating source")}
-            desc={t(
-              "Pick which score anime cards show. IMDb falls back to MAL when a title has no IMDb rating yet.",
-            )}
-          >
-            <Segmented
-              value={settings.animeCardRating}
-              options={[
-                { value: "mal", label: t("MAL") },
-                { value: "imdb", label: t("IMDb") },
-              ]}
-              onChange={(v) => update({ animeCardRating: v as "mal" | "imdb" })}
+        <SettingsWorkbench
+          compact
+          preview={
+            <CardScoresPreview
+              settings={settings}
+              flags={badgeFlags}
+              enabledBadgeCount={enabledBadgeCount}
             />
-          </SettingRow>
-        )}
+          }
+        >
+          <RatingsMatrix settings={settings} update={update} />
+          <CardBadgesPanel
+            settings={settings}
+            update={update}
+            enabledBadgeCount={enabledBadgeCount}
+          />
+          {settings.showMalBadge && (
+            <SettingRow
+              label={t("Anime card rating source")}
+              desc={t(
+                "Pick which score anime cards show. IMDb falls back to MAL when a title has no IMDb rating yet.",
+              )}
+            >
+              <Segmented
+                value={settings.animeCardRating}
+                options={[
+                  { value: "mal", label: t("MAL") },
+                  { value: "imdb", label: t("IMDb") },
+                ]}
+                onChange={(v) => update({ animeCardRating: v as "mal" | "imdb" })}
+              />
+            </SettingRow>
+          )}
         </SettingsWorkbench>
       </Section>
 
@@ -213,8 +225,7 @@ export function CardsTab() {
                   )
                 }
               />
-              {(settings.cardHoverStyle === "default" ||
-                settings.cardHoverStyle === "marquee") && (
+              {(settings.cardHoverStyle === "default" || settings.cardHoverStyle === "marquee") && (
                 <SettingRow
                   wide
                   label={t("Open preview")}

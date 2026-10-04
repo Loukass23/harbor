@@ -168,7 +168,9 @@ function parseStatus(stream: StatusStream): {
   rawLine: string;
 } {
   const text = `${stream.name ?? ""}\n${stream.title ?? ""}\n${stream.description ?? ""}`;
-  const daysMatch = text.match(/Days?\s+left[:\s]+(-?\d+)/i) ?? text.match(/(-?\d{1,4})\s*days?\s+(?:left|remaining)/i);
+  const daysMatch =
+    text.match(/Days?\s+left[:\s]+(-?\d+)/i) ??
+    text.match(/(-?\d{1,4})\s*days?\s+(?:left|remaining)/i);
   let days = daysMatch ? parseInt(daysMatch[1], 10) : null;
   // A debrid subscription is realistically days to a couple of years. A 4-digit
   // reading (e.g. Premiumize loyalty points like 4234) is a misparse, not days-left.
@@ -227,9 +229,9 @@ async function tryStreamFallback(
 function matchService(text: string): DebridSlug | null {
   const lower = text.toLowerCase();
   if (/\bpremiumize\b/.test(lower)) return "pm";
-  if (/\breal[\s\-]?debrid\b/.test(lower)) return "rd";
+  if (/\breal[\s-]?debrid\b/.test(lower)) return "rd";
   if (/\btorbox\b/.test(lower)) return "tb";
-  if (/\ball[\s\-]?debrid\b/.test(lower)) return "ad";
-  if (/\bdebrid[\s\-]?link\b/.test(lower)) return "dl";
+  if (/\ball[\s-]?debrid\b/.test(lower)) return "ad";
+  if (/\bdebrid[\s-]?link\b/.test(lower)) return "dl";
   return null;
 }

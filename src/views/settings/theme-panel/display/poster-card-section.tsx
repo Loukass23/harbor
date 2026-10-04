@@ -93,11 +93,7 @@ export function PosterCardSection() {
                   borderRadius: settings.posterRadius,
                 }}
               >
-                <TvCardArtwork
-                  meta={sample}
-                  logo={art.logo ?? undefined}
-                  posterSrc={art.poster}
-                />
+                <TvCardArtwork meta={sample} logo={art.logo ?? undefined} posterSrc={art.poster} />
               </div>
             ) : (
               <PreviewImage

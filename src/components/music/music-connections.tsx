@@ -53,7 +53,13 @@ export function requestMusicConnection(focusId: string) {
   window.dispatchEvent(new Event("harbor:music-connect"));
 }
 
-export function MusicConnectionsProvider({ children, active = true }: { children: ReactNode; active?: boolean }) {
+export function MusicConnectionsProvider({
+  children,
+  active = true,
+}: {
+  children: ReactNode;
+  active?: boolean;
+}) {
   const [request, setRequest] = useState<ConnectionsRequest | null>(null);
   const [connections, setConnections] = useState<MusicConnection[] | null>(null);
   const [error, setError] = useState("");

@@ -136,16 +136,23 @@ export function ParentalPinModal({
         aria-label={headerLabel}
         onKeyDown={(e) => {
           if (e.defaultPrevented || e.key !== "Tab") return;
-          const controls = Array.from(e.currentTarget.querySelectorAll<HTMLElement>(
-            'button:not([disabled]), input:not([disabled]), [tabindex="0"]',
-          )).filter(isVisible);
+          const controls = Array.from(
+            e.currentTarget.querySelectorAll<HTMLElement>(
+              'button:not([disabled]), input:not([disabled]), [tabindex="0"]',
+            ),
+          ).filter(isVisible);
           const first = controls[0];
           const last = controls[controls.length - 1];
-          if (!first) { e.preventDefault(); return; }
+          if (!first) {
+            e.preventDefault();
+            return;
+          }
           if (e.shiftKey && e.target === first) {
-            e.preventDefault(); last.focus();
+            e.preventDefault();
+            last.focus();
           } else if (!e.shiftKey && e.target === last) {
-            e.preventDefault(); first.focus();
+            e.preventDefault();
+            first.focus();
           }
         }}
         className={`relative flex w-full max-w-[420px] flex-col gap-7 overflow-hidden rounded-3xl px-9 py-9 shadow-[0_30px_80px_-25px_rgba(0,0,0,0.85)] animate-in zoom-in-95 fade-in duration-200 ${

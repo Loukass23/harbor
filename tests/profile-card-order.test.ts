@@ -13,7 +13,10 @@ function idx(order: CardKey[], k: CardKey) {
 test("comments never render above games, books or music", () => {
   const order = effectiveOrder({ order: ["comments", "favgames", "favbooks", "favmusic"] }, ALL);
   for (const k of ["favgames", "favbooks", "favmusic"] as CardKey[]) {
-    assert.ok(idx(order, k) < idx(order, "comments"), `${k} must come before comments, got ${order.join(",")}`);
+    assert.ok(
+      idx(order, k) < idx(order, "comments"),
+      `${k} must come before comments, got ${order.join(",")}`,
+    );
   }
 });
 

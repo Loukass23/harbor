@@ -19,12 +19,7 @@ import { Poster } from "@/components/poster";
 import { MusicServiceLogo } from "./music-service-logo";
 import "./music-queue.css";
 import { useT } from "@/lib/i18n";
-import {
-  playMusic,
-  setMusicQueue,
-  toggleMusicPlayback,
-  useMusicPlayer,
-} from "@/lib/music/player";
+import { playMusic, setMusicQueue, toggleMusicPlayback, useMusicPlayer } from "@/lib/music/player";
 import { musicPriorityNext, setMusicPriorityNext, useMusicTransport } from "@/lib/music/transport";
 import type { MusicSourceCandidate, MusicTrack } from "@/lib/music/types";
 

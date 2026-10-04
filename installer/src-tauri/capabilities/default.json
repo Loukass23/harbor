@@ -1,9 +1,7 @@
 {
   "identifier": "default",
   "description": "Harbor Setup",
-  "windows": [
-    "main"
-  ],
+  "windows": ["main"],
   "permissions": [
     "core:default",
     "core:event:default",

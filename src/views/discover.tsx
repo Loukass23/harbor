@@ -1,11 +1,4 @@
-import {
-  startTransition,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { startTransition, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { BackToTop } from "@/components/back-to-top";
 import { CollectionsRow } from "@/components/collections-row";
 import { CriticsPick } from "@/components/critics-pick";
@@ -666,14 +659,18 @@ export function Discover({ active = true }: { active?: boolean }) {
                 );
               })
             : visibleRails.map((item) => {
-              const row = renderRow(item);
-              if (!isSpecialRow(item.key)) return row;
-              return row ? (
-                <div key={item.key} data-scroll-anchor={`discover:${item.key}`} className="empty:hidden">
-                  {row}
-                </div>
-              ) : null;
-            })}
+                const row = renderRow(item);
+                if (!isSpecialRow(item.key)) return row;
+                return row ? (
+                  <div
+                    key={item.key}
+                    data-scroll-anchor={`discover:${item.key}`}
+                    className="empty:hidden"
+                  >
+                    {row}
+                  </div>
+                ) : null;
+              })}
         </div>
       </ScrollRootContext.Provider>
       <BackToTop scrollRef={scrollRef} />

@@ -207,9 +207,11 @@ async function mergeTags(): Promise<MangaTag[]> {
   const lists = await Promise.all(
     aggregateSubProviders().map((p) =>
       withTimeout(p.tags?.() ?? Promise.resolve([]), [] as MangaTag[]).then((tags) =>
-        tags.map((tag) => tag.group === "Categories" && tag.id.startsWith("category:")
-          ? { ...tag, id: prefixId(p.id, tag.id) }
-          : tag),
+        tags.map((tag) =>
+          tag.group === "Categories" && tag.id.startsWith("category:")
+            ? { ...tag, id: prefixId(p.id, tag.id) }
+            : tag,
+        ),
       ),
     ),
   );
@@ -232,8 +234,10 @@ export function withProviderTag<T>(
 export const aggregateProvider: MangaProvider = {
   id: "all",
   name: "All Sources",
-  popular: (offset, tagId) => mergeLists((p) => withProviderTag(p, tagId, (tag) => p.popular(offset, tag))),
-  search: (query, offset, tagId) => mergeLists((p) => withProviderTag(p, tagId, (tag) => p.search(query, offset, tag))),
+  popular: (offset, tagId) =>
+    mergeLists((p) => withProviderTag(p, tagId, (tag) => p.popular(offset, tag))),
+  search: (query, offset, tagId) =>
+    mergeLists((p) => withProviderTag(p, tagId, (tag) => p.search(query, offset, tag))),
   searchAll: mergeSearchLists,
   detail: async (id) => {
     const { source, orig } = parseId(id);

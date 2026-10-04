@@ -57,7 +57,7 @@ function loadDismissed(): void {
     }
   } catch {}
   try {
-    const raw = JSON.parse(profileId ? "[]" : localStorage.getItem(SIMKL_KEY) ?? "[]");
+    const raw = JSON.parse(profileId ? "[]" : (localStorage.getItem(SIMKL_KEY) ?? "[]"));
     const arr = Array.isArray(raw) ? (raw as string[]) : [];
     for (const v of arr) {
       if (typeof v !== "string" || !v) continue;

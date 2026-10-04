@@ -148,11 +148,7 @@ function ListsSection({
           )}
           <div className="grid grid-cols-[repeat(auto-fill,minmax(104px,1fr))] gap-x-4 gap-y-5">
             {list.items.map((item) => (
-              <ListItem
-                key={item.id}
-                item={item}
-                onOpenMeta={onOpenMeta}
-              />
+              <ListItem key={item.id} item={item} onOpenMeta={onOpenMeta} />
             ))}
           </div>
         </div>
@@ -161,7 +157,10 @@ function ListsSection({
   );
 }
 
-function ListItem({ item, onOpenMeta }: {
+function ListItem({
+  item,
+  onOpenMeta,
+}: {
   item: FeaturedItem;
   onOpenMeta?: (id: string, kind?: string, hint?: { name?: string; poster?: string }) => void;
 }) {

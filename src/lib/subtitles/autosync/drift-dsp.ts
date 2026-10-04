@@ -105,7 +105,13 @@ function maskSpeech(speech: Interval[], w0: number, n: number, gridHz: number): 
   return out;
 }
 
-function maskCues(cues: SubCue[], delaySec: number, w0: number, n: number, gridHz: number): Float32Array {
+function maskCues(
+  cues: SubCue[],
+  delaySec: number,
+  w0: number,
+  n: number,
+  gridHz: number,
+): Float32Array {
   const out = new Float32Array(n);
   for (const c of cues) {
     const a = c.start + delaySec;
@@ -117,7 +123,11 @@ function maskCues(cues: SubCue[], delaySec: number, w0: number, n: number, gridH
   return out;
 }
 
-function nccCoverageAtShift(speech: Float32Array, cue: Float32Array, shift: number): { ncc: number; coverage: number } {
+function nccCoverageAtShift(
+  speech: Float32Array,
+  cue: Float32Array,
+  shift: number,
+): { ncc: number; coverage: number } {
   const n = speech.length;
   let sx = 0;
   let sy = 0;
@@ -201,7 +211,13 @@ export function localFit(
   };
 }
 
-export function onsetResidual(speech: Interval[], cues: SubCue[], delaySec: number, window: Interval, bandSec: number): number {
+export function onsetResidual(
+  speech: Interval[],
+  cues: SubCue[],
+  delaySec: number,
+  window: Interval,
+  bandSec: number,
+): number {
   const [w0, w1] = window;
   const starts = speech.map((s) => s[0]).filter((t) => t >= w0 - bandSec && t <= w1 + bandSec);
   if (starts.length === 0) return NaN;
@@ -231,7 +247,11 @@ export function speechFraction(speech: Interval[], window: Interval): number {
   return clamp(sum / span, 0, 1);
 }
 
-export function aggregateQuality(samples: DriftSample[], extraLagSec: number, cfg: DriftConfig): AlignmentQuality {
+export function aggregateQuality(
+  samples: DriftSample[],
+  extraLagSec: number,
+  cfg: DriftConfig,
+): AlignmentQuality {
   let wNcc = 0;
   let wCov = 0;
   let wZ = 0;
@@ -297,7 +317,8 @@ export function driftStep(residualSec: number, cfg: DriftConfig): number {
 }
 
 export function vadEvidence(fit: LocalFit, speechFrac: number, cfg: DriftConfig): SignalEvidence {
-  const cleared = fit.ncc >= cfg.minNcc && fit.coverage >= cfg.minCoverage && fit.dominance >= cfg.minDominance;
+  const cleared =
+    fit.ncc >= cfg.minNcc && fit.coverage >= cfg.minCoverage && fit.dominance >= cfg.minDominance;
   return {
     tier: "vad_affine",
     rawScore: fit.ncc,
@@ -333,7 +354,8 @@ export function sampleUsable(
   onsetSec: number,
   cfg: DriftConfig,
 ): boolean {
-  const crossCheckOk = Number.isFinite(onsetSec) && Math.abs(onsetSec - fit.lagSec) <= cfg.crossCheckTolSec;
+  const crossCheckOk =
+    Number.isFinite(onsetSec) && Math.abs(onsetSec - fit.lagSec) <= cfg.crossCheckTolSec;
   return (
     speechFrac >= cfg.minSpeechFrac &&
     cueCount >= 3 &&

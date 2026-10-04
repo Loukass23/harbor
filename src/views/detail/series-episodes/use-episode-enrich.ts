@@ -12,7 +12,12 @@ import { harborImdbEpisodes } from "@/lib/providers/harbor-imdb";
 import { omdbSeasonRatings } from "@/lib/providers/omdb";
 import type { Episode } from "@/lib/providers/tmdb";
 import { tmdbLanguageIso } from "@/lib/providers/tmdb/tmdb-client";
-import { tvdbEpisodes, tvdbLangFromIso1, tvdbSeriesByImdb, type TvdbEpisode } from "@/lib/providers/tvdb";
+import {
+  tvdbEpisodes,
+  tvdbLangFromIso1,
+  tvdbSeriesByImdb,
+  type TvdbEpisode,
+} from "@/lib/providers/tvdb";
 
 export function useEpisodeEnrich({
   episodes,
@@ -35,7 +40,9 @@ export function useEpisodeEnrich({
   imdbRatings: Map<string, number>;
   preferredVideos: Map<string, PreferredVideo>;
 } {
-  const [tvdbBySeason, setTvdbBySeason] = useState<Map<number, Map<number, TvdbEpisode>>>(new Map());
+  const [tvdbBySeason, setTvdbBySeason] = useState<Map<number, Map<number, TvdbEpisode>>>(
+    new Map(),
+  );
   const [omdbBySeason, setOmdbBySeason] = useState<Map<number, Map<number, number>>>(new Map());
   const [harborImdb, setHarborImdb] = useState<Map<string, number>>(new Map());
   const [preferredVideos, setPreferredVideos] = useState<Map<string, PreferredVideo>>(new Map());
@@ -61,7 +68,12 @@ export function useEpisodeEnrich({
     void (async () => {
       const seriesId = await tvdbSeriesByImdb(tvdbKey, imdbId);
       if (!seriesId || cancelled) return;
-      const eps = await tvdbEpisodes(tvdbKey, seriesId, active, tvdbLangFromIso1(tmdbLanguageIso()));
+      const eps = await tvdbEpisodes(
+        tvdbKey,
+        seriesId,
+        active,
+        tvdbLangFromIso1(tmdbLanguageIso()),
+      );
       if (cancelled) return;
       const map = new Map<number, TvdbEpisode>();
       for (const e of eps) map.set(e.number, e);

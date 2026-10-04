@@ -36,7 +36,11 @@ function scoreCandidate(c: TvStreamCandidate, maxResolution: number): number {
   else if (h > maxResolution) score += 500 - (h - maxResolution);
   // Hardware path first: HEVC main-profile decodes on the Tizen VPU with
   // negligible CPU; AV1/SW fallbacks stall the WebView.
-  if (c.isHevc || c.codec?.toLowerCase().includes("hevc") || c.codec?.toLowerCase().includes("h265")) {
+  if (
+    c.isHevc ||
+    c.codec?.toLowerCase().includes("hevc") ||
+    c.codec?.toLowerCase().includes("h265")
+  ) {
     score += 300;
   } else if (c.codec?.toLowerCase().includes("h264") || c.codec?.toLowerCase().includes("avc")) {
     score += 200;

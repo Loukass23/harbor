@@ -1,4 +1,4 @@
-const MENTION_RE = /(^|[^A-Za-z0-9_@\/])@([A-Za-z0-9][A-Za-z0-9-]{1,22}[A-Za-z0-9])/g;
+const MENTION_RE = /(^|[^A-Za-z0-9_@/])@([A-Za-z0-9][A-Za-z0-9-]{1,22}[A-Za-z0-9])/g;
 
 export const MAX_MENTIONS = 5;
 

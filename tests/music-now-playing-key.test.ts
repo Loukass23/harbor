@@ -56,7 +56,11 @@ test("the row that started playback stays lit after it resolves to another sourc
 
 test("the built key round-trips through the parser", () => {
   const built = buildNowPlayingKey(
-    { id: "yt-9", connectorId: "youtube", collectionOrigin: { id: "deezer:42", connectorId: "catalog" } },
+    {
+      id: "yt-9",
+      connectorId: "youtube",
+      collectionOrigin: { id: "deezer:42", connectorId: "catalog" },
+    },
     "playing",
   );
   assert.deepEqual(parseNowPlayingKey(built), {

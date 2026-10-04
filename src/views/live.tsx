@@ -114,7 +114,11 @@ export function LiveView({ active }: { active: boolean }) {
     () => sources.filter((s) => s.kind === "epg").map((s) => s.epgUrl || s.url),
     [sources],
   );
-  const { index: baseEpg, loading: epgLoading, error: epgError } = useEpg(active ? activeSource : null, epgOnlyUrls);
+  const {
+    index: baseEpg,
+    loading: epgLoading,
+    error: epgError,
+  } = useEpg(active ? activeSource : null, epgOnlyUrls);
   const [epgErrorHidden, setEpgErrorHidden] = useState<string | null>(null);
   const epgErrorShown = epgError && epgError !== epgErrorHidden ? epgError : null;
   const epg = useXtreamEpgFallback(activeSource, playlist?.channels ?? EMPTY_CHANNELS, baseEpg);
@@ -349,7 +353,9 @@ export function LiveView({ active }: { active: boolean }) {
         {epgErrorShown && !epg && (
           <div className="mx-6 mt-2 flex items-center gap-2 rounded-xl border border-danger/40 bg-danger/10 py-2 pe-2 ps-4 text-[12.5px] text-ink-muted">
             <span className="font-semibold text-danger">{t("EPG failed:")}</span>
-            <span className="min-w-0 flex-1 truncate" title={epgErrorShown}>{epgErrorShown}</span>
+            <span className="min-w-0 flex-1 truncate" title={epgErrorShown}>
+              {epgErrorShown}
+            </span>
             <button
               type="button"
               onClick={() => setEpgErrorHidden(epgErrorShown)}

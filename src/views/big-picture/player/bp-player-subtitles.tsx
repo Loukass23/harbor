@@ -71,11 +71,14 @@ export function BpPlayerSubtitles(props: BpPlayerSubtitlesProps) {
   const playCtx = useSubtitleContext();
 
   const preferred =
-    settings.preferredSubLangs.length > 0 ? settings.preferredSubLangs : settings.preferredLanguages;
+    settings.preferredSubLangs.length > 0
+      ? settings.preferredSubLangs
+      : settings.preferredLanguages;
   const langTracks = useMemo(() => {
     const keep = new Set(filterTracksByPreferredLanguage(tracks, preferred));
     for (const track of tracks) {
-      if (hasImportedSubTitle(track.title) || importedTitles.has(track.title ?? "")) keep.add(track);
+      if (hasImportedSubTitle(track.title) || importedTitles.has(track.title ?? ""))
+        keep.add(track);
       if (track.id === selectedId || track.secondary) keep.add(track);
     }
     return tracks.filter((track) => keep.has(track));
@@ -177,7 +180,9 @@ export function BpPlayerSubtitles(props: BpPlayerSubtitlesProps) {
             <Captions size={28} strokeWidth={2} />
             {t("Subtitles")}
           </h2>
-          <p className={`line-clamp-1 ${MUTED}`}>{`${context} · ${selected ? variantTitle(selected) : t("Off")} · ${offset}`}</p>
+          <p
+            className={`line-clamp-1 ${MUTED}`}
+          >{`${context} · ${selected ? variantTitle(selected) : t("Off")} · ${offset}`}</p>
         </header>
 
         <Row>
@@ -309,9 +314,7 @@ export function BpPlayerSubtitles(props: BpPlayerSubtitlesProps) {
                         label={t("2nd")}
                         icon={<Languages size={19} strokeWidth={2.2} />}
                         on={track.id === secondary?.id}
-                        onPress={() =>
-                          pickSecondary(track.id === secondary?.id ? null : track.id)
-                        }
+                        onPress={() => pickSecondary(track.id === secondary?.id ? null : track.id)}
                       />
                     }
                   />

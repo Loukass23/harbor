@@ -4,11 +4,7 @@ import { pickEpisodeName } from "@/lib/providers/tmdb";
 import { useSettings } from "@/lib/settings";
 import { SFX } from "@/lib/sfx";
 import { useBpT } from "../bp-i18n";
-import {
-  BP_EPISODE_CARD_W,
-  BpEpisodeRating,
-  BpEpisodeStill,
-} from "../bp-episode-still";
+import { BP_EPISODE_CARD_W, BpEpisodeRating, BpEpisodeStill } from "../bp-episode-still";
 import { bpShortDate } from "./bp-detail-chrome";
 import type { BpEpisodeFact } from "./use-bp-episode-facts";
 import type { BpEp } from "./use-bp-episode-strip";

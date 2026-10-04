@@ -229,14 +229,18 @@ function periodicReport() {
   if (heapJumps.length > 0) {
     console.warn("Heap jumps (>5MB) in last window:");
     for (const { s, jump } of heapJumps) {
-      console.warn(`  +${jump.toFixed(1)}MB @ ${new Date(s.ts).toLocaleTimeString()} after ${s.kind}: ${s.label}`);
+      console.warn(
+        `  +${jump.toFixed(1)}MB @ ${new Date(s.ts).toLocaleTimeString()} after ${s.kind}: ${s.label}`,
+      );
     }
   }
   if (navStack.length > 0) {
     const lastNav = navStack[navStack.length - 1];
     const since = (Date.now() - lastNav.at) / 1000;
     const heapDeltaSinceNav = heap - lastNav.heap;
-    console.info(`Last nav: ${lastNav.label} (${since.toFixed(0)}s ago, Δ${heapDeltaSinceNav >= 0 ? "+" : ""}${heapDeltaSinceNav.toFixed(1)}MB since)`);
+    console.info(
+      `Last nav: ${lastNav.label} (${since.toFixed(0)}s ago, Δ${heapDeltaSinceNav >= 0 ? "+" : ""}${heapDeltaSinceNav.toFixed(1)}MB since)`,
+    );
   }
   console.groupEnd();
 }
@@ -288,7 +292,8 @@ function instrumentClicks() {
     (e) => {
       const target = e.target as HTMLElement | null;
       if (!target) return;
-      const label = target.getAttribute("aria-label") ||
+      const label =
+        target.getAttribute("aria-label") ||
         target.textContent?.trim().slice(0, 40) ||
         target.tagName.toLowerCase();
       pushSample("click", label);
@@ -313,7 +318,10 @@ function instrumentLongTasks() {
   } catch {}
 }
 
-const renderTimings = new Map<string, { count: number; totalMs: number; maxMs: number; lastMs: number }>();
+const renderTimings = new Map<
+  string,
+  { count: number; totalMs: number; maxMs: number; lastMs: number }
+>();
 
 export function recordRender(componentId: string, actualDurationMs: number): void {
   const entry = renderTimings.get(componentId) ?? { count: 0, totalMs: 0, maxMs: 0, lastMs: 0 };

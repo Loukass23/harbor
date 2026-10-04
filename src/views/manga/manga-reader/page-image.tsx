@@ -31,8 +31,7 @@ export function PageImage({
   const autoRetried = useRef(false);
   const prevUrl = useRef(url);
 
-  const wantHeaderFetch =
-    isTauri && !!headers && Object.keys(headers).length > 0 && !headerFailed;
+  const wantHeaderFetch = isTauri && !!headers && Object.keys(headers).length > 0 && !headerFailed;
   const nativeFetch = wantHeaderFetch || (isTauri && nativeFallback);
 
   const failHeaders = () => {

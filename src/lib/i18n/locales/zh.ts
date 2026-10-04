@@ -33,7 +33,7 @@ import bpSports from "./zh/bp-sports";
 import nytTv from "./zh/nyt-tv";
 
 const zh: Record<string, string> = {
-  "Translations": "翻译",
+  Translations: "翻译",
   "Translating…": "正在翻译…",
   "Showing {lang}": "正在显示{lang}",
   "Show all": "显示全部",

@@ -2,12 +2,7 @@ import { ArrowLeft, Layers, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import type { Meta } from "@/lib/cinemeta";
-import {
-  MAX_ITEMS,
-  sharedLists,
-  type ListItem,
-  type ListStore,
-} from "@/lib/custom-lists";
+import { MAX_ITEMS, sharedLists, type ListItem, type ListStore } from "@/lib/custom-lists";
 import { relativeTime } from "@/lib/dates";
 import { useT } from "@/lib/i18n";
 import { PickCard } from "@/components/pick-card";

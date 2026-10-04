@@ -46,10 +46,16 @@ export async function harborImdbEpisodes(seriesTt: string): Promise<Map<string, 
     } finally {
       episodeInflight.delete(seriesTt);
     }
-    lruSet(episodeCache, seriesTt, {
-      ratings: map,
-      expiresAt: Date.now() + (map.size > 0 ? EPISODE_RATINGS_TTL_MS : EMPTY_EPISODE_RATINGS_TTL_MS),
-    }, 200);
+    lruSet(
+      episodeCache,
+      seriesTt,
+      {
+        ratings: map,
+        expiresAt:
+          Date.now() + (map.size > 0 ? EPISODE_RATINGS_TTL_MS : EMPTY_EPISODE_RATINGS_TTL_MS),
+      },
+      200,
+    );
     return map;
   })();
   episodeInflight.set(seriesTt, p);

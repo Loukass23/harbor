@@ -65,9 +65,11 @@ export function MusicSpotifyLibrary({
   const origin = useRef<{ id: string; scroll: Element | null; top: number } | null>(null);
   const selectedId = selected?.id;
   const player = useMusicPlayback();
-  const collection = usePlaylistFilters(selectedId ?? kind, page?.tracks, { addedAt: page?.trackAddedAt, recentFirst: kind === "liked" && !selected });
+  const collection = usePlaylistFilters(selectedId ?? kind, page?.tracks, {
+    addedAt: page?.trackAddedAt,
+    recentFirst: kind === "liked" && !selected,
+  });
   const filteringCollection = collection.active || collection.filters.sort !== "default";
-
 
   const more = useRef<HTMLButtonElement | null>(null);
   const read = useCallback(
@@ -138,7 +140,15 @@ export function MusicSpotifyLibrary({
   }, [page?.nextOffset, loading, working, read, failure, filteringCollection]);
 
   useEffect(() => {
-    if (active && filteringCollection && page?.nextOffset != null && !loading && !working && !failure) void read(page.nextOffset, true);
+    if (
+      active &&
+      filteringCollection &&
+      page?.nextOffset != null &&
+      !loading &&
+      !working &&
+      !failure
+    )
+      void read(page.nextOffset, true);
   }, [active, filteringCollection, page?.nextOffset, loading, working, failure, read]);
 
   useEffect(() => {
@@ -259,9 +269,11 @@ export function MusicSpotifyLibrary({
   const title = selected?.name ?? t("music.spotifyLibrary.title");
   const play = (track: MusicTrack, queue: MusicTrack[]) => {
     registerMusicQueueOrigin(queue, {
-      kind: "spotify", id: selected?.id ?? "spotify:liked",
+      kind: "spotify",
+      id: selected?.id ?? "spotify:liked",
       name: selected?.name ?? t("music.spotifyLibrary.liked"),
-      collection: selected ? "playlist" : "liked", nextOffset: page?.nextOffset ?? null,
+      collection: selected ? "playlist" : "liked",
+      nextOffset: page?.nextOffset ?? null,
     });
     openSourcePicker(track, queue);
   };
@@ -482,9 +494,19 @@ export function MusicSpotifyLibrary({
           ) : (
             <>
               <MusicPlaylistToolbar controller={collection} loading={loading} />
-              <LibraryTrackList title="" subtitle="" showControls={false} tracks={collection.tracks} view={collection.filters.view}
-                likedIds={player.likedIds} selectedPlaylist={null} onPlay={play}
-                emptyCopy={t(collection.active ? "music.searchEmpty" : "music.spotifyLibrary.empty")} />
+              <LibraryTrackList
+                title=""
+                subtitle=""
+                showControls={false}
+                tracks={collection.tracks}
+                view={collection.filters.view}
+                likedIds={player.likedIds}
+                selectedPlaylist={null}
+                onPlay={play}
+                emptyCopy={t(
+                  collection.active ? "music.searchEmpty" : "music.spotifyLibrary.empty",
+                )}
+              />
             </>
           )}
           {loading && (

@@ -46,7 +46,9 @@ function normalize(e: Partial<AutoDlSeries> & { id: string }): AutoDlSeries {
     lastCheckedAt: typeof e.lastCheckedAt === "number" ? e.lastCheckedAt : null,
     lastGrabbed: typeof e.lastGrabbed === "string" ? e.lastGrabbed : null,
     grabbedCount: typeof e.grabbedCount === "number" ? e.grabbedCount : 0,
-    grabbedKeys: Array.isArray(e.grabbedKeys) ? e.grabbedKeys.filter((k) => typeof k === "string") : [],
+    grabbedKeys: Array.isArray(e.grabbedKeys)
+      ? e.grabbedKeys.filter((k) => typeof k === "string")
+      : [],
     nextAirDate: typeof e.nextAirDate === "number" ? e.nextAirDate : null,
     imdbId: typeof e.imdbId === "string" ? e.imdbId : null,
     lastError: typeof e.lastError === "string" ? e.lastError : null,

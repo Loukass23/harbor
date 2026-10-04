@@ -145,11 +145,7 @@ export function dedupeRelated(nodes: AnilistRelatedNode[]): AnilistRelatedNode[]
   return out;
 }
 
-export function dedupeMeta(
-  items: Meta[],
-  seenIds?: Set<string>,
-  seenNames?: Set<string>,
-): Meta[] {
+export function dedupeMeta(items: Meta[], seenIds?: Set<string>, seenNames?: Set<string>): Meta[] {
   const ids = seenIds ?? new Set<string>();
   const names = seenNames ?? new Set<string>();
   const out: Meta[] = [];

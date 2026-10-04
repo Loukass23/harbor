@@ -65,10 +65,18 @@ function subscribe(cb: () => void) {
 }
 
 export function useVoyage(): VoyageState {
-  return useSyncExternalStore(subscribe, () => state, () => state);
+  return useSyncExternalStore(
+    subscribe,
+    () => state,
+    () => state,
+  );
 }
 export function useVoyageOpen(): boolean {
-  return useSyncExternalStore(subscribe, () => open, () => open);
+  return useSyncExternalStore(
+    subscribe,
+    () => open,
+    () => open,
+  );
 }
 
 export function openVoyage() {
@@ -149,7 +157,7 @@ function mergeRelated(
   const genre = themeById(v.themeId)?.genre;
   const have = new Set(v.pool.map((m) => m.id));
   const pool = v.pool.slice();
-  const recVotes = { ...(v.recVotes ?? {}) };
+  const recVotes = { ...v.recVotes };
   for (const m of related) {
     if (!usable(m, exclude)) continue;
     if (!onTheme(m, genre)) continue;

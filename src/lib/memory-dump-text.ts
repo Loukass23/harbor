@@ -80,9 +80,7 @@ function rssLine(input: DumpInput): string {
   const { harborRss, webviewRss, total } = input.nativeMem;
   if (total <= 0) return "  native rss:    unavailable on this platform build";
   const webview =
-    webviewRss > 0
-      ? `webview ${webviewRss.toFixed(0)}`
-      : "webview not attributed on this platform";
+    webviewRss > 0 ? `webview ${webviewRss.toFixed(0)}` : "webview not attributed on this platform";
   return `  native rss:    ${total.toFixed(0)} MB (app ${harborRss.toFixed(0)}, ${webview}) tier ${input.ramTier}`;
 }
 

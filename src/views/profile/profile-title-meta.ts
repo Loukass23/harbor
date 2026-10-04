@@ -39,6 +39,8 @@ export async function profileTitleMeta(
   const title = translateTitles
     ? raw?.title || raw?.name
     : raw?.original_title || raw?.original_name || raw?.title || raw?.name;
-  const poster = await tmdbLocalizedPoster(key, tmdbId, raw?.original_language).catch(() => undefined);
+  const poster = await tmdbLocalizedPoster(key, tmdbId, raw?.original_language).catch(
+    () => undefined,
+  );
   return { title: title?.trim() || undefined, poster };
 }

@@ -426,7 +426,10 @@ export async function tvdbEpisodesAbsolute(
   const out: TvdbEpisode[] = [];
   const langSeg = lang ? `/${lang}` : "";
   for (let page = 0; page < 12; page++) {
-    const data = await getJson<any>(apiKey, `/series/${seriesId}/episodes/absolute${langSeg}?page=${page}`);
+    const data = await getJson<any>(
+      apiKey,
+      `/series/${seriesId}/episodes/absolute${langSeg}?page=${page}`,
+    );
     const arr = (data?.episodes ?? []) as any[];
     if (arr.length === 0) break;
     for (const e of arr) {

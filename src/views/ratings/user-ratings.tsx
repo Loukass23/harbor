@@ -94,9 +94,15 @@ export function UserRatings({
   const loadMore = useCallback(async () => {
     const current = request.current;
     if (
-      !cursor || !current || current.loading || current.more ||
-      current.handle !== handle || current.type !== type || current.controller.signal.aborted
-    ) return;
+      !cursor ||
+      !current ||
+      current.loading ||
+      current.more ||
+      current.handle !== handle ||
+      current.type !== type ||
+      current.controller.signal.aborted
+    )
+      return;
     current.more = true;
     setMore(true);
     try {
@@ -154,7 +160,9 @@ export function UserRatings({
                 }`}
               >
                 {t(tab.label)}
-                <span className={`tabular-nums ${active ? "text-canvas/70" : "text-ink-subtle"}`}>{n}</span>
+                <span className={`tabular-nums ${active ? "text-canvas/70" : "text-ink-subtle"}`}>
+                  {n}
+                </span>
               </button>
             );
           })}
@@ -210,14 +218,23 @@ function RatingRow({
     : undefined;
 
   return (
-    <div ref={media.ref} className="flex gap-4 rounded-2xl border border-edge-soft bg-canvas/40 p-3.5">
+    <div
+      ref={media.ref}
+      className="flex gap-4 rounded-2xl border border-edge-soft bg-canvas/40 p-3.5"
+    >
       <button
         type="button"
         onClick={open}
         disabled={!open}
         className="w-16 shrink-0 disabled:cursor-default"
       >
-        <Poster src={media.poster} seed={r.title} ratio="portrait" lazy className="rounded-[8px] ring-1 ring-edge-soft" />
+        <Poster
+          src={media.poster}
+          seed={r.title}
+          ratio="portrait"
+          lazy
+          className="rounded-[8px] ring-1 ring-edge-soft"
+        />
       </button>
       <div className="min-w-0 flex-1">
         <div className="flex items-start justify-between gap-3">

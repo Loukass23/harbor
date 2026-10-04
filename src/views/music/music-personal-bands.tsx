@@ -202,9 +202,7 @@ function freshBand(ctx: MusicBandContext): MusicBand | null {
     key: "fresh",
     title: t("music.row.fresh"),
     catalog: false,
-    render: (title) => (
-      <MusicFreshRow title={title} data={ctx.data} onOpen={ctx.openItem} />
-    ),
+    render: (title) => <MusicFreshRow title={title} data={ctx.data} onOpen={ctx.openItem} />,
   };
 }
 

@@ -27,10 +27,14 @@ export async function applyPreloadIfNeeded(): Promise<boolean> {
       const server = getCompanionServer();
       if (server) {
         console.log(`[preload] Fetching backup from ${server}/api/backup/preload...`);
-        const resp = await fetch(`${server}/api/backup/preload`, { signal: AbortSignal.timeout(6000) });
+        const resp = await fetch(`${server}/api/backup/preload`, {
+          signal: AbortSignal.timeout(6000),
+        });
         if (resp.ok) {
           text = await resp.text();
-          console.log(`[preload] Retrieved backup file from companion server: ${server}/api/backup/preload`);
+          console.log(
+            `[preload] Retrieved backup file from companion server: ${server}/api/backup/preload`,
+          );
         } else {
           console.warn(`[preload] Server responded with status ${resp.status}`);
         }
@@ -61,7 +65,9 @@ export async function applyPreloadIfNeeded(): Promise<boolean> {
   }
 
   try {
-    console.log(`[preload] Applying backup (${targetMarker}) with ${Object.keys(result.backup.data).length} keys...`);
+    console.log(
+      `[preload] Applying backup (${targetMarker}) with ${Object.keys(result.backup.data).length} keys...`,
+    );
     await applyBackup(result.backup);
     if (result.backup.sync) {
       if (result.backup.sync.idMap && Object.keys(result.backup.sync.idMap).length > 0) {
@@ -75,7 +81,9 @@ export async function applyPreloadIfNeeded(): Promise<boolean> {
       }
     }
     localStorage.setItem(PRELOAD_DONE_KEY, targetMarker);
-    console.log(`[preload] Successfully applied backup with ${Object.keys(result.backup.data).length} keys!`);
+    console.log(
+      `[preload] Successfully applied backup with ${Object.keys(result.backup.data).length} keys!`,
+    );
     return true;
   } catch (err) {
     console.error("[preload] Error applying backup:", err);

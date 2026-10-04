@@ -301,15 +301,18 @@ test("automatic discovery gives slow subtitle addons the full provider timeout",
 });
 
 test("automatic discovery progressively exposes 12 tracks and finishes at 15", async () => {
-  const candidates = Array.from({ length: 20 }, (_, index): SubResult => ({
-    ...top,
-    id: `arabic-${index}`,
-    url: `https://subs.test/arabic-${index}.srt`,
-    lang: "ar",
-    source: "addon",
-    title: "Subtitle addon",
-    providerMatch: { confidence: "exact", score: 1 - index / 100 },
-  }));
+  const candidates = Array.from(
+    { length: 20 },
+    (_, index): SubResult => ({
+      ...top,
+      id: `arabic-${index}`,
+      url: `https://subs.test/arabic-${index}.srt`,
+      lang: "ar",
+      source: "addon",
+      title: "Subtitle addon",
+      providerMatch: { confidence: "exact", score: 1 - index / 100 },
+    }),
+  );
   const calls: string[] = [];
   let releaseSearch!: () => void;
   const searchGate = new Promise<void>((resolve) => {

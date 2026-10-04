@@ -55,13 +55,7 @@ export function EventLogo(props: {
 
   sport?: string;
 }) {
-  return (
-    <EventLogoImage
-      key={`${props.side.logo ?? ""}|${props.fallback ?? ""}`}
-
-      {...props}
-    />
-  );
+  return <EventLogoImage key={`${props.side.logo ?? ""}|${props.fallback ?? ""}`} {...props} />;
 }
 
 function EventLogoImage({
@@ -94,27 +88,18 @@ function EventLogoImage({
   return (
     <span
       className={`sh-team-logo ${large ? "large" : ""}`}
-
       data-logo-fallback={fallbackActive}
-
       data-logo-loading={!!logo && loaded !== logo}
     >
       {logo ? (
         <img
           key={logo}
-
           src={logo}
-
           alt=""
-
           draggable={false}
-
           loading={large ? "eager" : "lazy"}
-
           decoding="async"
-
           onLoad={() => setLoaded(logo)}
-
           onError={() => setFailed((current) => new Set(current).add(logo))}
         />
       ) : (
@@ -197,7 +182,6 @@ export function HubCard({
   return (
     <article
       ref={root}
-
       className={`sh-event-card ${event ? "is-event" : "is-team-card"} ${sparse ? "is-context-sparse" : ""}`}
     >
       <button
@@ -230,13 +214,9 @@ export function HubCard({
             {eventImage ? (
               <img
                 className="sh-card-artwork"
-
                 src={eventImage}
-
                 alt=""
-
                 loading="lazy"
-
                 onError={() => setBroken((prior) => [...prior, eventImage])}
               />
             ) : (league?.group === "combat" || league?.group === "boxing") &&
@@ -244,17 +224,13 @@ export function HubCard({
               <span className="sh-card-fighters">
                 <EventLogo
                   side={{ ...game.home, logo: art.home || game.home.logo }}
-
                   fallback={league?.logo}
-
                   sport={league?.group}
                 />
 
                 <EventLogo
                   side={{ ...game.away, logo: art.away || game.away.logo }}
-
                   fallback={league?.logo}
-
                   sport={league?.group}
                 />
               </span>
@@ -262,9 +238,7 @@ export function HubCard({
               <EventLogo
                 side={{ ...game.home, logo: raceVenue?.logo || league?.logo || "" }}
                 fallback={league?.logo}
-
                 large
-
                 sport={league?.group}
               />
             )}
@@ -289,13 +263,7 @@ export function HubCard({
           {[game.away, game.home].map((side, i) => (
             <span key={i}>
               <TeamProfileLink team={teamIdentity(game, side)} className="sh-card-team-link">
-                <EventLogo
-                  side={side}
-
-                  fallback={league?.logo}
-
-                  sport={league?.group}
-                />
+                <EventLogo side={side} fallback={league?.logo} sport={league?.group} />
 
                 <span className="sh-card-team-copy">
                   <strong>
@@ -409,9 +377,7 @@ export function HubRow({
         <div className="sh-row-arrows">
           <button
             className="sh-icon"
-
             aria-label={t("Scroll left")}
-
             onClick={() =>
               rail.current?.scrollBy({
                 left: -rail.current.clientWidth * 0.8,
@@ -427,9 +393,7 @@ export function HubRow({
 
           <button
             className="sh-icon"
-
             aria-label={t("Scroll right")}
-
             onClick={() =>
               rail.current?.scrollBy({
                 left: rail.current.clientWidth * 0.8,
@@ -511,9 +475,7 @@ export function HubHero({
     return (
       <section
         className="sh-hero sh-hero-skeleton"
-
         aria-label={t("Loading schedules…")}
-
         role="status"
       >
         <div>
@@ -533,30 +495,20 @@ export function HubHero({
   return (
     <section
       className={`sh-hero has-backdrop ${combat ? "is-combat" : ""}`}
-
       aria-label={t("Featured event")}
     >
       {!backdrop && <SportsHeroScenery league={game?.league} sport={league?.group} />}
       {backdrop && (
         <img
           key={backdrop}
-
           className="sh-hero-backdrop"
-
           data-ready={showBackdrop}
-
           src={backdrop}
-
           alt=""
-
           draggable={false}
-
           decoding="async"
-
           fetchPriority="high"
-
           onLoad={() => setBackdropReady(backdrop)}
-
           onError={() => setBackdropFailed((prior) => [...prior, backdrop])}
         />
       )}
@@ -605,7 +557,6 @@ export function HubHero({
         <div className="sh-hero-actions">
           <button
             className="sh-button primary"
-
             onClick={() => (game ? onOpen(game) : onCustomize())}
           >
             {t(game ? "Explore event" : "Choose your sports")}
@@ -640,9 +591,7 @@ export function HubHero({
               <EventLogo
                 side={{ ...game.home, logo: raceVenue?.logo || league?.logo || "" }}
                 fallback={league?.logo}
-
                 large
-
                 sport={league?.group}
               />
             ) : (
@@ -651,11 +600,8 @@ export function HubHero({
                   <TeamProfileLink team={teamIdentity(game, "away")} className="sh-hero-team-link">
                     <EventLogo
                       side={{ ...game.away, logo: awayLogo || "" }}
-
                       large
-
                       fallback={league?.logo}
-
                       sport={league?.group}
                     />
                   </TeamProfileLink>
@@ -665,11 +611,8 @@ export function HubHero({
                   <TeamProfileLink team={teamIdentity(game, "home")} className="sh-hero-team-link">
                     <EventLogo
                       side={{ ...game.home, logo: homeLogo || "" }}
-
                       large
-
                       fallback={league?.logo}
-
                       sport={league?.group}
                     />
                   </TeamProfileLink>

@@ -31,7 +31,9 @@ function ListPoster({
         className="rounded-md ring-1 ring-edge-soft shadow-[0_2px_8px_-2px_rgba(0,0,0,0.35)] transition-[transform,box-shadow] duration-300 ease-[cubic-bezier(0.32,0.72,0.24,1)] motion-safe:group-hover:will-change-transform group-hover:shadow-[0_18px_36px_-14px_rgba(0,0,0,0.6)] motion-safe:group-hover:[transform:translate3d(0,-0.5rem,0)_scale(1.03)]"
         lazy
       />
-      {media.title && <div className="mt-1.5 truncate text-[12px] text-ink-muted">{media.title}</div>}
+      {media.title && (
+        <div className="mt-1.5 truncate text-[12px] text-ink-muted">{media.title}</div>
+      )}
     </button>
   );
 }

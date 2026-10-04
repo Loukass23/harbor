@@ -65,8 +65,7 @@ export function subscribeBundledAwards(fn: () => void): () => void {
   return () => listeners.delete(fn);
 }
 
-const IS_TV_APP =
-  typeof window !== "undefined" && ("tizen" in window || "webapis" in window);
+const IS_TV_APP = typeof window !== "undefined" && ("tizen" in window || "webapis" in window);
 
 // TV-side awards cache: the widget ships no awards chunk (see the
 // /api/tv/awards route, winners-only). The fetched table persists here so
@@ -341,9 +340,32 @@ export function bundledAwardsForPerson(name: string | undefined): AwardEntry[] {
 }
 
 const CATEGORY_STOPWORDS = new Set([
-  "outstanding", "performance", "by", "a", "an", "the", "in", "of", "for", "role",
-  "award", "awards", "best", "achievement", "motion", "picture", "television", "tv",
-  "miniseries", "series", "mini", "and", "or", "at", "as", "to",
+  "outstanding",
+  "performance",
+  "by",
+  "a",
+  "an",
+  "the",
+  "in",
+  "of",
+  "for",
+  "role",
+  "award",
+  "awards",
+  "best",
+  "achievement",
+  "motion",
+  "picture",
+  "television",
+  "tv",
+  "miniseries",
+  "series",
+  "mini",
+  "and",
+  "or",
+  "at",
+  "as",
+  "to",
 ]);
 
 function normCategoryKey(s: string): string {

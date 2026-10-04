@@ -9,7 +9,11 @@ import type { ScoredStream } from "@/lib/streams/types";
 import type { PlayEpisode } from "@/lib/view";
 import { isVideoFile } from "@/lib/local-library";
 import { localTorrentAllowed, trackersFromSources } from "@/lib/torrent/stremio-stream";
-import { torrentEngineAdd, torrentEngineSelectSet, type EngineFile } from "@/lib/torrent/local-engine";
+import {
+  torrentEngineAdd,
+  torrentEngineSelectSet,
+  type EngineFile,
+} from "@/lib/torrent/local-engine";
 import { activeDownloadFor, enqueueDownload } from "@/lib/download/downloads-store";
 import { seasonPackFileMatchesEpisode, streamForSeasonPackEpisode } from "./season-pack";
 
@@ -96,7 +100,13 @@ async function downloadPackViaEngine(
   for (const { ep, idx } of picks) {
     if (signal.aborted) break;
     try {
-      await enqueueDownload({ meta, episode: ep, streamLabel, url: `${base}/${idx}`, headers: null });
+      await enqueueDownload({
+        meta,
+        episode: ep,
+        streamLabel,
+        url: `${base}/${idx}`,
+        headers: null,
+      });
       result.queued += 1;
     } catch {
       result.failed += 1;

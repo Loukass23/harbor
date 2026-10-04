@@ -22,7 +22,9 @@ export function PlaybackCacheFolder() {
         : await join(await appCacheDir(), "mpv-cache");
       if (active) setPath(dir);
     })().catch(() => {});
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, [custom]);
 
   const choose = async () => {
@@ -40,7 +42,9 @@ export function PlaybackCacheFolder() {
       wide
       icon={<FolderOpen size={18} />}
       label={t("Playback cache folder")}
-      desc={t("Temporary video buffering, including debrid streams. Applies when playback restarts; existing files stay in their current folder.")}
+      desc={t(
+        "Temporary video buffering, including debrid streams. Applies when playback restarts; existing files stay in their current folder.",
+      )}
     >
       <div className="flex min-w-0 flex-col gap-3">
         <span dir="ltr" className="break-all font-mono text-[15.5px] leading-[22px] text-ink-muted">
@@ -49,13 +53,22 @@ export function PlaybackCacheFolder() {
         <span className="flex flex-wrap items-center gap-2.5">
           <SButton onClick={() => void choose()}>{t("Choose folder")}</SButton>
           {custom && (
-            <SButton onClick={() => { setError(""); update({ playbackCacheDir: "" }); }}>
+            <SButton
+              onClick={() => {
+                setError("");
+                update({ playbackCacheDir: "" });
+              }}
+            >
               <RotateCcw size={16} strokeWidth={2.2} />
               {t("Reset to default")}
             </SButton>
           )}
         </span>
-        {error && <p role="alert" className="text-[15px] text-danger">{error}</p>}
+        {error && (
+          <p role="alert" className="text-[15px] text-danger">
+            {error}
+          </p>
+        )}
       </div>
     </SettingRow>
   );

@@ -77,7 +77,9 @@ export async function applySubStyle(
 ): Promise<void> {
   const override = s.subAssOverride;
   const normScale =
-    typeof context.assScale === "number" && Number.isFinite(context.assScale) ? context.assScale : null;
+    typeof context.assScale === "number" && Number.isFinite(context.assScale)
+      ? context.assScale
+      : null;
   const effOverride = normScale != null ? "scale" : override;
   const assMargins = context.assNativeActive && override !== "no" ? "yes" : "no";
   const marginY = clamp(Number(s.subMarginY) || 0, 0, 100);
@@ -92,7 +94,12 @@ export async function applySubStyle(
     ["sub-filter-sdh-harder", false],
     ["sub-font-size", 32],
     ["sub-font", mpvFontFor(s.subFontFamily, customFontName(s))],
-    ["sub-scale", normScale != null ? clamp(normScale, 0.2, 6) : Math.min(4, Math.max(0.4, (Number(s.subFontSize) || 32) / 32))],
+    [
+      "sub-scale",
+      normScale != null
+        ? clamp(normScale, 0.2, 6)
+        : Math.min(4, Math.max(0.4, (Number(s.subFontSize) || 32) / 32)),
+    ],
     ["sub-color", mpvColor(s.subFontColor, opacity)],
     ["sub-border-color", mpvColor(s.subBorderColor, opacity)],
     ["sub-border-size", s.subBorderSize],
@@ -109,8 +116,6 @@ export async function applySubStyle(
     ["sub-pos", reposition ? clamp(100 - marginY, 0, 100) : 100],
   ];
   await Promise.all(
-    props.map(([name, value]) =>
-      invoke("mpv_set_property", { name, value }).catch(() => {}),
-    ),
+    props.map(([name, value]) => invoke("mpv_set_property", { name, value }).catch(() => {})),
   );
 }

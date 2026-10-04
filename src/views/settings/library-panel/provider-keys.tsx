@@ -68,9 +68,12 @@ export function useProviderKeys({
   const keyFieldRef = useRef<HTMLDivElement | null>(null);
   const extraTimerRef = useRef<number | null>(null);
 
-  useEffect(() => () => {
-    if (extraTimerRef.current) window.clearTimeout(extraTimerRef.current);
-  }, []);
+  useEffect(
+    () => () => {
+      if (extraTimerRef.current) window.clearTimeout(extraTimerRef.current);
+    },
+    [],
+  );
 
   useEffect(() => {
     if (!keyModal) return;

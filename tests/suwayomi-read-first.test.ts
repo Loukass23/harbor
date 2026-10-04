@@ -31,7 +31,10 @@ test("saved manga chapters read the server DB before any live source fetch", () 
 });
 
 test("graphql failures still fall through to REST", () => {
-  assert.match(gql, /if \(data == null && fdata == null\) throw new Error\("suwayomi_graphql_error"\);/);
+  assert.match(
+    gql,
+    /if \(data == null && fdata == null\) throw new Error\("suwayomi_graphql_error"\);/,
+  );
 });
 
 test("refs with an empty sourceId still decode (fetch only needs mangaId)", () => {
@@ -45,5 +48,8 @@ test("refs with an empty sourceId still decode (fetch only needs mangaId)", () =
   assert.match(mangaFn, /if \(!mangaId\) return null;/);
   assert.ok(!/!sourceId \|\| !mangaId/.test(mangaFn), "empty sourceId must not kill manga decode");
   assert.match(chapterFn, /if \(!mangaId \|\| !key\) return null;/);
-  assert.ok(!/!sourceId \|\| !mangaId \|\| !key/.test(chapterFn), "empty sourceId must not kill chapter decode");
+  assert.ok(
+    !/!sourceId \|\| !mangaId \|\| !key/.test(chapterFn),
+    "empty sourceId must not kill chapter decode",
+  );
 });

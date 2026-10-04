@@ -24,7 +24,10 @@ export function FiltersTab() {
   );
 }
 
-function StreamFilterPicker({ value, onChange }: {
+function StreamFilterPicker({
+  value,
+  onChange,
+}: {
   value: "strict" | "balanced" | "off";
   onChange: (value: "strict" | "balanced" | "off") => void;
 }) {
@@ -34,17 +37,23 @@ function StreamFilterPicker({ value, onChange }: {
     {
       id: "strict",
       label: t("Strict"),
-      description: t("Hide suspicious files, mismatched releases, likely camera recordings and trailers. Also check file sizes and season packs."),
+      description: t(
+        "Hide suspicious files, mismatched releases, likely camera recordings and trailers. Also check file sizes and season packs.",
+      ),
     },
     {
       id: "balanced",
       label: t("Balanced"),
-      description: t("Keep the suspicious-file and release checks, but allow more results, including larger files and season packs."),
+      description: t(
+        "Keep the suspicious-file and release checks, but allow more results, including larger files and season packs.",
+      ),
     },
     {
       id: "off",
       label: t("Off"),
-      description: t("Show all results returned by addons, including releases that do not match or may be suspicious."),
+      description: t(
+        "Show all results returned by addons, including releases that do not match or may be suspicious.",
+      ),
     },
   ] as const;
 
@@ -62,17 +71,27 @@ function StreamFilterPicker({ value, onChange }: {
               if (event.currentTarget.hasAttribute("data-tv-focused")) tvHover(null);
             }}
             onKeyDown={(event) => {
-              if (event.nativeEvent.isTrusted && event.key.startsWith("Arrow")) event.stopPropagation();
+              if (event.nativeEvent.isTrusted && event.key.startsWith("Arrow"))
+                event.stopPropagation();
             }}
             aria-labelledby={name + option.id}
             aria-describedby={name + option.id + "-description"}
           />
           <span className="flex min-w-0 flex-col gap-1">
             <span className="flex items-baseline gap-3">
-              <span id={name + option.id} className="text-[16px] font-semibold leading-6 text-ink">{option.label}</span>
-              {option.id === "strict" && <span className="text-[13px] text-ink-muted">{t("Default")}</span>}
+              <span id={name + option.id} className="text-[16px] font-semibold leading-6 text-ink">
+                {option.label}
+              </span>
+              {option.id === "strict" && (
+                <span className="text-[13px] text-ink-muted">{t("Default")}</span>
+              )}
             </span>
-            <span id={name + option.id + "-description"} className="max-w-[68ch] text-[15px] leading-[22px] text-ink-muted">{option.description}</span>
+            <span
+              id={name + option.id + "-description"}
+              className="max-w-[68ch] text-[15px] leading-[22px] text-ink-muted"
+            >
+              {option.description}
+            </span>
           </span>
         </label>
       ))}

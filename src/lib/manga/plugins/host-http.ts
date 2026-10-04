@@ -216,7 +216,7 @@ function parseGrpcFrames(bytes: Uint8Array): {
 } {
   const messages: string[] = [];
   const trailers: Record<string, string> = {};
-  for (let offset = 0; offset < bytes.length;) {
+  for (let offset = 0; offset < bytes.length; ) {
     if (offset + 5 > bytes.length) throw new Error("incomplete gRPC frame header");
     const flags = bytes[offset];
     const length = new DataView(bytes.buffer, bytes.byteOffset + offset + 1, 4).getUint32(0);

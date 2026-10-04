@@ -66,7 +66,9 @@ export function RatingsCard({
           <div className="mb-4 flex items-center gap-4">
             <div className="flex items-baseline gap-1.5">
               <Star size={18} className="translate-y-[3px] fill-current text-ink" />
-              <span className="text-[22px] font-bold tabular-nums text-ink">{ratings.avg.toFixed(1)}</span>
+              <span className="text-[22px] font-bold tabular-nums text-ink">
+                {ratings.avg.toFixed(1)}
+              </span>
               <span className="text-[12px] text-ink-subtle">{t("avg")}</span>
             </div>
             <span className="text-[13px] text-ink-muted">
@@ -100,7 +102,11 @@ function RatingTile({
         title={media.title || r.title}
         posterUrl={media.poster}
         score={r.score}
-        onOpen={onOpenMeta ? () => onOpenMeta(r.itemKey, r.mediaType, { name: media.title, poster: media.poster }) : undefined}
+        onOpen={
+          onOpenMeta
+            ? () => onOpenMeta(r.itemKey, r.mediaType, { name: media.title, poster: media.poster })
+            : undefined
+        }
       />
     </div>
   );

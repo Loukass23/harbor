@@ -1,5 +1,12 @@
 import type { JSX } from "react";
-import { Captions, CaptionsOff, Loader2, Maximize, Minimize, Wallpaper } from "@/components/icons/music-icons";
+import {
+  Captions,
+  CaptionsOff,
+  Loader2,
+  Maximize,
+  Minimize,
+  Wallpaper,
+} from "@/components/icons/music-icons";
 import { useT } from "@/lib/i18n";
 import { setMusicAppearance, useMusicAppearance } from "@/lib/music/appearance";
 import { lyricIndexAt, type LyricLine } from "@/lib/music/lyrics";

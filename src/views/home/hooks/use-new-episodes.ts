@@ -1,10 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  dismissEpisodes,
-  isDismissed,
-  newEpisodesFor,
-  type NewEpisode,
-} from "@/lib/new-episodes";
+import { dismissEpisodes, isDismissed, newEpisodesFor, type NewEpisode } from "@/lib/new-episodes";
 import type { LibraryItem } from "@/lib/stremio";
 
 const MAX_SERIES = 40;
@@ -15,10 +10,7 @@ export function useNewEpisodes(items: LibraryItem[], enabled: boolean) {
   const [dismissedVer, setDismissedVer] = useState(0);
 
   const series = useMemo(
-    () =>
-      items
-        .filter((i) => i.type === "series" && i._id.startsWith("tt"))
-        .slice(0, MAX_SERIES),
+    () => items.filter((i) => i.type === "series" && i._id.startsWith("tt")).slice(0, MAX_SERIES),
     [items],
   );
 

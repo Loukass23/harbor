@@ -2,14 +2,26 @@ import { lazy, Suspense, useCallback, useEffect, useState } from "react";
 import { Home } from "@/views/home";
 import { isSpooktoberSeason, nextSpooktoberDateCheck } from "@/lib/spooktober-season";
 import { useView } from "@/lib/view";
-import { SPOOKTOBER_PLAYLIST_EVENT, takeSpooktoberPlaylistRequest, type SpooktoberPlaylistRequest } from "@/lib/spooktober-navigation";
+import {
+  SPOOKTOBER_PLAYLIST_EVENT,
+  takeSpooktoberPlaylistRequest,
+  type SpooktoberPlaylistRequest,
+} from "@/lib/spooktober-navigation";
 import { SpooktoberInvitation } from "./spooktober-entry";
 import { SpooktoberLoadingScene } from "./spooktober-loading";
 import { useOnboarding } from "@/lib/onboarding";
 
-const Festival = lazy(() => import("./spooktober-view").then(module => ({ default: module.SpooktoberView })));
+const Festival = lazy(() =>
+  import("./spooktober-view").then((module) => ({ default: module.SpooktoberView })),
+);
 
-export function SpooktoberHome({ active = true, onReady }: { active?: boolean; onReady?: () => void }) {
+export function SpooktoberHome({
+  active = true,
+  onReady,
+}: {
+  active?: boolean;
+  onReady?: () => void;
+}) {
   const { setView } = useView();
   const { isDismissed, dismiss } = useOnboarding();
   const [available, setAvailable] = useState(isSpooktoberSeason);
@@ -20,10 +32,18 @@ export function SpooktoberHome({ active = true, onReady }: { active?: boolean; o
   const close = useCallback(() => {
     setScreen("home");
     setPlaylistRequest(null);
-    requestAnimationFrame(() => document.querySelector<HTMLButtonElement>("[data-spooktober-invitation]")?.focus({ preventScroll: true }));
+    requestAnimationFrame(() =>
+      document
+        .querySelector<HTMLButtonElement>("[data-spooktober-invitation]")
+        ?.focus({ preventScroll: true }),
+    );
   }, []);
   const prepareFestival = () => setFestivalOpened(true);
-  const openFestival = () => { prepareFestival(); setEntryToken(value => value + 1); setScreen("festival"); };
+  const openFestival = () => {
+    prepareFestival();
+    setEntryToken((value) => value + 1);
+    setScreen("festival");
+  };
   useEffect(() => {
     const receive = () => {
       const request = takeSpooktoberPlaylistRequest();
@@ -41,23 +61,63 @@ export function SpooktoberHome({ active = true, onReady }: { active?: boolean; o
     let timer: ReturnType<typeof setTimeout>;
     const check = () => {
       clearTimeout(timer);
-      const now = new Date(), inSeason = isSpooktoberSeason(now);
+      const now = new Date(),
+        inSeason = isSpooktoberSeason(now);
       setAvailable(inSeason);
       if (!inSeason) setScreen("home");
       timer = setTimeout(check, nextSpooktoberDateCheck(now));
     };
     check();
     document.addEventListener("visibilitychange", check);
-    return () => { clearTimeout(timer); document.removeEventListener("visibilitychange", check); };
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener("visibilitychange", check);
+    };
   }, []);
   return (
     <div className="spooktober-home">
-      <div className="spooktober-home-base" inert={screen !== "home"} style={{ visibility: screen === "home" ? "visible" : "hidden" }}>
-        <Home active={active && screen === "home"} onReady={onReady} seasonalInvitation={available && !isDismissed("spooktober") ? <SpooktoberInvitation onDismiss={() => dismiss("spooktober")} onOpen={openFestival} onPrepare={prepareFestival} /> : undefined} />
+      <div
+        className="spooktober-home-base"
+        inert={screen !== "home"}
+        style={{ visibility: screen === "home" ? "visible" : "hidden" }}
+      >
+        <Home
+          active={active && screen === "home"}
+          onReady={onReady}
+          seasonalInvitation={
+            available && !isDismissed("spooktober") ? (
+              <SpooktoberInvitation
+                onDismiss={() => dismiss("spooktober")}
+                onOpen={openFestival}
+                onPrepare={prepareFestival}
+              />
+            ) : undefined
+          }
+        />
       </div>
-      {festivalOpened && <div className="spooktober-surface" data-spooktober-surface hidden={screen !== "festival"} inert={screen !== "festival"}>
-        <Suspense fallback={<SpooktoberLoadingScene onBack={active && screen === "festival" ? close : undefined} />}><Festival active={active && screen === "festival"} onBack={close} playlistRequest={playlistRequest} entryToken={entryToken} /></Suspense>
-      </div>}
+      {festivalOpened && (
+        <div
+          className="spooktober-surface"
+          data-spooktober-surface
+          hidden={screen !== "festival"}
+          inert={screen !== "festival"}
+        >
+          <Suspense
+            fallback={
+              <SpooktoberLoadingScene
+                onBack={active && screen === "festival" ? close : undefined}
+              />
+            }
+          >
+            <Festival
+              active={active && screen === "festival"}
+              onBack={close}
+              playlistRequest={playlistRequest}
+              entryToken={entryToken}
+            />
+          </Suspense>
+        </div>
+      )}
     </div>
   );
 }

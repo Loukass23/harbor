@@ -77,7 +77,14 @@ import {
 import { dirname, join, relative, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { FIX, hostTriple, markLaunchers, releaseLabel, resolveJdks } from "./capstan-jdk.mjs";
-import { dest, readManifest, report, stagedJava, structureProblems, verifyStage } from "./capstan-verify.mjs";
+import {
+  dest,
+  readManifest,
+  report,
+  stagedJava,
+  structureProblems,
+  verifyStage,
+} from "./capstan-verify.mjs";
 
 const MODULES = [
   "java.base",
@@ -202,7 +209,10 @@ function ensureLayer() {
   const want = layerSourceHash();
   if (!existsSync(jar) || readStamp() !== want) {
     buildLayer();
-    writeFileSync(stamp, `${JSON.stringify({ format: STAGE_FORMAT, sourceHash: want }, null, 2)}\n`);
+    writeFileSync(
+      stamp,
+      `${JSON.stringify({ format: STAGE_FORMAT, sourceHash: want }, null, 2)}\n`,
+    );
   }
   return want;
 }
@@ -252,7 +262,8 @@ function stage() {
   const jlink = join(hostJdk, "bin", exe("jlink"));
   const jmods = join(targetJdk, "jmods");
   if (!existsSync(jlink)) die(`no jlink at ${jlink}`, ...FIX);
-  if (!existsSync(jmods)) die(`no jmods/ under ${targetJdk}. A JRE cannot build a runtime, a JDK can.`, ...FIX);
+  if (!existsSync(jmods))
+    die(`no jmods/ under ${targetJdk}. A JRE cannot build a runtime, a JDK can.`, ...FIX);
 
   rmSync(dest, { recursive: true, force: true });
   mkdirSync(dest, { recursive: true });
@@ -261,13 +272,17 @@ function stage() {
   execFileSync(
     jlink,
     [
-      "--module-path", jmods,
-      "--add-modules", MODULES.join(","),
-      "--output", join(dest, "runtime"),
+      "--module-path",
+      jmods,
+      "--add-modules",
+      MODULES.join(","),
+      "--output",
+      join(dest, "runtime"),
       "--strip-debug",
       "--no-header-files",
       "--no-man-pages",
-      "--compress", compress,
+      "--compress",
+      compress,
     ],
     { stdio: ["ignore", "inherit", "inherit"] },
   );
@@ -337,7 +352,10 @@ function devPreflight() {
     return;
   }
   if (!existsSync(jar)) {
-    off("The compat layer has not been built.", "Run: cd android-extension-compat && sh tools/build.sh");
+    off(
+      "The compat layer has not been built.",
+      "Run: cd android-extension-compat && sh tools/build.sh",
+    );
     return;
   }
   if (readStamp() !== layerSourceHash()) {
@@ -398,7 +416,10 @@ async function main() {
     await withoutSources();
     return;
   }
-  for (const [label, path] of [["libs", libs], ["dex tools", dexLib]]) {
+  for (const [label, path] of [
+    ["libs", libs],
+    ["dex tools", dexLib],
+  ]) {
     if (!existsSync(path)) die(`no ${label} at ${path}`);
   }
   try {
@@ -409,7 +430,8 @@ async function main() {
 
   if (mode === "check") {
     if (!existsSync(jar)) die("no out/capstan.jar to check the stage against.");
-    if (!stagedPlanHash()) die("nothing is staged at src-tauri/resources/capstan.", "Run: pnpm run setup:capstan");
+    if (!stagedPlanHash())
+      die("nothing is staged at src-tauri/resources/capstan.", "Run: pnpm run setup:capstan");
     if (stagedPlanHash() !== planHash(layerSourceHash())) {
       die("the staged runtime is out of date with the layer.", "Run: pnpm run setup:capstan");
     }

@@ -49,7 +49,7 @@ import bpSports from "./ja/bp-sports";
 import nytTv from "./ja/nyt-tv";
 
 const ja: Record<string, string> = {
-  "Translations": "翻訳",
+  Translations: "翻訳",
   "Translating…": "翻訳中…",
   "Showing {lang}": "{lang}を表示中",
   "Show all": "すべて表示",

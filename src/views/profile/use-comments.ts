@@ -1,6 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { currentAuthor, subscribeAuthor } from "@/lib/theme-auth";
-import { deleteComment, fetchComments, postComment, ProfileApiError, setCommentLike } from "./profile-api";
+import {
+  deleteComment,
+  fetchComments,
+  postComment,
+  ProfileApiError,
+  setCommentLike,
+} from "./profile-api";
 import type { Comment, LoadState } from "./profile-types";
 import { stripUrls, validateComment, type ComposeIssue } from "./text-safety";
 

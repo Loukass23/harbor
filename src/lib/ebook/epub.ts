@@ -122,11 +122,7 @@ function navigationLink(base: string, href: string, title: string): NavigationLi
   }
 }
 
-function navigationLinks(
-  document: Document | null,
-  path: string,
-  ncx = false,
-): NavigationLink[] {
+function navigationLinks(document: Document | null, path: string, ncx = false): NavigationLink[] {
   if (!document) return [];
   if (ncx)
     return elements(document, "navPoint").flatMap((point) => {
@@ -194,7 +190,7 @@ function documentSections(
   const visit = (node: Node, preserve = false): void => {
     if (node.nodeType === 3 || node.nodeType === 4) {
       chunks.push(
-        preserve ? node.textContent ?? "" : (node.textContent ?? "").replace(/\s+/g, " "),
+        preserve ? (node.textContent ?? "") : (node.textContent ?? "").replace(/\s+/g, " "),
       );
       return;
     }
@@ -260,7 +256,8 @@ export async function parseEpub(buffer: ArrayBuffer): Promise<EpubBook> {
   const documents = spine.length
     ? spine
     : [...manifest.values()].filter(
-        (item) => /xhtml|html/.test(item.mediaType) && !item.properties.split(/\s+/).includes("nav"),
+        (item) =>
+          /xhtml|html/.test(item.mediaType) && !item.properties.split(/\s+/).includes("nav"),
       );
   const scanned = documents.map((item, index) => {
     const document = contentDocument(entry(entries, item.path));
@@ -322,10 +319,12 @@ export async function parseEpub(buffer: ArrayBuffer): Promise<EpubBook> {
         active.parts.push(section.text);
       }
     }
-    chapters = drafts.filter((item) => item.parts.length).map(({ path, title, parts }) => {
-      chapterContents.set(path, parts.join("\n\n"));
-      return { path, title };
-    });
+    chapters = drafts
+      .filter((item) => item.parts.length)
+      .map(({ path, title, parts }) => {
+        chapterContents.set(path, parts.join("\n\n"));
+        return { path, title };
+      });
   }
   const coverId = elements(packageDocument, "meta")
     .find((item) => item.getAttribute("name")?.toLowerCase() === "cover")

@@ -56,19 +56,24 @@ export async function loadFreshFromArtists(
   if (artists.length === 0) return [];
   const heard = new Set(recents.map(heardKey));
   const lanes: MusicTrack[][] = artists.map(() => []);
-  let cursor = 0, failures = 0;
+  let cursor = 0,
+    failures = 0;
   // Check beyond the three most-played artists, with bounded catalog concurrency.
-  await Promise.all(Array.from({ length: Math.min(3, artists.length) }, async () => {
-    while (cursor < artists.length) {
-      const index = cursor++;
-      try {
-        const tracks = await loadArtistFreshTracks(artists[index], limit);
-        lanes[index] = tracks.filter((track) => !heard.has(heardKey(track)));
-        if (lanes[index].length) onUpdate?.(interleave(lanes, limit));
-      } catch { failures++; }
-    }
-  }));
-  if (failures && !lanes.some(lane => lane.length)) {
+  await Promise.all(
+    Array.from({ length: Math.min(3, artists.length) }, async () => {
+      while (cursor < artists.length) {
+        const index = cursor++;
+        try {
+          const tracks = await loadArtistFreshTracks(artists[index], limit);
+          lanes[index] = tracks.filter((track) => !heard.has(heardKey(track)));
+          if (lanes[index].length) onUpdate?.(interleave(lanes, limit));
+        } catch {
+          failures++;
+        }
+      }
+    }),
+  );
+  if (failures && !lanes.some((lane) => lane.length)) {
     throw new Error("Artist releases are unavailable");
   }
   // An empty recent-release catalog is valid. Ordinary search hits are not new releases.
@@ -103,7 +108,9 @@ export function getMusicHealth(): Promise<MusicConnectorHealth[]> {
 }
 
 export function getMusicSourceCandidates(track: MusicTrack): Promise<MusicSourceCandidate[]> {
-  return invoke<MusicSourceCandidate[]>("music_source_candidates", { track }).then(candidates => candidates.filter(candidate => compatibleVocalVersion(track, candidate.track)));
+  return invoke<MusicSourceCandidate[]>("music_source_candidates", { track }).then((candidates) =>
+    candidates.filter((candidate) => compatibleVocalVersion(track, candidate.track)),
+  );
 }
 
 export function getSpotifyStatus(): Promise<SpotifyStatus> {
@@ -342,7 +349,11 @@ export async function searchAcrossMusicSources(
   if (ids.length === 0) {
     // Health is unreadable, so fall back to the Rust fan-out under one deadline for all of it.
     const results = await withTimeout(
-      invoke<MusicSearchResults>("music_search_typed", { query, limit: pool, connector: undefined }),
+      invoke<MusicSearchResults>("music_search_typed", {
+        query,
+        limit: pool,
+        connector: undefined,
+      }),
       FALLBACK_FANOUT_TIMEOUT_MS,
     );
     return {

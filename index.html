@@ -64,7 +64,9 @@
         border-radius: 6px;
         background: transparent;
         color: #878d9c;
-        font: 12px/1 system-ui, sans-serif;
+        font:
+          12px/1 system-ui,
+          sans-serif;
         cursor: pointer;
       }
       #harbor-boot-chrome button:hover {
@@ -153,17 +155,18 @@
         } catch (e) {}
       })();
       // Watchdog: guarantee boot overlay never permanently covers screen if stalled
-      if (typeof setTimeout === "function") setTimeout(function () {
-        try {
-          var b = document.getElementById("harbor-boot");
-          if (b) b.remove();
-          var r = document.getElementById("root");
-          if (r) {
-            r.removeAttribute("data-startup-hidden");
-            r.inert = false;
-          }
-        } catch (e) {}
-      }, 7000);
+      if (typeof setTimeout === "function")
+        setTimeout(function () {
+          try {
+            var b = document.getElementById("harbor-boot");
+            if (b) b.remove();
+            var r = document.getElementById("root");
+            if (r) {
+              r.removeAttribute("data-startup-hidden");
+              r.inert = false;
+            }
+          } catch (e) {}
+        }, 7000);
     </script>
   </head>
   <body>

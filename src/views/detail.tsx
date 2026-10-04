@@ -571,7 +571,9 @@ export function DetailView({
     void fetchCinemetaMeta(capstanMeta.kind === "series" ? "series" : "movie", id)
       .then((full) => {
         if (cancelled || !full?.videos?.length) return;
-        setCinemetaFull((prev) => (prev && prev.id === meta.id ? { ...prev, videos: full.videos } : full));
+        setCinemetaFull((prev) =>
+          prev && prev.id === meta.id ? { ...prev, videos: full.videos } : full,
+        );
       })
       .catch(() => {});
     return () => {

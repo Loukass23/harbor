@@ -92,8 +92,7 @@ export function useBpAddonFeed(cursor: AddonCatalogCursor | undefined): {
     if (!cursor) return;
     let alive = true;
     setLoading(true);
-    void fetcher
-      .current!(1, 0)
+    void fetcher.current!(1, 0)
       .then((page) => {
         if (!alive) return;
         loaded.current = page.length;

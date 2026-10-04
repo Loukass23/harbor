@@ -1,6 +1,13 @@
 import { useMusicSourceRequest, musicSourceRequestMatches } from "@/lib/music/source-request";
 import { useRef, useState, type CSSProperties, type MouseEvent, type ReactNode } from "react";
-import { GripVertical, Heart, LoaderCircle, MoreHorizontal, Pause, Play } from "@/components/icons/music-icons";
+import {
+  GripVertical,
+  Heart,
+  LoaderCircle,
+  MoreHorizontal,
+  Pause,
+  Play,
+} from "@/components/icons/music-icons";
 import { MusicTrackMenu, useMusicTrackMenuItems } from "./music-track-menu";
 import { MusicCardBadgeChip, type MusicCardBadge } from "@/components/music/music-cover-card";
 import { Poster } from "@/components/poster";
@@ -109,7 +116,10 @@ export function MusicTrackRow({
             {String(index).padStart(2, "0")}
           </span>
         ) : null)}
-      <div onContextMenu={openMenu} className="music-track-details flex h-14 min-w-0 flex-1 items-center text-start">
+      <div
+        onContextMenu={openMenu}
+        className="music-track-details flex h-14 min-w-0 flex-1 items-center text-start"
+      >
         <button
           type="button"
           onClick={nowPlaying ? toggleMusicPlayback : onPlay}
@@ -187,7 +197,10 @@ export function MusicTrackRow({
         )}
       </div>
       {showDuration && (
-        <span data-music-duration className="ms-4 inline-flex shrink-0 items-center gap-3 text-xs tabular-nums text-ink-muted">
+        <span
+          data-music-duration
+          className="ms-4 inline-flex shrink-0 items-center gap-3 text-xs tabular-nums text-ink-muted"
+        >
           <MusicTrackLabels track={track} />
           <MusicMediaBadge kind={track.mediaKind} compact />
           <span>{track.durationLabel}</span>
@@ -200,7 +213,7 @@ export function MusicTrackRow({
           data-burst={burst || undefined}
           onClick={(event) => {
             event.stopPropagation();
-            setBurst((count) => saved ? 0 : count + 1);
+            setBurst((count) => (saved ? 0 : count + 1));
             save();
           }}
           aria-pressed={saved}
@@ -210,9 +223,14 @@ export function MusicTrackRow({
         >
           <Heart size={16} fill={saved ? "currentColor" : "none"} aria-hidden="true" />
           {burst > 0 && saved && (
-            <span key={burst} className="dock-like-burst" aria-hidden="true" onAnimationEnd={(event) => {
-              if (event.animationName === "dock-like-ring") setBurst(0);
-            }}>
+            <span
+              key={burst}
+              className="dock-like-burst"
+              aria-hidden="true"
+              onAnimationEnd={(event) => {
+                if (event.animationName === "dock-like-ring") setBurst(0);
+              }}
+            >
               <span className="dock-like-ring" />
               {ROW_LIKE_SPOKES.map((rotate, index) => (
                 <span

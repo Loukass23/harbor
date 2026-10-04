@@ -31,7 +31,11 @@ export function MusicGenreChannels({
       active={active}
       onWatch={onWatch}
       headerContent={
-        <div className="music-genre-channel-picker" role="group" aria-label={t("music.explore.scene")}>
+        <div
+          className="music-genre-channel-picker"
+          role="group"
+          aria-label={t("music.explore.scene")}
+        >
           {channels.map((channel, index) => (
             <button
               key={channel.name}

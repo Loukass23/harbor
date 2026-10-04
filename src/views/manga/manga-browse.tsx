@@ -100,9 +100,13 @@ export function MangaBrowse({
 
   const reload = useCallback(() => setReloadTick((n) => n + 1), []);
 
-  useEffect(() => subscribeMangaLibraryChanged(() => {
-    if (/(?:^|::)category:\d+$/.test(tagRef.current)) reload();
-  }), [reload]);
+  useEffect(
+    () =>
+      subscribeMangaLibraryChanged(() => {
+        if (/(?:^|::)category:\d+$/.test(tagRef.current)) reload();
+      }),
+    [reload],
+  );
 
   const sourceRef = useRef(activeMangaSourceId());
   const activeSource = activeMangaSource();

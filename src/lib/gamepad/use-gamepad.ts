@@ -137,10 +137,13 @@ export function useGamepad(): void {
       stopRepeat(id);
       fire(false);
       const r: { delay: number | null; interval: number | null } = { delay: null, interval: null };
-      r.delay = window.setTimeout(() => {
-        r.delay = null;
-        r.interval = window.setInterval(() => fire(true), Math.max(40, cfgRef.current.repeatMs));
-      }, Math.max(0, cfgRef.current.initialDelayMs));
+      r.delay = window.setTimeout(
+        () => {
+          r.delay = null;
+          r.interval = window.setInterval(() => fire(true), Math.max(40, cfgRef.current.repeatMs));
+        },
+        Math.max(0, cfgRef.current.initialDelayMs),
+      );
       repeats.set(id, r);
     };
     const stopAll = () => {

@@ -25,7 +25,9 @@ export function SharedListPosters({
             className="rounded-[12px] ring-1 ring-edge-soft shadow-[0_4px_16px_-6px_rgba(0,0,0,0.5)] transition-[transform,box-shadow] duration-300 ease-[cubic-bezier(0.32,0.72,0.24,1)] motion-safe:group-hover:will-change-transform group-hover:shadow-[0_22px_44px_-16px_rgba(0,0,0,0.65)] motion-safe:group-hover:[transform:translate3d(0,-0.4rem,0)_scale(1.03)]"
             lazy
           />
-          {item.name && <div className="mt-2 truncate text-[12.5px] text-ink-muted">{item.name}</div>}
+          {item.name && (
+            <div className="mt-2 truncate text-[12.5px] text-ink-muted">{item.name}</div>
+          )}
         </button>
       ))}
     </div>

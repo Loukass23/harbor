@@ -28,11 +28,7 @@ import { matchPersonForQuery, PersonTopMatch } from "./person-top-match";
 import { PeopleRow } from "./people-row";
 import { collectionForTitle, useCollectionHits } from "./use-collection-hits";
 import { MetaList } from "./meta-list";
-import {
-  SearchFilterBar,
-  type SearchFilter,
-  type SearchFilterKey,
-} from "./search-filter-bar";
+import { SearchFilterBar, type SearchFilter, type SearchFilterKey } from "./search-filter-bar";
 import { requestMusicSearch } from "@/lib/music/navigation";
 import { AddonHits } from "./addon-hits";
 import { AddonResults } from "./addon-results";
@@ -446,9 +442,7 @@ export function SearchOverlay() {
               />
             ) : (
               <>
-                {!trimmed && (
-                  <EmptyState onClose={close} onOpenGuide={() => setGuideOpen(true)} />
-                )}
+                {!trimmed && <EmptyState onClose={close} onOpenGuide={() => setGuideOpen(true)} />}
 
                 {magnetInput && (
                   <div className="harbor-search-section mb-5">
@@ -526,7 +520,8 @@ export function SearchOverlay() {
                           }
                         />
                       ) : (
-                        mediaFilter === "all" && currentResults.topMatch && (
+                        mediaFilter === "all" &&
+                        currentResults.topMatch && (
                           <TopMatch
                             match={currentResults.topMatch}
                             onClose={commit}
@@ -603,11 +598,26 @@ export function SearchOverlay() {
                           }
                         />
                       )}
-                      <AnimeRow items={showKind("anime") ? currentResults.anime : []} onClose={commit} />
-                      <MangaRow items={showKind("manga") ? currentResults.manga : []} onClose={commit} />
-                      <MusicRow items={showKind("music") ? currentResults.music : []} onClose={commit} />
-                      <EBookRow items={showKind("ebooks") ? currentResults.ebooks : []} onClose={commit} />
-                      <SportsRow items={showKind("sports") ? currentResults.sports : []} onClose={commit} />
+                      <AnimeRow
+                        items={showKind("anime") ? currentResults.anime : []}
+                        onClose={commit}
+                      />
+                      <MangaRow
+                        items={showKind("manga") ? currentResults.manga : []}
+                        onClose={commit}
+                      />
+                      <MusicRow
+                        items={showKind("music") ? currentResults.music : []}
+                        onClose={commit}
+                      />
+                      <EBookRow
+                        items={showKind("ebooks") ? currentResults.ebooks : []}
+                        onClose={commit}
+                      />
+                      <SportsRow
+                        items={showKind("sports") ? currentResults.sports : []}
+                        onClose={commit}
+                      />
                       <CharacterGroup items={currentResults.characters} onClose={commit} />
                       <AddonResults groups={shownAddonGroups} onClose={commit} />
                     </div>

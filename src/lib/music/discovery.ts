@@ -70,12 +70,18 @@ export function parseMusicDiscoveryChart(data: unknown[]): MusicDiscoveryChart {
     const artist = label(credit.name);
     if (!Number.isSafeInteger(id) || id <= 0 || seen.has(id) || !title || !artist) continue;
     seen.add(id);
-    if (typeof entry.rank === "number" && Number.isFinite(entry.rank) && entry.rank > 0) popularity[`deezer:track:${id}`] = entry.rank;
+    if (typeof entry.rank === "number" && Number.isFinite(entry.rank) && entry.rank > 0)
+      popularity[`deezer:track:${id}`] = entry.rank;
     const albumId = Number(album.id);
-    if (Number.isSafeInteger(albumId) && albumId > 0 && label(album.title)) albums.set(albumId, {
-      kind: "album", id: `deezer:album:${albumId}`, connectorId: "catalog", title: label(album.title), artist,
-      artwork: image(album.cover_xl, album.cover_big, album.cover_medium),
-    });
+    if (Number.isSafeInteger(albumId) && albumId > 0 && label(album.title))
+      albums.set(albumId, {
+        kind: "album",
+        id: `deezer:album:${albumId}`,
+        connectorId: "catalog",
+        title: label(album.title),
+        artist,
+        artwork: image(album.cover_xl, album.cover_big, album.cover_medium),
+      });
     const duration =
       typeof entry.duration === "number" && Number.isFinite(entry.duration)
         ? Math.max(0, Math.floor(entry.duration))
@@ -109,7 +115,13 @@ export function parseMusicDiscoveryChart(data: unknown[]): MusicDiscoveryChart {
       });
     }
   }
-  return { tracks, positions, artists: [...artists.values()], albums: [...albums.values()], popularity };
+  return {
+    tracks,
+    positions,
+    artists: [...artists.values()],
+    albums: [...albums.values()],
+    popularity,
+  };
 }
 
 export async function loadMusicDiscoveryChart(genreId = 0): Promise<MusicDiscoveryChart> {
@@ -128,33 +140,62 @@ export type MusicGenreSelection = MusicDiscoveryChart & { playlists: DiscoveryPl
 /** Match whole genre terms: a search hit alone is not evidence of genre membership. */
 export function matchesGenrePlaylist(title: string, terms: readonly string[]): boolean {
   const name = ` ${genreSearchKey(title)} `;
-  return terms.some(term => name.includes(` ${genreSearchKey(term)} `));
+  return terms.some((term) => name.includes(` ${genreSearchKey(term)} `));
 }
 
 export async function loadMusicGenreSelection(genreId: number): Promise<MusicGenreSelection> {
   const genre = musicGenre(genreId);
   if (!genre) throw new Error("Unknown music genre");
-  if (genre.deezerId) return { ...await loadMusicDiscoveryChart(genre.deezerId), playlists: [] };
-  const query = genre.aliases[0] && ["hardcore", "regional-mexican"].includes(genre.slug)
-    ? genre.aliases[0] : genre.name;
+  if (genre.deezerId) return { ...(await loadMusicDiscoveryChart(genre.deezerId)), playlists: [] };
+  const query =
+    genre.aliases[0] && ["hardcore", "regional-mexican"].includes(genre.slug)
+      ? genre.aliases[0]
+      : genre.name;
   const results = await entries(`search/playlist?q=${encodeURIComponent(query)}&limit=20`);
-  const playlists: DiscoveryPlaylist[] = results.flatMap(value => {
-    const entry = record(value), id = Number(entry.id), name = label(entry.title);
-    if (!Number.isSafeInteger(id) || id <= 0 || !matchesGenrePlaylist(name, [genre.name, ...genre.aliases])) return [];
-    const artwork = image(entry.picture_xl, entry.picture_big, entry.picture_medium);
-    return [{ kind: "playlist" as const, id: `deezer:playlist:${id}`, connectorId: "catalog", name,
-      artwork: artwork ? [artwork] : [], trackCount: typeof entry.nb_tracks === "number" ? entry.nb_tracks : undefined,
-      subtitle: label(record(entry.user).name) || "Deezer" }];
-  }).slice(0, 8);
+  const playlists: DiscoveryPlaylist[] = results
+    .flatMap((value) => {
+      const entry = record(value),
+        id = Number(entry.id),
+        name = label(entry.title);
+      if (
+        !Number.isSafeInteger(id) ||
+        id <= 0 ||
+        !matchesGenrePlaylist(name, [genre.name, ...genre.aliases])
+      )
+        return [];
+      const artwork = image(entry.picture_xl, entry.picture_big, entry.picture_medium);
+      return [
+        {
+          kind: "playlist" as const,
+          id: `deezer:playlist:${id}`,
+          connectorId: "catalog",
+          name,
+          artwork: artwork ? [artwork] : [],
+          trackCount: typeof entry.nb_tracks === "number" ? entry.nb_tracks : undefined,
+          subtitle: label(record(entry.user).name) || "Deezer",
+        },
+      ];
+    })
+    .slice(0, 8);
   // Two playlists give breadth without fan-out for every genre tile or artist.
-  const pages = await Promise.allSettled(playlists.slice(0, 2).map(playlist =>
-    entries(`playlist/${playlist.id.split(":").at(-1)}/tracks?limit=24`)));
-  if (pages.length && pages.every(page => page.status === "rejected")) throw new Error("Genre selections unavailable");
-  const lanes = pages.flatMap(page => page.status === "fulfilled" ? [page.value] : []);
+  const pages = await Promise.allSettled(
+    playlists
+      .slice(0, 2)
+      .map((playlist) => entries(`playlist/${playlist.id.split(":").at(-1)}/tracks?limit=24`)),
+  );
+  if (pages.length && pages.every((page) => page.status === "rejected"))
+    throw new Error("Genre selections unavailable");
+  const lanes = pages.flatMap((page) => (page.status === "fulfilled" ? [page.value] : []));
   const mixed: unknown[] = [];
-  for (let index = 0; index < 24; index++) for (const lane of lanes) if (lane[index]) mixed.push(lane[index]);
+  for (let index = 0; index < 24; index++)
+    for (const lane of lanes) if (lane[index]) mixed.push(lane[index]);
   const parsed = parseMusicDiscoveryChart(mixed);
-  return { ...parsed, tracks: parsed.tracks.slice(0, 30), positions: parsed.tracks.slice(0, 30).map(() => null), playlists };
+  return {
+    ...parsed,
+    tracks: parsed.tracks.slice(0, 30),
+    positions: parsed.tracks.slice(0, 30).map(() => null),
+    playlists,
+  };
 }
 
 export async function loadMusicDiscoveryPlaylists(

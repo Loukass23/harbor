@@ -24,7 +24,9 @@ export function MangaFavCard({ entry }: { entry: MangaFavEntry }) {
       const results = await searchManga(title);
       const match =
         results.find(
-          (r) => norm(r.title) === norm(title) || (r.altTitle != null && norm(r.altTitle) === norm(title)),
+          (r) =>
+            norm(r.title) === norm(title) ||
+            (r.altTitle != null && norm(r.altTitle) === norm(title)),
         ) ?? results[0];
       if (match) target = match.id;
     } catch {

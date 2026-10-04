@@ -27,11 +27,7 @@ export function SignedOutHero({ onSignIn }: { onSignIn: (mode: "register" | "sig
             >
               {t("Create your account")}
             </button>
-            <button
-              type="button"
-              onClick={() => onSignIn("signin")}
-              className={ROW_ACTION}
-            >
+            <button type="button" onClick={() => onSignIn("signin")} className={ROW_ACTION}>
               {t("Sign in")}
             </button>
           </div>
@@ -55,7 +51,9 @@ export function SignedOutHero({ onSignIn }: { onSignIn: (mode: "register" | "sig
       <div className="flex flex-wrap items-center gap-x-6 gap-y-4 border-t border-edge-soft py-6">
         <img src={stremioLogo} alt="" className="h-8 w-8 shrink-0 object-contain" />
         <div className="min-w-[220px] flex-1">
-          <p className="text-[15.5px] font-medium leading-[23px] text-ink">{t("Bringing your Stremio library?")}</p>
+          <p className="text-[15.5px] font-medium leading-[23px] text-ink">
+            {t("Bringing your Stremio library?")}
+          </p>
           <p className="mt-1 text-[15px] leading-[22px] text-ink-muted">
             {t("Connect Stremio to bring in your library and addons.")}
           </p>

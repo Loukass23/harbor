@@ -15,7 +15,7 @@ export function musicVideoIdentity(title: string, artist: string): string {
   const strip = (value: string) =>
     value
       .toLowerCase()
-      .replace(/[\(\[][^\)\]]*[\)\]]/g, " ")
+      .replace(/[(\[][^)\]]*[)\]]/g, " ")
       .replace(/(feat|ft|featuring|with)[^-]*/g, " ")
       .replace(NOISE, " ")
       .replace(/[^\p{L}\p{N}]+/gu, " ")
@@ -36,9 +36,7 @@ function relevanceKey(value: string): string {
 function aboutSubject(track: MusicTrack, subject: string): boolean {
   const want = relevanceKey(subject);
   if (want.length < 3) return true;
-  return (
-    relevanceKey(track.artist).includes(want) || relevanceKey(track.title).includes(want)
-  );
+  return relevanceKey(track.artist).includes(want) || relevanceKey(track.title).includes(want);
 }
 
 /** Only accepts exact YouTube identities returned by the native video-only endpoint. */

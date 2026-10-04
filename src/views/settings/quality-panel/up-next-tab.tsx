@@ -24,7 +24,9 @@ export function UpNextTab() {
   return (
     <Section
       title={t("Next episode prompt")}
-      subtitle={t("When the Up Next pill appears before an episode ends. Auto scales to the episode length, so short episodes stop prompting so early. Off hides it.")}
+      subtitle={t(
+        "When the Up Next pill appears before an episode ends. Auto scales to the episode length, so short episodes stop prompting so early. Off hides it.",
+      )}
     >
       <Segmented
         value={nextEpLeadKey(settings.nextEpisodeLeadSec)}
@@ -36,14 +38,18 @@ export function UpNextTab() {
       <UpNextPreview leadSec={settings.nextEpisodeLeadSec} />
       <ToggleRow
         label={t("Auto-play next episode")}
-        sub={t("When an episode ends, automatically start the next one. Off lets the episode finish and stop.")}
+        sub={t(
+          "When an episode ends, automatically start the next one. Off lets the episode finish and stop.",
+        )}
         value={settings.autoPlayNextEpisode}
         onChange={(v) => update({ autoPlayNextEpisode: v })}
       />
       {settings.autoPlayNextEpisode && (
         <ToggleRow
           label={t("Ask if you're still watching")}
-          sub={t("After several episodes auto-play in a row with no input, pause and check you're still there before continuing. Off by default.")}
+          sub={t(
+            "After several episodes auto-play in a row with no input, pause and check you're still there before continuing. Off by default.",
+          )}
           value={settings.stillWatching}
           onChange={(v) => update({ stillWatching: v })}
         />
@@ -68,7 +74,9 @@ export function UpNextTab() {
       )}
       <ToggleRow
         label={t("Queue drives Next/Previous")}
-        sub={t("After the current show's episodes, Next flows into your queue. Off keeps Next/Previous within the current show only.")}
+        sub={t(
+          "After the current show's episodes, Next flows into your queue. Off keeps Next/Previous within the current show only.",
+        )}
         value={settings.queueDrivesNav}
         onChange={(v) => update({ queueDrivesNav: v })}
       />

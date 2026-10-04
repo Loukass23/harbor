@@ -2,18 +2,17 @@ import { useEffect, type RefObject } from "react";
 import type { PlayerBridge } from "@/lib/player/bridge";
 import { anime4kChain, type Anime4kMode, type Anime4kTier } from "@/lib/player/anime4k-modes";
 import { metaIsAnime } from "@/lib/player/anime-src";
-import {
-  generalShaderChain,
-  shaderCompanionProps,
-} from "@/lib/player/shader-chain";
+import { generalShaderChain, shaderCompanionProps } from "@/lib/player/shader-chain";
 import { useSettings, type Settings } from "@/lib/settings";
 import type { PlayerSrc } from "@/lib/view";
 
 export type Anime4kChoice = "auto" | "off" | Anime4kMode;
 
 function autoActive(settings: Settings, src: PlayerSrc): boolean {
-  return settings.playerAnime4k &&
-    (!settings.playerAnime4kAnimeOnly || !!src.isAnime || metaIsAnime(src.meta));
+  return (
+    settings.playerAnime4k &&
+    (!settings.playerAnime4kAnimeOnly || !!src.isAnime || metaIsAnime(src.meta))
+  );
 }
 
 type Anime4kDims = { srcWidth: number; displayWidth: number };

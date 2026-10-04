@@ -48,7 +48,8 @@ const musicTaste: Record<string, string> = {
   "music.explore.moreSets": "이 무대 더 보기",
   "music.explore.noRecommendations": "다른 아티스트를 선택해 더 많은 음악을 찾아보세요.",
   "music.taste.choose": "음악 취향 선택",
-  "music.taste.body": "추천에 사용할 장르를 고르세요. 선곡은 순환하며 언제든 취향을 바꿀 수 있어요.",
+  "music.taste.body":
+    "추천에 사용할 장르를 고르세요. 선곡은 순환하며 언제든 취향을 바꿀 수 있어요.",
   "music.taste.search": "장르 검색",
   "music.taste.selected": "{count}개 선택됨",
   "music.taste.clear": "선택 지우기",

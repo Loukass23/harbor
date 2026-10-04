@@ -1,4 +1,12 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 
 type Flags = { onboarded: boolean; nudges: Record<string, boolean> };
 
@@ -22,7 +30,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
     if (!raw) return DEFAULT;
     try {
       const parsed = JSON.parse(raw) as Partial<Flags>;
-      return { ...DEFAULT, ...parsed, nudges: { ...DEFAULT.nudges, ...(parsed.nudges ?? {}) } };
+      return { ...DEFAULT, ...parsed, nudges: { ...DEFAULT.nudges, ...parsed.nudges } };
     } catch {
       return DEFAULT;
     }

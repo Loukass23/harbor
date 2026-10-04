@@ -116,7 +116,8 @@ const catalog12: Record<string, string> = {
     "Pokazuj elementy sterujące odtwarzacza po wstrzymaniu lub wznowieniu za pomocą klawiatury. Wyłącz tę opcję, aby pozostały ukryte i nie zasłaniały napisów.",
   "Show the player controls when you pause or resume using the keyboard. Turn off to keep them hidden so they don't cover subtitles.":
     "Pokazuj elementy sterujące odtwarzaczem, gdy wstrzymujesz lub wznawiasz odtwarzanie za pomocą klawiatury. Wyłącz tę opcję, aby pozostały ukryte i nie zasłaniały napisów.",
-  "Show the report button on every P2P stream, not just likely new releases.": "Pokazuj przycisk zgłaszania przy każdym strumieniu P2P, a nie tylko przy prawdopodobnych nowościach.",
+  "Show the report button on every P2P stream, not just likely new releases.":
+    "Pokazuj przycisk zgłaszania przy każdym strumieniu P2P, a nie tylko przy prawdopodobnych nowościach.",
   "Show them anyway": "Pokaż je mimo to",
   "Show this catalog": "Pokaż ten katalog",
   "Show this control": "Pokaż ten element sterujący",

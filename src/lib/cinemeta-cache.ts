@@ -52,7 +52,9 @@ function loadDisk(): void {
 function flushDisk(): void {
   if (!dirty || diskDisabled) return;
   dirty = false;
-  const ordered = [...mem.entries()].filter(([k, e]) => isFresh(k, e)).sort((a, b) => b[1].t - a[1].t);
+  const ordered = [...mem.entries()]
+    .filter(([k, e]) => isFresh(k, e))
+    .sort((a, b) => b[1].t - a[1].t);
   const out: Record<string, Entry> = {};
   let chars = 0;
   let kept = 0;

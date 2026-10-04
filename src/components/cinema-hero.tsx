@@ -226,8 +226,13 @@ function CinemaSlide({
   const [trailerCandidates, setTrailerCandidates] = useState<string[]>([]);
   const [trailerInfo, setTrailerInfo] = useState<TrailerInfo | null>(null);
   const pageVisible = usePageVisible();
-  const wantsPlayback = active && !!trailerInfo && pageVisible && inViewport && settings.heroTrailers;
-  const { slot, video: videoRef, ready: videoReady } = useTrailerVideo({
+  const wantsPlayback =
+    active && !!trailerInfo && pageVisible && inViewport && settings.heroTrailers;
+  const {
+    slot,
+    video: videoRef,
+    ready: videoReady,
+  } = useTrailerVideo({
     src: trailerInfo ? trailerSrc(trailerInfo) : null,
     active: !!wantsPlayback,
     className: CINEMA_VIDEO_CLASS,
@@ -309,10 +314,7 @@ function CinemaSlide({
   }, [wantsPlayback, videoReady, videoRef]);
 
   return (
-    <div
-      aria-hidden={!active}
-      className="relative h-full w-full"
-    >
+    <div aria-hidden={!active} className="relative h-full w-full">
       {bg && (
         <img
           src={bg}
@@ -374,7 +376,9 @@ function CinemaSlide({
           )}
           <div className="mt-2 flex items-center gap-3">
             <button
-              onClick={() => openPicker(meta, smartPlayEpisode(meta), { autoPlay: settings.instantPlay })}
+              onClick={() =>
+                openPicker(meta, smartPlayEpisode(meta), { autoPlay: settings.instantPlay })
+              }
               className="flex h-12 items-center gap-2.5 rounded-md bg-ink px-7 text-[14.5px] font-semibold text-canvas transition-transform duration-200 hover:scale-[1.03] active:scale-[0.97]"
             >
               <Play size={17} fill="currentColor" />

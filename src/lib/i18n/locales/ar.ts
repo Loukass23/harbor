@@ -52,7 +52,7 @@ import brands from "./ar/brands";
 import nytTv from "./ar/nyt-tv";
 
 const ar: Record<string, string> = {
-  "Translations": "الترجمات",
+  Translations: "الترجمات",
   "Translating…": "جارٍ الترجمة…",
   "Showing {lang}": "عرض {lang}",
   "Show all": "عرض الكل",

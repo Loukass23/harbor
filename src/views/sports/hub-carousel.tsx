@@ -215,21 +215,13 @@ export function HubCarousel({
   return (
     <div
       ref={root}
-
       className="sh-carousel"
-
       role="region"
-
       aria-roledescription={t("Carousel")}
-
       aria-label={t("Featured matches")}
-
       onMouseEnter={() => setHovered(true)}
-
       onMouseLeave={() => setHovered(false)}
-
       onFocusCapture={() => setFocused(true)}
-
       onBlurCapture={(e) => {
         if (!e.currentTarget.contains(e.relatedTarget)) setFocused(false);
       }}
@@ -237,37 +229,20 @@ export function HubCarousel({
       <div className="sh-carousel-stage">
         <HubHero
           key={currentKey}
-
           game={game}
-
           onOpen={onOpen}
-
           onCustomize={onCustomize}
-
           loading={loading}
-
           stale={stale}
         />
 
         {leaving && (
-          <div
-            key={gameKey(leaving)}
-
-            className="sh-carousel-leaving"
-
-            inert
-
-            aria-hidden="true"
-          >
+          <div key={gameKey(leaving)} className="sh-carousel-leaving" inert aria-hidden="true">
             <HubHero
               game={leaving}
-
               onOpen={onOpen}
-
               onCustomize={onCustomize}
-
               loading={false}
-
               stale={stale}
             />
           </div>
@@ -292,9 +267,7 @@ export function HubCarousel({
                       <span key={j}>
                         <EventLogo
                           side={side}
-
                           fallback={hubLeague(item.league)?.logo}
-
                           sport={hubLeague(item.league)?.group}
                         />
                       </span>
@@ -306,9 +279,7 @@ export function HubCarousel({
 
                         logo: racingVenue(item)?.logo || hubLeague(item.league)?.logo || "",
                       }}
-
                       fallback={hubLeague(item.league)?.logo}
-
                       sport={hubLeague(item.league)?.group}
                     />
                   )}
@@ -346,11 +317,8 @@ export function HubCarousel({
 
             <button
               className="sh-icon"
-
               aria-label={t("Previous featured event")}
-
               disabled={games.length < 2}
-
               onClick={() => go(-1)}
             >
               <ChevronLeft size={18} />
@@ -358,11 +326,8 @@ export function HubCarousel({
 
             <button
               className="sh-icon"
-
               aria-label={t("Next featured event")}
-
               disabled={games.length < 2}
-
               onClick={() => go(1)}
             >
               <ChevronRight size={18} />
@@ -370,11 +335,8 @@ export function HubCarousel({
 
             <button
               className="sh-icon"
-
               aria-label={t(paused ? "Play carousel" : "Pause carousel")}
-
               aria-pressed={paused}
-
               onClick={() => setPaused((value) => !value)}
             >
               {paused ? <Play size={15} /> : <Pause size={15} />}

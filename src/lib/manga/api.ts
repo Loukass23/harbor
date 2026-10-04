@@ -6,7 +6,12 @@ import {
   aggregateSubProviders,
   ensureMangaSources,
 } from "./sources";
-import { routeById, streamAll, streamAggregateChapters, withProviderTag } from "./sources/aggregate";
+import {
+  routeById,
+  streamAll,
+  streamAggregateChapters,
+  withProviderTag,
+} from "./sources/aggregate";
 import { suwayomiSourcesRevision } from "./sources/suwayomi/source-events";
 import { mangaLibraryRevision } from "./library-events";
 import { loadMangaLangFilter, mangaLangFilterRevision } from "./lang-filter";
@@ -199,8 +204,11 @@ export function popularManga(offset = 0, tagId?: string) {
 }
 
 export function searchManga(query: string, offset = 0, tagId?: string) {
-  return cached("search", `${mangaLibraryRevision()}|${query}|${offset}|${tagId ?? ""}`, 5 * MIN, (p) =>
-    withProviderTag(p, tagId, (tag) => p.search(query, offset, tag)),
+  return cached(
+    "search",
+    `${mangaLibraryRevision()}|${query}|${offset}|${tagId ?? ""}`,
+    5 * MIN,
+    (p) => withProviderTag(p, tagId, (tag) => p.search(query, offset, tag)),
   );
 }
 

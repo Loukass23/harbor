@@ -88,8 +88,8 @@ function parseInline(src: string): InlineNode[] {
     if (src[i] === "_") {
       const prev = i === 0 ? " " : src[i - 1];
       const end = src.indexOf("_", i + 1);
-      const next = end >= 0 ? src[end + 1] ?? " " : " ";
-      if (end > i + 1 && /[\s.,!?;:"')\]]/.test(prev) && /[\s.,!?;:"'(\[]/.test(next)) {
+      const next = end >= 0 ? (src[end + 1] ?? " ") : " ";
+      if (end > i + 1 && /[\s.,!?;:"')\]]/.test(prev) && /[\s.,!?;:"'([]/.test(next)) {
         flush();
         out.push({ kind: "italic", children: parseInline(src.slice(i + 1, end)) });
         i = end + 1;
@@ -176,7 +176,9 @@ function renderNodes(
     const key = `${keyBase}-${idx}`;
     if (node.kind === "br") return <br key={key} />;
     if (node.kind === "text") {
-      return <Fragment key={key}>{renderText(node.value, rx, nameToId, onPersonClick, key)}</Fragment>;
+      return (
+        <Fragment key={key}>{renderText(node.value, rx, nameToId, onPersonClick, key)}</Fragment>
+      );
     }
     if (node.kind === "italic") {
       return (

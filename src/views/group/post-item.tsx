@@ -99,9 +99,15 @@ export function PostItem({
 
   return (
     <article
-      style={{ animationDelay: `${Math.min(index * 40, 320)}ms`, animationDuration: "420ms", animationFillMode: "both" }}
+      style={{
+        animationDelay: `${Math.min(index * 40, 320)}ms`,
+        animationDuration: "420ms",
+        animationFillMode: "both",
+      }}
       className={`group/post relative flex gap-3 rounded-lg p-3.5 ring-1 transition-colors duration-200 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-1 ${
-        post.pinned ? "bg-elevated/60 ring-accent/25" : "bg-surface ring-edge-soft hover:bg-elevated/40"
+        post.pinned
+          ? "bg-elevated/60 ring-accent/25"
+          : "bg-surface ring-edge-soft hover:bg-elevated/40"
       }`}
     >
       <AuthorAvatar post={post} onOpenProfile={onOpenProfile} />
@@ -114,7 +120,9 @@ export function PostItem({
             </span>
           )}
           <AuthorName post={post} onOpenProfile={onOpenProfile} />
-          <span aria-hidden className="text-[12px] text-ink-subtle">·</span>
+          <span aria-hidden className="text-[12px] text-ink-subtle">
+            ·
+          </span>
           <span className="text-[12px] text-ink-subtle">{timeAgo(post.createdAt)}</span>
           {post.editedAt && <span className="text-[12px] text-ink-subtle">({t("edited")})</span>}
         </div>
@@ -198,7 +206,9 @@ export function PostItem({
                 onBlur={() => setConfirming(false)}
                 disabled={busy}
                 className={`flex h-8 items-center gap-1.5 rounded-full px-2.5 text-[12px] font-semibold transition-colors disabled:opacity-50 ${
-                  confirming ? "bg-danger/15 text-danger" : "text-ink-subtle hover:bg-elevated hover:text-danger"
+                  confirming
+                    ? "bg-danger/15 text-danger"
+                    : "text-ink-subtle hover:bg-elevated hover:text-danger"
                 }`}
               >
                 <Trash2 size={14} /> {confirming ? t("Confirm") : t("Delete")}
@@ -240,7 +250,8 @@ function AuthorName({
   onOpenProfile?: (handle: string) => void;
 }) {
   const t = useT();
-  if (!post.author) return <span className="text-[13.5px] font-semibold text-ink">{t("Someone")}</span>;
+  if (!post.author)
+    return <span className="text-[13.5px] font-semibold text-ink">{t("Someone")}</span>;
   return (
     <UserHoverCard handle={post.author.handle}>
       <button

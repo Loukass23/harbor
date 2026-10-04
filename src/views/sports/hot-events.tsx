@@ -82,7 +82,6 @@ function HotArtwork({
   return (
     <div
       ref={root}
-
       className={`hot-art ${fight ? "is-fight" : ""} ${venueTeam ? "is-venue-team" : ""}`}
     >
       <SportsHeroScenery league={game?.league} sport={league?.group} priority={lead} />
@@ -91,21 +90,13 @@ function HotArtwork({
         <>
           <img
             className="hot-art-photo"
-
             src={image}
-
             alt=""
-
             loading={lead ? "eager" : "lazy"}
-
             decoding="async"
-
             draggable={false}
-
             data-ready={loaded === image}
-
             onLoad={() => setLoaded(image)}
-
             onError={() => setFailed((prior) => [...prior, image])}
           />
 
@@ -117,9 +108,7 @@ function HotArtwork({
           {solo ? (
             <EventLogo
               side={{ ...game.home, logo: league?.logo || game.home.logo }}
-
               large
-
               sport={league?.group}
             />
           ) : (
@@ -127,11 +116,8 @@ function HotArtwork({
               <TeamProfileLink team={teamIdentity(game, "away")} className="hot-art-team-link">
                 <EventLogo
                   side={{ ...game.away, logo: art.away || game.away.logo }}
-
                   large
-
                   fallback={league?.logo}
-
                   sport={league?.group}
                 />
               </TeamProfileLink>
@@ -141,11 +127,8 @@ function HotArtwork({
               <TeamProfileLink team={teamIdentity(game, "home")} className="hot-art-team-link">
                 <EventLogo
                   side={{ ...game.home, logo: art.home || game.home.logo }}
-
                   large
-
                   fallback={league?.logo}
-
                   sport={league?.group}
                 />
               </TeamProfileLink>
@@ -257,7 +240,6 @@ function HotPoster({
 
             eventStartMs: game.startMs,
           }}
-
           title={hotEventTitle(game)}
         />
       </div>
@@ -281,23 +263,11 @@ function WeekLogos({ game }: { game: SportsGame }) {
       ) : (
         <>
           <TeamProfileLink team={teamIdentity(game, "away")} className="hot-week-team-link">
-            <EventLogo
-              side={game.away}
-
-              fallback={league?.logo}
-
-              sport={league?.group}
-            />
+            <EventLogo side={game.away} fallback={league?.logo} sport={league?.group} />
           </TeamProfileLink>
 
           <TeamProfileLink team={teamIdentity(game, "home")} className="hot-week-team-link">
-            <EventLogo
-              side={game.home}
-
-              fallback={league?.logo}
-
-              sport={league?.group}
-            />
+            <EventLogo side={game.home} fallback={league?.logo} sport={league?.group} />
           </TeamProfileLink>
         </>
       )}
@@ -395,9 +365,7 @@ export function HotEventsContent({
           ].map(([key, label]) => (
             <button
               key={key}
-
               aria-pressed={windowFilter === key}
-
               onClick={() => setWindowFilter(key)}
             >
               {t(label)}
@@ -423,13 +391,7 @@ export function HotEventsContent({
       </div>
 
       {loading && !ranked.length ? (
-        <div
-          className="hot-skeleton"
-
-          role="status"
-
-          aria-label={t("Loading highlights…")}
-        >
+        <div className="hot-skeleton" role="status" aria-label={t("Loading highlights…")}>
           <div />
 
           <div />
@@ -439,15 +401,7 @@ export function HotEventsContent({
       ) : lead ? (
         <>
           <div className="hot-feature">
-            <HotPoster
-              key={gameKey(lead.game)}
-
-              item={lead}
-
-              lead
-
-              onOpen={onOpen}
-            />
+            <HotPoster key={gameKey(lead.game)} item={lead} lead onOpen={onOpen} />
 
             <aside className="hot-week harbor-scroll">
               <div>
@@ -504,13 +458,7 @@ export function HotEventsContent({
 
               <div className="hot-grid">
                 {rest.map((item) => (
-                  <HotPoster
-                    key={gameKey(item.game)}
-
-                    item={item}
-
-                    onOpen={onOpen}
-                  />
+                  <HotPoster key={gameKey(item.game)} item={item} onOpen={onOpen} />
                 ))}
               </div>
             </>
@@ -530,7 +478,6 @@ export function HotEventsContent({
 
           <button
             className="sh-button"
-
             onClick={() => {
               setWindowFilter("all");
 
@@ -651,17 +598,11 @@ export function HotEvents({
   return (
     <HotEventsContent
       games={games}
-
       loading={feed.pending > 0}
-
       stale={feed.stale || feed.failed > 0}
-
       now={now}
-
       favourites={favourites}
-
       onOpen={onOpen}
-
       onExplore={onExplore}
     />
   );

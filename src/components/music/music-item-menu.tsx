@@ -90,8 +90,10 @@ export function useMusicItemMenu(handlers: Handlers) {
 
   return {
     open,
-    openFor: (item: MusicCatalogItem, index = 0) => (event: MouseEvent<HTMLElement>) =>
-      open(item, index, event),
+    openFor:
+      (item: MusicCatalogItem, index = 0) =>
+      (event: MouseEvent<HTMLElement>) =>
+        open(item, index, event),
     isOpen: target !== null,
     menu: (
       <MusicTrackMenu

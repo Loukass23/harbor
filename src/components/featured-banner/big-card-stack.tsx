@@ -51,7 +51,7 @@ export function BigCardStack({
     let cancelled = false;
     const indices = new Set<number>();
     for (let i = -2; i <= 2; i++) {
-      indices.add(((active + i) % items.length + items.length) % items.length);
+      indices.add((((active + i) % items.length) + items.length) % items.length);
     }
     const pending = items.filter((m, i) => indices.has(i) && !(m.id in logos));
     if (pending.length === 0) return;
@@ -223,10 +223,22 @@ export function BigCardStack({
           data-no-drag
           onPointerDown={(e) => e.stopPropagation()}
           onClick={(e) => e.stopPropagation()}
-          style={{ position: "absolute", insetInlineStart: 6, top: "50%", transform: "translateY(-50%)", zIndex: 10 }}
+          style={{
+            position: "absolute",
+            insetInlineStart: 6,
+            top: "50%",
+            transform: "translateY(-50%)",
+            zIndex: 10,
+          }}
           className="opacity-0 transition-opacity duration-200 group-hover:opacity-100"
         >
-          <NavArrow dir="left" onClick={onPrev} label={t("Previous")} size={34} className="h-12 w-12" />
+          <NavArrow
+            dir="left"
+            onClick={onPrev}
+            label={t("Previous")}
+            size={34}
+            className="h-12 w-12"
+          />
         </div>
       )}
       {onNext && items.length > 1 && (
@@ -234,10 +246,22 @@ export function BigCardStack({
           data-no-drag
           onPointerDown={(e) => e.stopPropagation()}
           onClick={(e) => e.stopPropagation()}
-          style={{ position: "absolute", insetInlineEnd: 6, top: "50%", transform: "translateY(-50%)", zIndex: 10 }}
+          style={{
+            position: "absolute",
+            insetInlineEnd: 6,
+            top: "50%",
+            transform: "translateY(-50%)",
+            zIndex: 10,
+          }}
           className="opacity-0 transition-opacity duration-200 group-hover:opacity-100"
         >
-          <NavArrow dir="right" onClick={onNext} label={t("Next")} size={34} className="h-12 w-12" />
+          <NavArrow
+            dir="right"
+            onClick={onNext}
+            label={t("Next")}
+            size={34}
+            className="h-12 w-12"
+          />
         </div>
       )}
       <ThumbsDock meta={current} />
@@ -276,4 +300,3 @@ function TitlePlate({ title, logo }: { title: string; logo?: string }) {
     </div>
   );
 }
-

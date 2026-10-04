@@ -37,7 +37,8 @@ const musicTaste: Record<string, string> = {
   "music.explore.performance": "İzlemeye değer",
   "music.explore.stage": "Sahneler ve oturumlar",
   "music.explore.liveFrom": "{artist} canlı",
-  "music.explore.performanceHint": "Büyük sahneler, samimi oturumlar ve tekrar izlenecek performanslar.",
+  "music.explore.performanceHint":
+    "Büyük sahneler, samimi oturumlar ve tekrar izlenecek performanslar.",
   "music.explore.watchPerformance": "Performansı izle",
   "music.explore.events": "Festivallerde ön sıra",
   "music.explore.eventHint": "Önce güncel setler. Bir etkinlik ve yıl seç.",

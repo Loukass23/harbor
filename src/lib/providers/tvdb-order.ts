@@ -67,7 +67,8 @@ async function build(
 ): Promise<TvdbOrder | null> {
   const joinedClean = seasonType === "absolute";
   const rawAbsolute = seasonType === "tvdbabsolute";
-  const slug = seasonType === "aired" || joinedClean ? "default" : rawAbsolute ? "absolute" : seasonType;
+  const slug =
+    seasonType === "aired" || joinedClean ? "default" : rawAbsolute ? "absolute" : seasonType;
   const nameTypeSlug =
     seasonType === "aired" || joinedClean || rawAbsolute ? "official" : seasonType;
   const [defaultEps, names] = await Promise.all([
@@ -84,7 +85,9 @@ async function build(
   // as nameEn/overviewEn for consumers that need an English fallback when no localized text exists.
   const requestedLang = lang && lang !== "eng" ? lang : undefined;
   const [transAlt, transEn] = await Promise.all([
-    requestedLang ? tvdbEpisodesByType(apiKey, seriesId, slug, requestedLang).catch(() => []) : Promise.resolve<TvdbEpisode[]>([]),
+    requestedLang
+      ? tvdbEpisodesByType(apiKey, seriesId, slug, requestedLang).catch(() => [])
+      : Promise.resolve<TvdbEpisode[]>([]),
     tvdbEpisodesByType(apiKey, seriesId, slug, "eng").catch(() => []),
   ]);
   const transById = new Map(transAlt.map((e) => [e.id, e] as const));
@@ -140,7 +143,9 @@ async function build(
   }
   if (bySeason.size === 0) return null;
   if (joinedClean) {
-    bySeason.get(1)?.sort((x, y) => x.seasonNumber - y.seasonNumber || x.episodeNumber - y.episodeNumber);
+    bySeason
+      .get(1)
+      ?.sort((x, y) => x.seasonNumber - y.seasonNumber || x.episodeNumber - y.episodeNumber);
   }
 
   const absByEpId = new Map<number, number>();

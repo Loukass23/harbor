@@ -199,5 +199,14 @@ export function useContinueWatching(excludeId?: string, limit = 12): CwCard[] {
       if (out.length >= limit) break;
     }
     return out;
-  }, [items, externalCw, localVersion, excludeId, limit, hideSharedCw, cwSources, activeProfile?.id]);
+  }, [
+    items,
+    externalCw,
+    localVersion,
+    excludeId,
+    limit,
+    hideSharedCw,
+    cwSources,
+    activeProfile?.id,
+  ]);
 }

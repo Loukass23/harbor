@@ -97,7 +97,7 @@ export async function commonsAthletePortrait(
         url.password ||
         url.port ||
         !["upload.wikimedia.org", "thumb.wikimedia.org"].includes(url.hostname) ||
-        !/^\/wikipedia\/commons\//.test(url.pathname) ||
+        !url.pathname.startsWith("/wikipedia/commons/") ||
         !/\.(?:png|jpe?g|webp)$/i.test(url.pathname)
       )
         continue;

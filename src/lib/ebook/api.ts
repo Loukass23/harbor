@@ -383,9 +383,7 @@ function hasFreshMetadata(ebook: EBook): boolean {
 }
 
 function cachedMetadata(ebooks: EBook[]): EBook[] {
-  return combineMetadata(
-    ebooks.flatMap((ebook) => cachedMetadataRecord(ebook)?.metadata ?? []),
-  );
+  return combineMetadata(ebooks.flatMap((ebook) => cachedMetadataRecord(ebook)?.metadata ?? []));
 }
 
 function combineMetadata(...groups: EBook[][]): EBook[] {
@@ -824,7 +822,6 @@ function dropLegacyOpenLibraryCache(): void {
 
 let legacyDropped = false;
 
-
 async function cachedJson<T>(url: string, timeoutMs = 8_000): Promise<T> {
   const cacheUrl = new URL(url);
   const authenticated = cacheUrl.searchParams.has("key");
@@ -1035,8 +1032,7 @@ async function fetchGoogleMetadata(
         );
         detailUrl.searchParams.set("includeNonComicsSeries", "true");
         detailUrl.searchParams.set("key", apiKey);
-        exact =
-          (await cachedJson<GoogleBook>(detailUrl.toString()).catch(() => null)) ?? exact;
+        exact = (await cachedJson<GoogleBook>(detailUrl.toString()).catch(() => null)) ?? exact;
       }
       if (exact || ebook.googleBooksId || ebook.isbn) break;
     }
@@ -1325,9 +1321,7 @@ async function googleBookCollections(
     const seriesUrl = new URL("https://www.googleapis.com/books/v1/series/get");
     seriesUrl.searchParams.append("series_id", seriesId);
     seriesUrl.searchParams.set("key", apiKey);
-    const membershipUrl = new URL(
-      "https://www.googleapis.com/books/v1/series/membership/get",
-    );
+    const membershipUrl = new URL("https://www.googleapis.com/books/v1/series/membership/get");
     membershipUrl.searchParams.set("series_id", seriesId);
     membershipUrl.searchParams.set("page_size", "50");
     membershipUrl.searchParams.set("key", apiKey);
@@ -1404,10 +1398,12 @@ SELECT DISTINCT ?seed ?item ?series ?seriesLabel ?ordinal ?kind WHERE {
 
   const entityIds = [
     ...new Set(
-      bindings.flatMap((binding) => [binding.item.value, binding.series.value]).flatMap((value) => {
-        const id = value.match(/Q\d+$/)?.[0];
-        return id ? [id] : [];
-      }),
+      bindings
+        .flatMap((binding) => [binding.item.value, binding.series.value])
+        .flatMap((value) => {
+          const id = value.match(/Q\d+$/)?.[0];
+          return id ? [id] : [];
+        }),
     ),
   ];
   const entities: Record<string, WikidataEntity> = {};
@@ -1502,9 +1498,7 @@ SELECT DISTINCT ?seed ?award WHERE {
   }>(awardUrl.toString(), 30_000).catch(() => null);
   const awardRows = awardsData?.results?.bindings ?? [];
   const awardIds = [
-    ...new Set(
-      awardRows.flatMap((row) => row.award.value.match(/Q\d+$/)?.[0] ?? []),
-    ),
+    ...new Set(awardRows.flatMap((row) => row.award.value.match(/Q\d+$/)?.[0] ?? [])),
   ];
   if (!awardIds.length) return [];
 
@@ -1535,9 +1529,10 @@ LIMIT 240`;
   if (!memberRows.length) return [];
 
   const entityIds = [
-    ...new Set(
-      [...awardIds, ...memberRows.flatMap((row) => row.item.value.match(/Q\d+$/)?.[0] ?? [])],
-    ),
+    ...new Set([
+      ...awardIds,
+      ...memberRows.flatMap((row) => row.item.value.match(/Q\d+$/)?.[0] ?? []),
+    ]),
   ];
   const entities: Record<string, WikidataEntity> = {};
   for (let start = 0; start < entityIds.length; start += 50) {
@@ -1568,14 +1563,7 @@ LIMIT 240`;
     ownersByAward.set(awardId, owners);
   }
 
-  const literaryKinds = new Set([
-    "Q571",
-    "Q8261",
-    "Q277759",
-    "Q1667921",
-    "Q7725634",
-    "Q47461344",
-  ]);
+  const literaryKinds = new Set(["Q571", "Q8261", "Q277759", "Q1667921", "Q7725634", "Q47461344"]);
   const isLiteraryWork = (entity: WikidataEntity) => {
     const kinds = (entity.claims?.P31 ?? []).flatMap((statement) => {
       const value = statement.mainsnak?.datavalue?.value;
@@ -1667,7 +1655,8 @@ export async function ebookCollections(
     );
     const matches: Array<{ book: EBook; collection: EBookCollection }> = [];
     for (const match of collections) {
-      if (match.collection?.books.length) matches.push({ book: match.book, collection: match.collection });
+      if (match.collection?.books.length)
+        matches.push({ book: match.book, collection: match.collection });
     }
     append(matches);
   }
@@ -1812,7 +1801,7 @@ SELECT DISTINCT ?item ?series ?seriesLabel ?ordinal WHERE {
 
   if (!series) return null;
   const url = new URL("https://openlibrary.org/search.json");
-  url.searchParams.set("q", `series:\"${series.replaceAll('"', "")}\"`);
+  url.searchParams.set("q", `series:"${series.replaceAll('"', "")}"`);
   url.searchParams.set("fields", OPEN_LIBRARY_FIELDS);
   url.searchParams.set("limit", "50");
   const data = await cachedJson<{ docs?: OpenLibraryDoc[] }>(url.toString()).catch(() => null);
@@ -1981,9 +1970,7 @@ export async function fetchEBookMetadata(
   ebooks: EBook[],
   onPartial?: (metadata: EBook[]) => void,
 ): Promise<EBook[]> {
-  const unique = [
-    ...new Map(ebooks.map((ebook) => [metadataRequestKey(ebook), ebook])).values(),
-  ];
+  const unique = [...new Map(ebooks.map((ebook) => [metadataRequestKey(ebook), ebook])).values()];
   const cached = cachedMetadata(unique);
   if (cached.length) onPartial?.(cached);
   const pending = unique.filter((ebook) => !hasFreshMetadata(ebook));
@@ -2006,7 +1993,7 @@ export async function fetchEBookMetadata(
     for (const ebook of owned) metadataInflight.set(metadataRequestKey(ebook), ownedRequest);
     joined.add(ownedRequest);
   }
-  await Promise.allSettled([...joined]);
+  await Promise.allSettled(joined);
   if (ownedRequest) {
     for (const ebook of owned) {
       const key = metadataRequestKey(ebook);
@@ -2139,10 +2126,10 @@ function explicitSourceIdentityMatch(left: EBook, right: EBook): boolean {
   if (!a || !b) return false;
   return Boolean(
     (a.anilistId && a.anilistId === b.anilistId) ||
-      (a.googleBooksId && a.googleBooksId === b.googleBooksId) ||
-      (a.openLibraryId && a.openLibraryId === b.openLibraryId) ||
-      (a.wikidataId && a.wikidataId === b.wikidataId) ||
-      (a.isbn && a.isbn === b.isbn),
+    (a.googleBooksId && a.googleBooksId === b.googleBooksId) ||
+    (a.openLibraryId && a.openLibraryId === b.openLibraryId) ||
+    (a.wikidataId && a.wikidataId === b.wikidataId) ||
+    (a.isbn && a.isbn === b.isbn),
   );
 }
 
@@ -2190,8 +2177,7 @@ export function dedupeEBooks(ebooks: EBook[]): EBook[] {
   return groups.map((items) => {
     const primary =
       items.find(
-        (item) =>
-          /\p{Script=Latin}/u.test(item.title) && !/\p{Script=Arabic}/u.test(item.title),
+        (item) => /\p{Script=Latin}/u.test(item.title) && !/\p{Script=Arabic}/u.test(item.title),
       ) ?? items[0];
     const ordered = [primary, ...items.filter((item) => item.id !== primary.id)];
     return {

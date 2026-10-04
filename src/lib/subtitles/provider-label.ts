@@ -99,11 +99,7 @@ export function subtitleTitleOf(
   >,
 ): string {
   return (
-    releaseOf(r) ??
-    filenameFromUrl(r.url) ??
-    r.label?.trim() ??
-    r.displayTitle ??
-    providerLabel(r)
+    releaseOf(r) ?? filenameFromUrl(r.url) ?? r.label?.trim() ?? r.displayTitle ?? providerLabel(r)
   );
 }
 

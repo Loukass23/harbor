@@ -1,9 +1,6 @@
 import { COLLECTIONS_CATALOG, type CatalogCollection } from "@/lib/collections-catalog";
 import type { Collection, CollectionItem } from "@/lib/collections";
-import {
-  fetchCommunityCollections,
-  type CommunityCollection,
-} from "@/lib/social/collections-sync";
+import { fetchCommunityCollections, type CommunityCollection } from "@/lib/social/collections-sync";
 import { searchTvdbCollectionsOrNull } from "@/lib/providers/tvdb-collections";
 import { tmdbCollectionsFeed } from "@/lib/providers/tmdb";
 import type { CategoryHit } from "@/views/collections/use-category-feed";
@@ -137,7 +134,12 @@ function communityEntry(c: CommunityCollection): BpCollectionEntry {
   return ownedEntry(c, "community", c.displayName || c.handle);
 }
 
-export function tmdbEntry(id: number, name: string, image: string | null, count: number | null): BpCollectionEntry {
+export function tmdbEntry(
+  id: number,
+  name: string,
+  image: string | null,
+  count: number | null,
+): BpCollectionEntry {
   return {
     key: `tmdb:${id}`,
     source: "tmdb",

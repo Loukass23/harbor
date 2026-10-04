@@ -7,7 +7,13 @@ import type { PlayEpisode } from "@/lib/view";
 import { resolveAddonRanks } from "./addon-priority";
 import { animeAbsoluteFromScopedId } from "./anime-identity-core";
 import type { PipelineInput } from "./pipeline";
-import { PLUGIN_ADDON_PREFIX, isPluginAddon, pluginAddonById, pluginIdFromCatalogueBase, pluginsForAddon } from "./plugins/addon";
+import {
+  PLUGIN_ADDON_PREFIX,
+  isPluginAddon,
+  pluginAddonById,
+  pluginIdFromCatalogueBase,
+  pluginsForAddon,
+} from "./plugins/addon";
 import { unverifiedAnimeSeasonId } from "./stream-ids";
 import type { Stream } from "./types";
 
@@ -85,9 +91,7 @@ export function buildEpisodePipelineInput(params: {
   // The master switch wins: with every plugin paused there is nothing to resolve an item with,
   // however it names its source.
   if (params.resolvePinnedPlugin !== false && settings.pluginsEnabled) {
-    pinnedId = originBases
-      .map((base) => pluginIdFromCatalogueBase(base))
-      .find((id) => id != null);
+    pinnedId = originBases.map((base) => pluginIdFromCatalogueBase(base)).find((id) => id != null);
     // A plugin row names its plugin by id rather than by base, and a saved row may have kept
     // only that; either way the name is enough when it belongs to an installed plugin.
     if (!pinnedId && meta.addonOrigin?.id && pluginAddonById(meta.addonOrigin.id)) {
@@ -102,7 +106,8 @@ export function buildEpisodePipelineInput(params: {
     const covered = effectiveAddons.some(
       (a) =>
         a.transportUrl === url ||
-        (isPluginAddon(a) && pluginsForAddon(a).some((p) => `${PLUGIN_ADDON_PREFIX}${p.id}` === url)),
+        (isPluginAddon(a) &&
+          pluginsForAddon(a).some((p) => `${PLUGIN_ADDON_PREFIX}${p.id}` === url)),
     );
     if (!covered) {
       const only = pluginAddonById(pinnedId);

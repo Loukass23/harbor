@@ -80,7 +80,11 @@ export function MinimalShell({
             className="flex h-10 w-10 items-center justify-center rounded-full bg-black/55 text-white backdrop-blur-md transition-colors hover:bg-black/85"
             aria-label={fullscreen ? t("Exit fullscreen") : t("Fullscreen")}
           >
-            {fullscreen ? <Minimize size={16} strokeWidth={2.2} /> : <Maximize size={16} strokeWidth={2.2} />}
+            {fullscreen ? (
+              <Minimize size={16} strokeWidth={2.2} />
+            ) : (
+              <Maximize size={16} strokeWidth={2.2} />
+            )}
           </button>
         </div>
         <MinimalTrack durationSec={snap.durationSec} visible={visible} onSeek={onSeek} />
