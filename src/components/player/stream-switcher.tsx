@@ -1,5 +1,6 @@
 import { MousePointerClick, RefreshCw, X } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useTvFocusScope } from "@/lib/keyboard-navigation";
 import { addonLogoMap } from "@/components/addon-logo";
 import { HostSourceBanner } from "@/components/host-source-banner";
 import { HoverTooltip } from "@/components/hover-tooltip";
@@ -107,6 +108,89 @@ export function StreamSwitcher({
     active: open,
   });
 
+  const scopeRef = useRef<HTMLDivElement>(null);
+  // Move TV focus into the panel on open so D-pad starts on its controls,
+  // never on the Big Picture view underneath.
+  useTvFocusScope(open, scopeRef);
+
+  // Tizen Back (Return keyCode 10009 / keyName 'back') must unmount only this
+  // overlay and return focus to the player — never bubble up to app exit.
+  useEffect(() => {
+    if (!open) return;
+    const BACK_KEYCODES = new Set([27, 4, 461, 10009, 166]);
+    const BACK_KEYS = new Set(["Escape", "Esc", "BrowserBack", "GoBack", "Back"]);
+    const isBack = (e: KeyboardEvent) => BACK_KEYS.has(e.key) || BACK_KEYCODES.has(e.keyCode);
+    const onKey = (e: KeyboardEvent) => {
+      if (!isBack(e)) return;
+      e.preventDefault();
+      e.stopPropagation();
+      if (typeof e.stopImmediatePropagation === "function") e.stopImmediatePropagation();
+      onClose();
+    };
+    const onHwKey = (e: Event) => {
+      if ((e as unknown as { keyName?: string }).keyName !== "back") return;
+      e.preventDefault();
+      e.stopPropagation();
+      const stopImmediate = (e as unknown as { stopImmediatePropagation?: () => void })
+        .stopImmediatePropagation;
+      if (typeof stopImmediate === "function") {
+        try {
+          stopImmediate.call(e);
+        } catch {}
+      }
+      onClose();
+    };
+    window.addEventListener("keydown", onKey, true);
+    window.addEventListener("tizenhwkey", onHwKey, true);
+    return () => {
+      window.removeEventListener("keydown", onKey, true);
+      window.removeEventListener("tizenhwkey", onHwKey, true);
+    };
+  }, [open, onClose]);
+
+  // Focus trap: while open, Arrow/Tab navigation must stay inside this panel
+  // and never leak to hidden Big Picture elements underneath.
+  useEffect(() => {
+    if (!open) return;
+    const scope = scopeRef.current;
+    if (!scope) return;
+    const focusables = () =>
+      Array.from(
+        scope.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), [tabindex="0"], input:not([disabled]), [data-focusable="true"]',
+        ),
+      ).filter((el) => el.getClientRects().length > 0);
+    const onTrap = (e: KeyboardEvent) => {
+      if (e.key !== "Tab" && !e.key.startsWith("Arrow")) return;
+      if (!scope.contains(document.activeElement)) {
+        const first = focusables()[0];
+        if (first) {
+          e.preventDefault();
+          e.stopPropagation();
+          first.focus();
+        }
+        return;
+      }
+      if (e.key === "Tab") {
+        const items = focusables();
+        if (items.length === 0) return;
+        const first = items[0]!;
+        const last = items[items.length - 1]!;
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          e.stopPropagation();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          e.stopPropagation();
+          first.focus();
+        }
+      }
+    };
+    window.addEventListener("keydown", onTrap, true);
+    return () => window.removeEventListener("keydown", onTrap, true);
+  }, [open]);
+
   useEffect(() => {
     if (!open) return;
     let cancelled = false;
@@ -120,19 +204,6 @@ export function StreamSwitcher({
       cancelled = true;
     };
   }, [open, authKey]);
-
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        e.preventDefault();
-        e.stopPropagation();
-        onClose();
-      }
-    };
-    window.addEventListener("keydown", onKey, true);
-    return () => window.removeEventListener("keydown", onKey, true);
-  }, [open, onClose]);
 
   const keptStreams = useMemo<ScoredStream[]>(() => {
     const all = cache?.result.picker.all ?? [];
@@ -276,30 +347,30 @@ export function StreamSwitcher({
   const hiddenCount = addonFilteredList.length - matchedStreams.length;
   const uncachedHidden = allStreams.length - cachedStreams.length;
   const filters: SwitcherFilters = {
-    mode: settings.streamMode,
-    setMode: (m) => update({ streamMode: m }),
-    quality: qualityFilter,
-    setQuality: setQualityFilter,
-    qualityOptions,
-    source: sourceFilter,
-    setSource: setSourceFilter,
-    sourceOptions,
-    addon: addonFilter,
-    setAddon: setAddonFilter,
-    addonOptions,
-    addonLogos,
-    total: allStreams.length,
-    hasDebrid: debridSlugs.length > 0,
-    cachedOnly,
-    setCachedOnly,
-    uncachedHidden,
-    preferredLangs,
-    filterToPreferred,
-    setFilterToPreferred,
-    langHidden: hiddenCount,
-    rejectedCount: rejectedStreams.length,
-    showFlagged: showFiltered,
     setShowFlagged: setShowFiltered,
+    showFlagged: showFiltered,
+    rejectedCount: rejectedStreams.length,
+    langHidden: hiddenCount,
+    setFilterToPreferred,
+    filterToPreferred,
+    preferredLangs,
+    uncachedHidden,
+    setCachedOnly,
+    cachedOnly,
+    hasDebrid: debridSlugs.length > 0,
+    total: allStreams.length,
+    addonLogos,
+    addonOptions,
+    setAddon: setAddonFilter,
+    addon: addonFilter,
+    sourceOptions,
+    setSource: setSourceFilter,
+    source: sourceFilter,
+    qualityOptions,
+    setQuality: setQualityFilter,
+    quality: qualityFilter,
+    setMode: (m) => update({ streamMode: m }),
+    mode: settings.streamMode,
   };
   void cache?.meta.name;
   void cache?.episode;
@@ -322,12 +393,21 @@ export function StreamSwitcher({
 
   return (
     <div
+      data-avplay-overlay="open"
+      data-stream-switcher="open"
       className="pointer-events-auto absolute inset-0 z-[60] flex items-center justify-center bg-black/72 backdrop-blur-md animate-in fade-in duration-200"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="flex h-full max-h-[82vh] w-full max-w-[880px] flex-col overflow-hidden rounded-xl bg-elevated shadow-[0_28px_72px_-20px_rgba(0,0,0,0.85)] ring-1 ring-edge animate-in fade-in slide-in-from-bottom-2 duration-150 backdrop-blur-xl">
+      <div
+        ref={scopeRef}
+        data-tv-focus-scope
+        role="dialog"
+        aria-modal="true"
+        aria-label={t("Switch stream")}
+        className="flex h-full max-h-[82vh] w-full max-w-[880px] flex-col overflow-hidden rounded-xl bg-elevated shadow-[0_28px_72px_-20px_rgba(0,0,0,0.85)] ring-1 ring-edge animate-in fade-in slide-in-from-bottom-2 duration-150 backdrop-blur-xl"
+      >
         <header className="flex items-center justify-between gap-4 border-b border-edge-soft px-6 py-4">
           <div className="flex items-center gap-2.5">
             <HoverTooltip
@@ -337,6 +417,8 @@ export function StreamSwitcher({
               disabled={refreshing}
             >
               <button
+                type="button"
+                tabIndex={0}
                 onClick={() => refresh()}
                 disabled={refreshing}
                 className="flex h-9 w-9 items-center justify-center rounded-md bg-raised text-ink-muted transition-colors hover:bg-elevated hover:text-ink disabled:cursor-default disabled:opacity-70"
@@ -360,6 +442,9 @@ export function StreamSwitcher({
           <div className="flex items-center gap-2">
             <FiltersMenu filters={filters} />
             <button
+              type="button"
+              tabIndex={0}
+              data-tv-initial-focus
               onClick={onClose}
               className="flex h-9 w-9 items-center justify-center rounded-md bg-raised text-ink-muted transition-colors hover:bg-elevated hover:text-ink"
               aria-label={t("Close")}
@@ -377,6 +462,8 @@ export function StreamSwitcher({
               {refreshing ? t("Looking for sources…") : t("No sources loaded for this title yet.")}
             </p>
             <button
+              type="button"
+              tabIndex={0}
               onClick={() => refresh()}
               disabled={refreshing}
               className="flex h-10 items-center gap-2 rounded-md bg-raised px-4 text-[13px] font-semibold text-ink transition-colors hover:bg-elevated disabled:opacity-70"
@@ -401,6 +488,8 @@ export function StreamSwitcher({
             {list.length > showCount && (
               <li className="px-4 pb-3 pt-1.5">
                 <button
+                  type="button"
+                  tabIndex={0}
                   onClick={() => setShowCount((n) => n + 80)}
                   className="flex w-full items-center justify-center gap-2 rounded-md bg-raised px-4 py-2.5 text-[12.5px] font-semibold text-ink-muted transition-colors hover:bg-elevated hover:text-ink"
                 >

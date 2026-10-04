@@ -80,6 +80,7 @@ export function updatePosterDock({
 }): void {
   const rect = track.getBoundingClientRect();
   const stride = cellWidth + gap;
+
   if (rect.width <= 0 || stride <= 0) return;
 
   const viewportX = rtl ? rect.right - pointerX : pointerX - rect.left;

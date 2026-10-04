@@ -214,6 +214,7 @@ export function renderControl(id: PlayerControlId, ctx: ControlContext): ReactNo
           >
             <button
               type="button"
+              tabIndex={0}
               onClick={ctx.onBack}
               aria-label={t("Back")}
               className="pointer-events-auto flex h-full w-full items-center justify-center rounded-full bg-transparent text-white transition-colors hover:bg-white/[0.06]"
@@ -261,6 +262,7 @@ export function renderControl(id: PlayerControlId, ctx: ControlContext): ReactNo
         return (
           <button
             type="button"
+            tabIndex={0}
             onClick={ctx.onTitleClick}
             className="pointer-events-auto group inline-flex items-center gap-2 rounded-lg px-2 py-0.5 text-start transition-colors hover:bg-white/10"
             aria-label={t("Title info")}
@@ -389,6 +391,7 @@ export function renderControl(id: PlayerControlId, ctx: ControlContext): ReactNo
           >
             <button
               type="button"
+              tabIndex={0}
               onClick={ctx.onPlayPause}
               data-player-play-pause
               data-tv-initial-focus

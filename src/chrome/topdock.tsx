@@ -28,8 +28,12 @@ export function TopDock() {
   const { view, setView, chromeHidden } = useView();
   const { locked, unlock, hiddenTabs } = useParental();
   const { settings } = useSettings();
+
+  const navbarLiquidGlassEnabled = true;
+
   const { setOpen: setSearchOpen } = useSearch();
   const t = useT();
+
   const [pinFor, setPinFor] = useState<View | null>(null);
   const maxed = useMaximized();
   const bigPicture = useBigPictureEntry();
@@ -42,6 +46,7 @@ export function TopDock() {
 
   const themePreset =
     settings.theme.preset !== "custom" ? getThemeById(settings.theme.preset) : null;
+
   const customMark = themePreset?.logo?.mark ?? null;
 
   const navigate = (item: NavItem) => {
@@ -49,6 +54,7 @@ export function TopDock() {
       setPinFor(item.view);
       return;
     }
+
     setView(item.view);
   };
 
@@ -67,6 +73,7 @@ export function TopDock() {
     .map((item) => {
       const active = view === item.view;
       const label = t(item.label);
+
       return {
         key: item.id,
         label,
@@ -82,9 +89,15 @@ export function TopDock() {
         data-tv-focus-scope={editing || undefined}
         data-tv-top-chrome
         aria-hidden={chromeHidden}
-        className={`fixed inset-x-0 top-0 z-[60] flex h-20 items-center px-4 transition-opacity duration-300 ${
-          chromeHidden ? "pointer-events-none opacity-0" : "opacity-100"
-        }`}
+        className={`
+          ${
+            navbarLiquidGlassEnabled
+              ? "pointer-events-none fixed inset-x-0 top-3 z-[60] px-4"
+              : "fixed inset-x-0 top-0 z-[60] flex h-20 items-center px-4"
+          }
+          transition-opacity duration-300
+          ${chromeHidden ? "pointer-events-none opacity-0" : "opacity-100"}
+        `}
       >
         <div
           data-tauri-drag-region
@@ -209,11 +222,17 @@ export function TopDock() {
         <ParentalPinModal
           mode={{
             kind: "unlock",
+
             onUnlock: () => {
-              const v = pinFor;
+              const nextView = pinFor;
+
               setPinFor(null);
-              if (v) setView(v);
+
+              if (nextView) {
+                setView(nextView);
+              }
             },
+
             onCancel: () => setPinFor(null),
           }}
           verify={unlock}

@@ -19,7 +19,7 @@ import { useT, useUiLanguage, isRtl as checkRtl } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
 import { useView } from "@/lib/view";
 import { resetPosterDock as resetPosterDockItems, updatePosterDock } from "@/lib/poster-dock";
-import { scrollDeltaToRevealCard } from "@/lib/poster-backdrop-expansion";
+import { POSTER_CARD_ANIMATION, scrollDeltaToRevealCard } from "@/lib/poster-backdrop-expansion";
 import { RowCardExpansionProvider } from "@/components/row-card-expansion";
 
 const GAP = 20;
@@ -136,19 +136,22 @@ function LazyChild({
       data-tv-nav-base-width={expansion?.baseWidth}
       className={
         expansion
-          ? "relative min-w-0 transition-[flex-basis] duration-[480ms] ease-[cubic-bezier(0.16,1,0.3,1)]"
+          ? "relative min-w-0 transition-[flex-basis] [transition-duration:var(--row-card-expansion-duration)] ease-[cubic-bezier(0.16,1,0.3,1)]"
           : undefined
       }
-      style={
-        expansion
+      style={{
+        ...(expansion
           ? {
               flex: "0 0 auto",
               flexBasis: `${expansion.expandedWidth ?? expansion.baseWidth}px`,
+              "--row-card-base-width": `${expansion.baseWidth}px`,
             }
           : span
             ? { gridColumn: span }
-            : undefined
-      }
+            : undefined),
+        contentVisibility: visible ? "visible" : "auto",
+        containIntrinsicSize: visible ? undefined : "auto 200px",
+      }}
     >
       {visible ? (
         expansion ? (
@@ -789,6 +792,12 @@ export function Row({
               dockPointerXRef.current = null;
               resetPosterDock();
             }}
+            onKeyDownCapture={() => {
+              // Poster Dock is pointer-only. Clear its last hover transform
+              // before global keyboard navigation moves focus through this row.
+              dockPointerXRef.current = null;
+              resetPosterDock();
+            }}
             onClickCapture={onClickCapture}
             onDragStart={(e) => e.preventDefault()}
             data-far={near ? undefined : ""}
@@ -801,11 +810,15 @@ export function Row({
               {
                 "--row-poster-height": `${(cellWidth ?? effMin) * posterHeightRatio}px`,
                 ...(expandingCards
-                  ? {}
+                  ? {
+                      "--row-card-expansion-duration": `${POSTER_CARD_ANIMATION.expansionMs}ms`,
+                      "--row-card-wide-fade-duration": `${POSTER_CARD_ANIMATION.wideFadeMs}ms`,
+                      "--row-card-title-restore-duration": `${POSTER_CARD_ANIMATION.titleRestoreMs}ms`,
+                    }
                   : { gridAutoColumns: cellWidth != null ? `${cellWidth}px` : `${effMin}px` }),
                 transform: near ? "translateZ(0)" : undefined,
                 contain: expandingCards ? "style" : "layout style",
-              } as React.CSSProperties
+              } as unknown as React.CSSProperties
             }
           >
             {Children.map(children, (child, i) => {
@@ -829,6 +842,7 @@ export function Row({
                   : Math.max(baseWidth, Math.min(desiredExpandedWidth, viewportLimit));
               return (
                 <LazyChild
+                  key={i}
                   eager={alwaysActive || i < EAGER_COUNT}
                   shape={effShape}
                   span={span}

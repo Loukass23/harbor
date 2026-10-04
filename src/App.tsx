@@ -146,6 +146,7 @@ import { useWatchShare } from "@/lib/social/watch-presence";
 import { usePluginCataloguesAvailable } from "@/lib/streams/plugins/available";
 import { SpooktoberHome } from "@/views/spooktober/spooktober-home";
 import { MusicDock } from "@/components/music/music-dock";
+import { CustomLayoutSafetyNet } from "@/chrome/custom-layout-safety-net";
 import { ParentalProvider } from "@/lib/parental";
 import { TraktProvider } from "@/lib/trakt/provider";
 import { AnilistProvider } from "@/lib/anilist/provider";
@@ -1555,6 +1556,9 @@ function Shell({ onReady }: { onReady?: () => void }) {
           <div className="fixed end-3 top-3 z-[120]">
             <WindowControls />
           </div>
+        )}
+        {!settingsTop && !playerActive && !pickerTop && layout === "custom" && (
+          <CustomLayoutSafetyNet />
         )}
         <MusicDock />
         {!playerActive && <WindowResizeEdges />}

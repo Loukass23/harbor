@@ -790,7 +790,7 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
   const volumeHudEnabled = settings.playerVolumeHud;
   const showVolumeFeedback = useCallback(
     (volume: number, muted: boolean) => {
-      if (!volumeHudEnabled) return;
+      if (!volumeHudEnabled || chromeVisible || drawMode) return;
       if (volumeIndicatorTimerRef.current != null) {
         window.clearTimeout(volumeIndicatorTimerRef.current);
       }
@@ -800,7 +800,7 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
         volumeIndicatorTimerRef.current = null;
       }, 1200);
     },
-    [volumeHudEnabled],
+    [volumeHudEnabled, chromeVisible, drawMode],
   );
   useEffect(() => {
     return () => {

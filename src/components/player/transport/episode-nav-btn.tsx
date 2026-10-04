@@ -16,6 +16,8 @@ export function EpisodeNavBtn({
   const Icon = direction === "prev" ? ChevronsLeft : ChevronsRight;
   return (
     <button
+      type="button"
+      tabIndex={0}
       onClick={disabled ? undefined : onClick}
       disabled={disabled}
       aria-label={label}

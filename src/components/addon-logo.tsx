@@ -24,11 +24,21 @@ const BUNDLED: Array<{ match: (id: string, name: string) => boolean; src: string
   { match: (id, n) => id.includes("comet") || /^comet\b/i.test(n), src: cometLogo },
   { match: (id, n) => id.includes("mediafusion") || /mediafusion/i.test(n), src: mediafusionLogo },
   { match: (id, n) => id.includes("aiostreams") || /aio.?streams/i.test(n), src: aioStreamsLogo },
-  { match: (id, n) => id.includes("opensubtitles") || /opensubtitles/i.test(n), src: opensubtitlesLogo },
+  {
+    match: (id, n) => id.includes("opensubtitles") || /opensubtitles/i.test(n),
+    src: opensubtitlesLogo,
+  },
   { match: (id, n) => id.includes("anime-kitsu") || /anime.?kitsu/i.test(n), src: animeKitsuLogo },
-  { match: (id, n) => id.includes("streaming-catalogs") || /streaming.catalog/i.test(n), src: streamingCatalogsLogo },
+  {
+    match: (id, n) => id.includes("streaming-catalogs") || /streaming.catalog/i.test(n),
+    src: streamingCatalogsLogo,
+  },
   { match: (id, n) => id.includes("easynews") || /easy.?news/i.test(n), src: easynewsLogo },
-  { match: (id, n) => id === "org.stremio.local" || /^local files\b/i.test(n) || /local.?files/i.test(id), src: localFilesLogo },
+  {
+    match: (id, n) =>
+      id === "org.stremio.local" || /^local files\b/i.test(n) || /local.?files/i.test(id),
+    src: localFilesLogo,
+  },
 ];
 
 export const BOAT_ADDON_LOGOS: string[] = [
@@ -85,7 +95,10 @@ export function addonLogoSrc(addonId: string, addonName: string): string | null 
   return null;
 }
 
-export function resolveAddonLogo(logo: string | null | undefined, transportUrl: string | null | undefined): string | null {
+export function resolveAddonLogo(
+  logo: string | null | undefined,
+  transportUrl: string | null | undefined,
+): string | null {
   if (!logo) return null;
   const trimmed = logo.trim();
   if (!trimmed) return null;

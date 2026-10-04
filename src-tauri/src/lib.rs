@@ -785,7 +785,8 @@ pub fn run() {
             let builder = tauri_plugin_window_state::Builder::default().with_denylist(&["harbor-ytmusic-embed"]).with_state_flags(
                 tauri_plugin_window_state::StateFlags::SIZE
                     | tauri_plugin_window_state::StateFlags::POSITION
-                    | tauri_plugin_window_state::StateFlags::MAXIMIZED,
+                    | tauri_plugin_window_state::StateFlags::MAXIMIZED
+                    | tauri_plugin_window_state::StateFlags::FULLSCREEN,
             );
             // Restore the Windows main window only after its maximize guard is
             // installed, so startup uses the same work-area rules as user maximize.

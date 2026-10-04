@@ -19,6 +19,8 @@ export function BigButton({
 }) {
   const btn = (
     <button
+      type="button"
+      tabIndex={0}
       onClick={onClick}
       disabled={disabled}
       aria-label={ariaLabel}

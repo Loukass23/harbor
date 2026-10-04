@@ -28,7 +28,7 @@ Offering things like a native player, a stream ranking engine, Wikidata, watch p
 </div>
 
 <br/>
-<h4 align="center">💬 New: By popular demand, join our community discord for support and help (https://discord.gg/gUGg4YSsg)!</h4>
+<h4 align="center">💬 New: By popular demand, join our community discord for support and help (https://discord.gg/harbor)!</h4>
 <p align="center">
   <img src="https://harbor.site/readme-media/hero.png" width="900">
   <br/>
@@ -660,6 +660,13 @@ Thank you to everyone, named and unnamed, whose open work Harbor builds upon.
 <br/><br/>
 <sub>Built with care for the people who love good cinema and an open web. <a href="#readme-top">&#9650; back to top</a></sub>
 </div>
+
+<br/>
+
+Package repository hosting for Linux is graciously provided by [Cloudsmith](https://cloudsmith.com).
+<br/>
+
+<a href="https://cloudsmith.com"><img alt="OSS hosting by Cloudsmith" src="https://img.shields.io/badge/OSS%20hosting%20by-cloudsmith-blue?logo=cloudsmith&amp;style=flat-square" /></a>
 
 <!-- reference links -->
 

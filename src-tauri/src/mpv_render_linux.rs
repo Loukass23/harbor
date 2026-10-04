@@ -245,6 +245,12 @@ pub fn configure_linux_graphics() {
         );
         std::env::set_var("__NV_DISABLE_EXPLICIT_SYNC", "1");
     }
+    if !wayland && std::env::var("WEBKIT_DISABLE_DMABUF_RENDERER").is_err() {
+        eprintln!(
+            "[harbor::mpv_linux] NVIDIA + X11 detected; setting WEBKIT_DISABLE_DMABUF_RENDERER=1"
+        );
+        std::env::set_var("WEBKIT_DISABLE_DMABUF_RENDERER", "1");
+    }
 }
 
 pub fn prepare(mpv_ctx: NonNull<mpv_handle>) -> Result<(), String> {

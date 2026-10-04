@@ -124,6 +124,7 @@ export function SeekStepBtn({
       <Tooltip label={t("Hold for more options")}>
         <button
           type="button"
+          tabIndex={0}
           onPointerDown={onPointerDown}
           onPointerUp={onPointerUp}
           onPointerLeave={onPointerLeave}

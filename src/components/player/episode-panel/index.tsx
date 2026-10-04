@@ -232,6 +232,9 @@ export function EpisodePanel({
   return (
     <div
       aria-hidden={!open}
+      data-tv-focus-scope={open || undefined}
+      data-avplay-overlay={open ? "open" : undefined}
+      inert={!open ? true : undefined}
       className={`pointer-events-${open ? "auto" : "none"} absolute inset-0 z-30`}
     >
       {resolvingFor && (
@@ -263,6 +266,7 @@ export function EpisodePanel({
           open ? "opacity-100" : "opacity-0"
         }`}
       />
+
       <aside
         role="dialog"
         aria-label={t("Up next")}

@@ -567,6 +567,8 @@ const PosterCard = memo(function PosterCard({
       data-media-card
       data-expanding-card={expandingCard.enabled ? "" : undefined}
       data-row-card-expanded={expandingCard.expanded ? "true" : undefined}
+      data-row-card-collapsing={expandingCard.collapsing ? "" : undefined}
+      data-row-card-title-collapsing={expandingCard.titleCollapsing ? "" : undefined}
       data-focused-card={expandingCard.focusEnabled ? "" : undefined}
       data-no-card-ring={inCardHover !== "none" || activeCustom ? "" : undefined}
       className="group relative z-0 flex w-full min-w-0 flex-col gap-2.5 text-start hover:z-[2]"

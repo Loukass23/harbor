@@ -474,6 +474,9 @@ export const PlayerOverlayLayers = memo(function PlayerOverlayLayers(p: PlayerOv
               ? () => p.setStreamCheckOpen(false)
               : p.dismissStreamPill
           }
+          onLooksGood={
+            p.streamPillVariant === "check" ? () => p.setStreamCheckOpen(false) : undefined
+          }
           onPickAnother={p.pickAnotherOrGuide}
         />
       )}

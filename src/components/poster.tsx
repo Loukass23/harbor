@@ -13,9 +13,12 @@ import { tmdbLocalizedPoster } from "@/lib/providers/tmdb/tmdb-images";
 import { sizeImageUrl, qualityMultiplier } from "@/lib/img-size";
 import { shouldLocalizePosters } from "@/lib/providers/tmdb/tmdb-image-lang";
 import { useProxiedImageSrc } from "@/lib/remote-image-proxy";
-import { observeResize, observeWithin } from "@/lib/visibility";
+import { observe, observeResize, observeWithin } from "@/lib/visibility";
+import { PosterRetryPolicy, POSTER_RETRY_LIMIT } from "./poster-retry";
 
 type Ratio = "portrait" | "landscape" | "wide" | "square";
+
+const posterRetryPolicy = new PosterRetryPolicy();
 
 export function useLocalizedPoster(metaId: string): {
   url: string | undefined;
@@ -168,6 +171,7 @@ export function usePosterChain(
   ]);
   const sig = candidates.join("|");
   const failedRef = useRef<Set<string>>(new Set());
+  const attemptsRef = useRef({ sig, n: 0 });
   const sigRef = useRef(sig);
   const [, bump] = useReducer((n: number) => n + 1, 0);
   if (sigRef.current !== sig) {
@@ -175,6 +179,26 @@ export function usePosterChain(
     failedRef.current = new Set();
   }
   const src = candidates.find((u) => !failedRef.current.has(u));
+  const wedged = src === undefined && candidates.length > 0;
+  useEffect(() => {
+    if (!wedged) return;
+    if (attemptsRef.current.sig !== sig) attemptsRef.current = { sig, n: 0 };
+    const retryNow = () => {
+      failedRef.current = new Set();
+      bump();
+    };
+    // All candidates failed (often a transient CDN blip or rate limit):
+    // retry with a bounded exponential ladder plus network recovery.
+    let timer: number | undefined;
+    if (attemptsRef.current.n < 4) {
+      timer = window.setTimeout(retryNow, 1200 * 2 ** attemptsRef.current.n++);
+    }
+    window.addEventListener("online", retryNow);
+    return () => {
+      window.removeEventListener("online", retryNow);
+      if (timer !== undefined) window.clearTimeout(timer);
+    };
+  }, [wedged, sig]);
   return {
     src,
     onError: () => {
@@ -280,6 +304,7 @@ function PosterBody({
   const failedRef = useRef<Set<string>>(new Set());
   const firedRef = useRef(false);
   const failBurstRef = useRef<{ t: number; n: number }>({ t: 0, n: 0 });
+  const wasOfflineRef = useRef(false);
   const onErrorRef = useRef(onError);
   onErrorRef.current = onError;
   useEffect(() => {
@@ -320,7 +345,12 @@ function PosterBody({
   }, [lazy]);
 
   let cursor = idx;
-  while (cursor < candidates.length && failedRef.current.has(candidates[cursor])) cursor++;
+  while (
+    cursor < candidates.length &&
+    (failedRef.current.has(candidates[cursor]) || posterRetryPolicy.isCooling(candidates[cursor]))
+  ) {
+    cursor++;
+  }
   const current: string | undefined = candidates[cursor];
   const exhausted = cursor >= candidates.length;
   // Remote plain-HTTP images (e.g. a Suwayomi server on a VPS) are mixed-content
@@ -335,6 +365,8 @@ function PosterBody({
     }
   }, [exhausted]);
 
+  const retryRef = useRef<(() => void) | null>(null);
+
   useEffect(() => {
     if (!exhausted) return;
     const retryNow = () => {
@@ -343,11 +375,74 @@ function PosterBody({
       setIdx(0);
       setRetry((r) => r + 1);
     };
-    window.addEventListener("online", retryNow);
-    const timer = retry < 4 ? window.setTimeout(retryNow, 1200 * 2 ** retry) : undefined;
+    const isCoolingDown = candidates.some((url) => posterRetryPolicy.isCooling(url));
+    const isOffline = navigator.onLine === false;
+    const canAutomaticallyRetry = posterRetryPolicy.canAutomaticallyRetry(
+      candidates,
+      retry,
+      !isOffline,
+    );
+    if (isOffline) wasOfflineRef.current = true;
+    retryRef.current = () => {
+      if (
+        wasOfflineRef.current === false &&
+        !candidates.some((url) => posterRetryPolicy.isCooling(url))
+      ) {
+        retryNow();
+      }
+    };
+    let timer: number | undefined;
+    const cancel = () => {
+      if (timer !== undefined) {
+        window.clearTimeout(timer);
+        timer = undefined;
+      }
+    };
+    const schedule = () => {
+      if (timer !== undefined || wasOfflineRef.current) return;
+      const delay = posterRetryPolicy.delayFor(retry);
+      if (delay !== null) timer = window.setTimeout(retryNow, delay);
+    };
+
+    const onOffline = () => {
+      wasOfflineRef.current = true;
+      cancel();
+    };
+    const onOnline = () => {
+      if (!wasOfflineRef.current) return;
+      wasOfflineRef.current = false;
+      posterRetryPolicy.clear(candidates);
+      retryNow();
+    };
+
+    window.addEventListener("offline", onOffline);
+    window.addEventListener("online", onOnline);
+    const onVisibility = () => {
+      if (!document.hidden && wasOfflineRef.current === false) retryRef.current?.();
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+
+    if (!canAutomaticallyRetry) {
+      if (retry >= POSTER_RETRY_LIMIT && !isCoolingDown) posterRetryPolicy.cool(candidates);
+      return () => {
+        retryRef.current = null;
+        window.removeEventListener("offline", onOffline);
+        window.removeEventListener("online", onOnline);
+        document.removeEventListener("visibilitychange", onVisibility);
+        cancel();
+      };
+    }
+
+    const el = rootRef.current;
+    const offViewport = el ? observe(el, (visible) => (visible ? schedule() : cancel())) : null;
+    if (!el) schedule();
     return () => {
-      window.removeEventListener("online", retryNow);
-      if (timer) window.clearTimeout(timer);
+      retryRef.current = null;
+      window.removeEventListener("offline", onOffline);
+      window.removeEventListener("online", onOnline);
+      document.removeEventListener("visibilitychange", onVisibility);
+      offViewport?.();
+      cancel();
     };
   }, [exhausted, retry]);
 
@@ -407,6 +502,8 @@ function PosterBody({
   return (
     <div
       ref={rootRef}
+      onPointerEnter={() => retryRef.current?.()}
+      onFocusCapture={() => retryRef.current?.()}
       className={`harbor-poster your-card relative w-full overflow-hidden rounded-[var(--poster-radius,12px)] ${className}`}
       style={showPlate ? { background: gradient(hue) } : undefined}
     >
@@ -438,6 +535,7 @@ function PosterBody({
           decoding="async"
           fetchPriority={eager ? "high" : undefined}
           onLoad={() => {
+            posterRetryPolicy.clear([current]);
             setLoaded(true);
             setDisplayed(current);
           }}

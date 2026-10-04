@@ -60,7 +60,15 @@ export function VolumeIndicator({
         interactive={false}
         alwaysActive
         backdropBlur
-        defaultStyle={{ backgroundColor: "rgba(8,12,18,0.35)" }}
+        defaultStyle={{
+          // mpv video is composited outside WebKit, so use a subtle tint instead
+          // of the opaque canvas fallback.
+          backgroundColor: "rgba(8,12,18,0.35)",
+        }}
+        experimentalStyle={{
+          background:
+            "linear-gradient(145deg, rgba(8,12,18,0.36), rgba(8,12,18,0.30) 48%, rgba(8,12,18,0.34))",
+        }}
         style={{
           overflow: "hidden",
           transition: "opacity 200ms ease-out",
