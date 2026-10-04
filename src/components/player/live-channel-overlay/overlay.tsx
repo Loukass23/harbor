@@ -183,14 +183,34 @@ export function LiveChannelOverlay({
   };
 
   useEffect(() => {
+    const BACK_KEYCODES = new Set([27, 4, 461, 10009, 166]);
+    const BACK_KEYS = new Set(["Escape", "Esc", "BrowserBack", "GoBack", "Back"]);
     const onKey = (e: KeyboardEvent) => {
-      if (e.key !== "Escape") return;
+      if (!BACK_KEYS.has(e.key) && !BACK_KEYCODES.has(e.keyCode)) return;
       e.preventDefault();
       e.stopPropagation();
+      if (typeof e.stopImmediatePropagation === "function") e.stopImmediatePropagation();
+      onClose();
+    };
+    const onHwKey = (e: Event) => {
+      if ((e as unknown as { keyName?: string }).keyName !== "back") return;
+      e.preventDefault();
+      e.stopPropagation();
+      const stopImmediate = (e as unknown as { stopImmediatePropagation?: () => void })
+        .stopImmediatePropagation;
+      if (typeof stopImmediate === "function") {
+        try {
+          stopImmediate.call(e);
+        } catch {}
+      }
       onClose();
     };
     window.addEventListener("keydown", onKey, true);
-    return () => window.removeEventListener("keydown", onKey, true);
+    window.addEventListener("tizenhwkey", onHwKey, true);
+    return () => {
+      window.removeEventListener("keydown", onKey, true);
+      window.removeEventListener("tizenhwkey", onHwKey, true);
+    };
   }, [onClose]);
 
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -199,10 +219,17 @@ export function LiveChannelOverlay({
   return (
     <div
       data-tv-focus-scope
+      data-avplay-overlay="open"
+      role="dialog"
+      aria-modal="true"
+      aria-label={t("TV Guide")}
       className="pointer-events-auto absolute inset-0 z-[60] flex flex-col bg-canvas/95 text-ink"
     >
       <div className="flex shrink-0 items-start gap-3 px-6 pt-6">
         <button
+          type="button"
+          tabIndex={0}
+          data-tv-initial-focus
           onClick={onClose}
           data-tv-modal-close
           aria-label={t("Close guide")}
@@ -234,6 +261,7 @@ export function LiveChannelOverlay({
           {query && (
             <button
               type="button"
+              tabIndex={0}
               onClick={() => setQuery("")}
               className="text-[12.5px] font-medium text-ink-subtle transition-colors hover:text-ink"
             >
@@ -243,6 +271,7 @@ export function LiveChannelOverlay({
         </div>
         <button
           type="button"
+          tabIndex={0}
           onClick={toggleGuideStyle}
           title={
             guideStyle === "timeline"

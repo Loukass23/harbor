@@ -1,5 +1,6 @@
 import { Filter, Languages, MousePointerClick, RefreshCw, X, Zap } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useTvFocusScope } from "@/lib/keyboard-navigation";
 import { resolveAddonLogo } from "@/components/addon-logo";
 import { HostSourceBanner } from "@/components/host-source-banner";
 import { Tooltip } from "./transport/tooltip";
@@ -17,11 +18,25 @@ import type { Meta } from "@/lib/cinemeta";
 import type { PlayEpisode, PlayerStreamRef } from "@/lib/view";
 import { useT } from "@/lib/i18n";
 import { useActiveKid } from "@/lib/profiles";
-import { AddonFilterMenu, QualityFilterMenu, SourceFilterMenu } from "./stream-switcher/filter-dropdowns";
+import {
+  AddonFilterMenu,
+  QualityFilterMenu,
+  SourceFilterMenu,
+} from "./stream-switcher/filter-dropdowns";
 import { sourceGroup } from "@/views/play-picker/quality-filter";
 import { KidsStreamSwitcher } from "./stream-switcher/kids-switcher";
-import { abbreviateLanguages, normalizeLangCode, streamMatchesLangs } from "./stream-switcher/lang-utils";
-import { QUALITY_BADGE, QUALITY_LABEL, QUALITY_ORDER, qualityKey, type QualityKey } from "./stream-switcher/quality";
+import {
+  abbreviateLanguages,
+  normalizeLangCode,
+  streamMatchesLangs,
+} from "./stream-switcher/lang-utils";
+import {
+  QUALITY_BADGE,
+  QUALITY_LABEL,
+  QUALITY_ORDER,
+  qualityKey,
+  type QualityKey,
+} from "./stream-switcher/quality";
 import { isCurrentStream, streamKey, SwitcherRow } from "./stream-switcher/switcher-row";
 import { useSwitcherRefresh } from "./stream-switcher/use-switcher-refresh";
 
@@ -93,7 +108,95 @@ export function StreamSwitcher({
     [meta, episode],
   );
 
-  const { refreshing, refresh } = useSwitcherRefresh({ meta, episode, imdbId: imdbId ?? null, active: open });
+  const { refreshing, refresh } = useSwitcherRefresh({
+    meta,
+    episode,
+    imdbId: imdbId ?? null,
+    active: open,
+  });
+
+  const scopeRef = useRef<HTMLDivElement>(null);
+  // Move TV focus into the panel on open so D-pad starts on its controls,
+  // never on the Big Picture view underneath.
+  useTvFocusScope(open, scopeRef);
+
+  // Tizen Back (Return keyCode 10009 / keyName 'back') must unmount only this
+  // overlay and return focus to the player — never bubble up to app exit.
+  useEffect(() => {
+    if (!open) return;
+    const BACK_KEYCODES = new Set([27, 4, 461, 10009, 166]);
+    const BACK_KEYS = new Set(["Escape", "Esc", "BrowserBack", "GoBack", "Back"]);
+    const isBack = (e: KeyboardEvent) => BACK_KEYS.has(e.key) || BACK_KEYCODES.has(e.keyCode);
+    const onKey = (e: KeyboardEvent) => {
+      if (!isBack(e)) return;
+      e.preventDefault();
+      e.stopPropagation();
+      if (typeof e.stopImmediatePropagation === "function") e.stopImmediatePropagation();
+      onClose();
+    };
+    const onHwKey = (e: Event) => {
+      if ((e as unknown as { keyName?: string }).keyName !== "back") return;
+      e.preventDefault();
+      e.stopPropagation();
+      const stopImmediate = (e as unknown as { stopImmediatePropagation?: () => void })
+        .stopImmediatePropagation;
+      if (typeof stopImmediate === "function") {
+        try {
+          stopImmediate.call(e);
+        } catch {}
+      }
+      onClose();
+    };
+    window.addEventListener("keydown", onKey, true);
+    window.addEventListener("tizenhwkey", onHwKey, true);
+    return () => {
+      window.removeEventListener("keydown", onKey, true);
+      window.removeEventListener("tizenhwkey", onHwKey, true);
+    };
+  }, [open, onClose]);
+
+  // Focus trap: while open, Arrow/Tab navigation must stay inside this panel
+  // and never leak to hidden Big Picture elements underneath.
+  useEffect(() => {
+    if (!open) return;
+    const scope = scopeRef.current;
+    if (!scope) return;
+    const focusables = () =>
+      Array.from(
+        scope.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), [tabindex="0"], input:not([disabled]), [data-focusable="true"]',
+        ),
+      ).filter((el) => el.getClientRects().length > 0);
+    const onTrap = (e: KeyboardEvent) => {
+      if (e.key !== "Tab" && !e.key.startsWith("Arrow")) return;
+      if (!scope.contains(document.activeElement)) {
+        const first = focusables()[0];
+        if (first) {
+          e.preventDefault();
+          e.stopPropagation();
+          first.focus();
+        }
+        return;
+      }
+      if (e.key === "Tab") {
+        const items = focusables();
+        if (items.length === 0) return;
+        const first = items[0]!;
+        const last = items[items.length - 1]!;
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          e.stopPropagation();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          e.stopPropagation();
+          first.focus();
+        }
+      }
+    };
+    window.addEventListener("keydown", onTrap, true);
+    return () => window.removeEventListener("keydown", onTrap, true);
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
@@ -115,18 +218,6 @@ export function StreamSwitcher({
       cancelled = true;
     };
   }, [open, authKey]);
-
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key !== "Escape") return;
-      e.preventDefault();
-      e.stopImmediatePropagation();
-      onClose();
-    };
-    window.addEventListener("keydown", onKey, true);
-    return () => window.removeEventListener("keydown", onKey, true);
-  }, [open, onClose]);
 
   const keptStreams = useMemo<ScoredStream[]>(() => cache?.result.picker.all ?? [], [cache]);
   const rejectedStreams = useMemo<ScoredStream[]>(
@@ -150,14 +241,17 @@ export function StreamSwitcher({
         (s) =>
           s.url != null ||
           debridSlugs.some(
-            (slug) => s.cached[slug as keyof typeof s.cached] || s.inLibrary[slug as keyof typeof s.inLibrary],
+            (slug) =>
+              s.cached[slug as keyof typeof s.cached] ||
+              s.inLibrary[slug as keyof typeof s.inLibrary],
           ) ||
           hasCachedMarker(s),
       ),
     [allStreams, debridSlugs],
   );
   const [cachedOnly, setCachedOnly] = useState(false);
-  const baseList = cachedOnly && debridSlugs.length > 0 && cachedStreams.length > 0 ? cachedStreams : allStreams;
+  const baseList =
+    cachedOnly && debridSlugs.length > 0 && cachedStreams.length > 0 ? cachedStreams : allStreams;
   const [addonFilter, setAddonFilter] = useState<string>("all");
   const [addonMenuOpen, setAddonMenuOpen] = useState(false);
   const [qualityFilter, setQualityFilter] = useState<QualityKey>("all");
@@ -234,7 +328,8 @@ export function StreamSwitcher({
         : addonFilteredList.filter((s) => streamMatchesLangs(s, preferredLangs)),
     [addonFilteredList, preferredLangs],
   );
-  const filteredList = filterToPreferred && preferredLangs.length > 0 ? matchedStreams : addonFilteredList;
+  const filteredList =
+    filterToPreferred && preferredLangs.length > 0 ? matchedStreams : addonFilteredList;
   const matchCurrent = useMemo(() => {
     const norm = (v?: string | null) => (v ?? "").trim().toLowerCase();
     return (s: ScoredStream): boolean => {
@@ -266,7 +361,9 @@ export function StreamSwitcher({
   const hiddenCount = addonFilteredList.length - matchedStreams.length;
   const uncachedHidden = allStreams.length - cachedStreams.length;
   const activeAddonName =
-    addonFilter === "all" ? t("All addons") : addonOptions.find((o) => o.id === addonFilter)?.name ?? addonFilter;
+    addonFilter === "all"
+      ? t("All addons")
+      : (addonOptions.find((o) => o.id === addonFilter)?.name ?? addonFilter);
   void cache?.meta.name;
   void cache?.episode;
 
@@ -288,25 +385,37 @@ export function StreamSwitcher({
 
   return (
     <div
+      data-avplay-overlay="open"
+      data-stream-switcher="open"
       className="pointer-events-auto absolute inset-0 z-[60] flex items-center justify-center bg-black/72 backdrop-blur-md animate-in fade-in duration-200"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
       <div
+        ref={scopeRef}
         data-tv-focus-scope
+        role="dialog"
+        aria-modal="true"
+        aria-label={t("Switch stream")}
         className="flex h-full max-h-[82vh] w-full max-w-[880px] flex-col overflow-hidden rounded-[8px] border border-edge bg-elevated shadow-[0_28px_72px_-20px_rgba(0,0,0,0.85)] animate-in fade-in slide-in-from-bottom-2 duration-150 backdrop-blur-xl"
       >
         <header className="flex items-center justify-between gap-4 border-b border-edge-soft px-6 py-4">
           <div className="flex items-center gap-2.5">
             <Tooltip label={t("Refresh sources")} side="bottom">
               <button
+                type="button"
+                tabIndex={0}
                 onClick={() => refresh()}
                 disabled={refreshing}
                 className="flex h-9 w-9 items-center justify-center rounded-md bg-raised text-ink-muted transition-colors hover:bg-elevated hover:text-ink disabled:cursor-default disabled:opacity-70"
                 aria-label={t("Refresh sources")}
               >
-                <RefreshCw size={15} strokeWidth={2.2} className={refreshing ? "animate-spin" : ""} />
+                <RefreshCw
+                  size={15}
+                  strokeWidth={2.2}
+                  className={refreshing ? "animate-spin" : ""}
+                />
               </button>
             </Tooltip>
             <span className="text-[13px] font-semibold tracking-[0.01em] text-ink-muted whitespace-nowrap">
@@ -321,6 +430,8 @@ export function StreamSwitcher({
             {rejectedStreams.length > 0 && (
               <Tooltip label={t("Show sources hidden by the trust filter")} side="bottom">
                 <button
+                  type="button"
+                  tabIndex={0}
                   onClick={() => setShowFiltered((v) => !v)}
                   className={`flex h-9 items-center gap-2 rounded-md px-3.5 text-[11.5px] font-semibold tracking-[0.04em] transition-colors ${
                     showFiltered
@@ -330,12 +441,16 @@ export function StreamSwitcher({
                   aria-pressed={showFiltered}
                 >
                   <Filter size={11} strokeWidth={2.2} />
-                  {showFiltered ? t("Flagged shown") : t("Flagged ({n})", { n: rejectedStreams.length })}
+                  {showFiltered
+                    ? t("Flagged shown")
+                    : t("Flagged ({n})", { n: rejectedStreams.length })}
                 </button>
               </Tooltip>
             )}
             {debridSlugs.length > 0 && uncachedHidden > 0 && (
               <button
+                type="button"
+                tabIndex={0}
                 onClick={() => setCachedOnly((v) => !v)}
                 className={`flex h-9 items-center gap-2 rounded-md px-3.5 text-[11.5px] font-semibold tracking-[0.04em] transition-colors ${
                   cachedOnly
@@ -382,6 +497,8 @@ export function StreamSwitcher({
             )}
             {preferredLangs.length > 0 && hiddenCount > 0 && (
               <button
+                type="button"
+                tabIndex={0}
                 onClick={() => setFilterToPreferred((v) => !v)}
                 className={`flex h-9 items-center gap-2 rounded-md px-3.5 text-[11.5px] font-semibold tracking-[0.04em] transition-colors ${
                   filterToPreferred
@@ -392,11 +509,17 @@ export function StreamSwitcher({
               >
                 <Languages size={13} strokeWidth={2.2} />
                 {filterToPreferred
-                  ? t("{langs} only · {n} hidden", { langs: abbreviateLanguages(preferredLangs), n: hiddenCount })
+                  ? t("{langs} only · {n} hidden", {
+                      langs: abbreviateLanguages(preferredLangs),
+                      n: hiddenCount,
+                    })
                   : t("{langs} only", { langs: abbreviateLanguages(preferredLangs) })}
               </button>
             )}
             <button
+              type="button"
+              tabIndex={0}
+              data-tv-initial-focus
               onClick={onClose}
               data-tv-modal-close
               className="flex h-9 w-9 items-center justify-center rounded-md bg-raised text-ink-muted transition-colors hover:bg-elevated hover:text-ink"
@@ -415,6 +538,8 @@ export function StreamSwitcher({
               {refreshing ? t("Looking for sources…") : t("No sources loaded for this title yet.")}
             </p>
             <button
+              type="button"
+              tabIndex={0}
               onClick={() => refresh()}
               disabled={refreshing}
               className="flex h-10 items-center gap-2 rounded-md bg-raised px-4 text-[13px] font-semibold text-ink transition-colors hover:bg-elevated disabled:opacity-70"
@@ -440,6 +565,8 @@ export function StreamSwitcher({
             {list.length > showCount && (
               <li className="border-t border-edge-soft/60 px-4 py-3">
                 <button
+                  type="button"
+                  tabIndex={0}
                   onClick={() => setShowCount((n) => n + 80)}
                   className="flex w-full items-center justify-center gap-2 rounded-md bg-raised px-4 py-2.5 text-[12.5px] font-semibold text-ink-muted transition-colors hover:bg-elevated hover:text-ink"
                 >
@@ -469,4 +596,3 @@ export function StreamSwitcher({
     </div>
   );
 }
-

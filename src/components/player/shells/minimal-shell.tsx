@@ -22,12 +22,16 @@ export function MinimalShell({
 
   return (
     <div
+      inert={!visible ? true : undefined}
+      aria-hidden={!visible}
       className={`pointer-events-none absolute inset-x-0 bottom-0 z-20 flex flex-col gap-2 bg-gradient-to-t from-black/70 to-transparent px-8 pb-5 pt-12 transition-opacity duration-300 ${
         visible ? "opacity-100" : "opacity-0"
       }`}
     >
       <div className="pointer-events-auto flex items-center gap-4">
         <button
+          type="button"
+          tabIndex={0}
           onClick={onBack}
           className="flex h-10 w-10 items-center justify-center rounded-full bg-black/55 text-white backdrop-blur-md transition-colors hover:bg-black/85"
           aria-label={t("Back")}
@@ -35,6 +39,8 @@ export function MinimalShell({
           <ChevronLeft size={18} strokeWidth={2.2} />
         </button>
         <button
+          type="button"
+          tabIndex={0}
           onClick={onPlayPause}
           data-player-play-pause
           className="relative flex h-12 w-12 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur-md transition-colors hover:bg-white/25"
@@ -53,6 +59,8 @@ export function MinimalShell({
           <MinimalTime durationSec={snap.durationSec} visible={visible} />
         </div>
         <button
+          type="button"
+          tabIndex={0}
           onClick={onFullscreen}
           className="flex h-10 w-10 items-center justify-center rounded-full bg-black/55 text-white backdrop-blur-md transition-colors hover:bg-black/85"
           aria-label={fullscreen ? t("Exit fullscreen") : t("Fullscreen")}

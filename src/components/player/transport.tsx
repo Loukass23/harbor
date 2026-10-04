@@ -429,6 +429,8 @@ export function Transport({
       <SongIdToast />
       <div
         data-tauri-drag-region={fullscreen ? undefined : ""}
+        inert={!visible ? true : undefined}
+        aria-hidden={!visible}
         className="pointer-events-none absolute inset-x-0 top-0 z-20 flex items-start justify-between px-7 pt-4 pb-8"
       >
         <div
@@ -452,6 +454,8 @@ export function Transport({
       <div
         ref={controlsRef}
         dir="ltr"
+        inert={!visible ? true : undefined}
+        aria-hidden={!visible}
         className={`pointer-events-none absolute inset-x-0 bottom-0 z-20 flex flex-col gap-2.5 ${
           tight ? "px-3 pt-6 pb-3" : "px-7 pt-10 pb-5"
         }`}

@@ -88,6 +88,7 @@ export function SeekStepBtn({
       <Tooltip label={t("{word} {n}s · hold for options", { word, n: seconds })}>
         <button
           type="button"
+          tabIndex={0}
           onPointerDown={onPointerDown}
           onPointerUp={onPointerUp}
           onPointerLeave={onPointerLeave}
@@ -98,7 +99,9 @@ export function SeekStepBtn({
           }}
           aria-label={t("{word} {n} seconds. Hold for options", { word, n: seconds })}
           className={`relative flex h-14 w-14 items-center justify-center rounded-full transition-colors ${
-            pickerOpen ? "bg-white/15 text-white" : "text-white/85 hover:bg-white/10 hover:text-white"
+            pickerOpen
+              ? "bg-white/15 text-white"
+              : "text-white/85 hover:bg-white/10 hover:text-white"
           }`}
         >
           <Icon size={32} strokeWidth={1.8} />

@@ -410,6 +410,22 @@ function closeTopFocusScope(): boolean {
   const closer = scope.querySelector<HTMLElement>(MODAL_CLOSE_SELECTOR);
   if (!closer) return false;
   closer.click();
+  // The closer unmounts with its overlay: return focus to the underlying
+  // player view so D-pad navigation never strands on <body>.
+  window.requestAnimationFrame(() => {
+    try {
+      const active = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+      if (active && active !== document.body && document.contains(active)) return;
+      const player = document.querySelector<HTMLElement>("[data-harbor-player]");
+      const target =
+        player?.querySelector<HTMLElement>("[data-tv-initial-focus]") ??
+        player?.querySelector<HTMLElement>(
+          'button:not([disabled]), [tabindex="0"], [data-focusable="true"]',
+        ) ??
+        null;
+      if (target) focusElement(target, "none");
+    } catch {}
+  });
   return true;
 }
 
@@ -1144,6 +1160,27 @@ export function useKeyboardNavigation(options: TVNavigationOptions = {}) {
     window.addEventListener("focusin", onFocusIn, true);
     window.addEventListener("pointerdown", onPointerDown, true);
 
+    // Tizen hardware Back: the platform fires `tizenhwkey` with
+    // keyName === 'back' (keyCode 10009 arrives separately as keydown).
+    // Swallow it here so the overlay close path above runs and the event
+    // never bubbles up to the native app-exit behavior.
+    const onTizenHwKey = (e: Event) => {
+      const keyName = (e as unknown as { keyName?: string }).keyName;
+      if (keyName !== "back") return;
+      if (e.defaultPrevented) return;
+      e.preventDefault();
+      e.stopPropagation();
+      const stopImmediate = (e as unknown as { stopImmediatePropagation?: () => void })
+        .stopImmediatePropagation;
+      if (typeof stopImmediate === "function") {
+        try {
+          stopImmediate.call(e);
+        } catch {}
+      }
+      runBack();
+    };
+    window.addEventListener("tizenhwkey", onTizenHwKey, true);
+
     const onPointerMove = (e: PointerEvent) => notePointerMove(e.screenX, e.screenY);
     const onWheel = () => setPointerModality();
     window.addEventListener("pointermove", onPointerMove, true);
@@ -1151,6 +1188,7 @@ export function useKeyboardNavigation(options: TVNavigationOptions = {}) {
 
     return () => {
       window.removeEventListener("keydown", onKeyDown, true);
+      window.removeEventListener("tizenhwkey", onTizenHwKey, true);
       window.removeEventListener("beforeinput", onBeforeInput, true);
       window.removeEventListener("focusin", onFocusIn, true);
       window.removeEventListener("pointerdown", onPointerDown, true);

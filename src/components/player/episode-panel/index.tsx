@@ -167,6 +167,7 @@ export function EpisodePanel({
     <div
       aria-hidden={!open}
       data-tv-focus-scope={open || undefined}
+      data-avplay-overlay={open ? "open" : undefined}
       inert={!open ? true : undefined}
       className={`pointer-events-${open ? "auto" : "none"} absolute inset-0 z-30`}
     >
