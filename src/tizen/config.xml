@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<widget xmlns="http://www.w3.org/ns/widgets" xmlns:tizen="http://tizen.org/ns/widgets"
+    id="http://swormharbor.local/SwormHarbor" version="0.1.0" viewmodes="maximized">
+    <access origin="*" subdomains="true" />
+
+    <!-- Package ID MUST be exactly 10 alphanumeric chars (0-9a-zA-Z) for Samsung TV -->
+    <tizen:application id="SwormHarb1.HarborTV" package="SwormHarb1" required_version="3.0" />   
+    <name>HarborTV</name>
+    <icon src="icon.png" />
+    <content src="index.html" />
+    <tizen:profile name="tv" />
+    <tizen:privilege name="http://tizen.org/privilege/internet" />
+    <tizen:privilege name="http://developer.samsung.com/privilege/network.public" />
+    <tizen:privilege name="http://tizen.org/privilege/application.launch" />
+    <tizen:setting screen-orientation="landscape" context-menu="disable" background-support="disable" encryption="disable" install-location="auto" />
+    <tizen:metadata key="http://samsung.com/tv/metadata/use.tv.profile" value="true" />
+</widget>

@@ -22,7 +22,11 @@
     "setup:mpv": "node scripts/fetch-mpv.mjs",
     "setup:ffmpeg": "node scripts/fetch-ffmpeg.mjs",
     "setup:fonts": "node scripts/fetch-fonts.mjs",
-    "prepare": "vp config"
+    "prepare": "vp config",
+    "build:tizen": "vp build --mode tizen",
+    "package:tizen": "tz pack -w src/tizen/dist -t wgt -s SwormHarbor",
+    "install:tizen": "tz install -t GU43DU7199UXZG -p src/tizen/dist/Debug/dist.wgt",
+    "tizen:deploy": "pnpm run build:tizen && pnpm run package:tizen && pnpm run install:tizen"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.101.2",
@@ -54,6 +58,7 @@
     "@resvg/resvg-js": "^2.6.2",
     "@tailwindcss/vite": "^4.3.2",
     "@tauri-apps/cli": "^2.11.4",
+    "@types/node": "^26.6.4",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.3",
