@@ -7,6 +7,8 @@ dist-ssr
 *.bak-orig
 *.tmp.*
 _backups/
+harbor-backups/
+*.harbx
 
 .env
 .env.*
@@ -99,6 +101,14 @@ audit-rest.txt
 installer/src-tauri/payload/
 installer/payload-stage/
 !installer/**/*.md
+!docs/**/*.md
+
+# Tizen build artifacts
+src-tizen/dist/
+src-tizen/Debug/
+src-tizen/.tizen-rds/
+*.wgt
+
 # local design references and perf captures, not for distribution
 tools/tv-refs/
 docs/tv-perf/

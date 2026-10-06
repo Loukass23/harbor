@@ -50,8 +50,10 @@ function servePublicMediapipe() {
 
 export default defineConfig(({ mode }) => {
   const android = mode === "android" || process.env.HARBOR_TARGET === "android";
+  const tizen = mode === "tizen" || process.env.HARBOR_TARGET === "tizen";
   const devHost = process.env.TAURI_DEV_HOST;
   return {
+    base: tizen ? "./" : "/",
     staged: { "*": "vp check --fix" },
     plugins: [react(), tailwindcss(), silenceMediapipeSourcemap(), servePublicMediapipe()],
     clearScreen: false,
@@ -79,14 +81,23 @@ export default defineConfig(({ mode }) => {
     // failure is a bare SyntaxError before React mounts, with no error surface
     // on a device you cannot open devtools on. Pin a floor the hardware meets.
     // This lowers syntax only; esbuild adds no API polyfills.
-    ...(android
+    ...(tizen
       ? {
           build: {
+            outDir: "src-tizen/dist",
+            emptyOutDir: true,
             target: "chrome87",
-            rollupOptions: { input: { tv: "index-tv.html", main: "index.html" } },
+            rollupOptions: { input: { tv: "index-tv.html" } },
           },
         }
-      : {}),
+      : android
+        ? {
+            build: {
+              target: "chrome87",
+              rollupOptions: { input: { tv: "index-tv.html", main: "index.html" } },
+            },
+          }
+        : {}),
     server: {
       host: devHost || "127.0.0.1",
       port: 1420,
@@ -95,6 +106,7 @@ export default defineConfig(({ mode }) => {
       watch: {
         ignored: [
           "**/src-tauri/**",
+          "**/src-tizen/**",
           "**/android-native/**",
           "**/android/**",
           "**/android-extension-compat/**",
