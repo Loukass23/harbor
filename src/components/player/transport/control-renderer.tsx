@@ -95,7 +95,7 @@ export type ControlContext = {
   hasPrevEp: boolean;
   hasNextEp: boolean;
   canPickAnother: boolean;
-  engine: "html5" | "mpv";
+  engine: "html5" | "mpv" | "avplay";
   useOverlayPopups?: boolean;
   editing?: boolean;
   customIcons?: CustomIconMap;

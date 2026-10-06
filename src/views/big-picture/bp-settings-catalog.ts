@@ -253,6 +253,7 @@ export function bpSettingsControls(
           { value: "auto", label: t("Auto") },
           { value: "mpv", label: "mpv" },
           { value: "html5", label: "HTML5" },
+          { value: "avplay", label: "AVPlay (Tizen)" },
         ],
       },
       {
@@ -405,7 +406,7 @@ export function bpSettingsCategories(
     )}`,
     language: language?.nativeLabel ?? s.uiLanguage,
     subtitles: subLang ? `${subLang} / ${s.subFontSize}px` : t("Off"),
-    playback: `${s.playerEngine === "auto" ? t("Auto") : s.playerEngine === "mpv" ? "mpv" : "HTML5"}`,
+    playback: `${s.playerEngine === "auto" ? t("Auto") : s.playerEngine === "mpv" ? "mpv" : s.playerEngine === "avplay" ? "AVPlay" : "HTML5"}`,
     home: s.homeMode === "harbor" ? t("Harbor") : t("Classic"),
     services: t("{n} on", { n: services }),
     setup: connected.length > 0 ? connected.join(", ") : t("None"),

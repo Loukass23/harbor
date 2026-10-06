@@ -69,7 +69,7 @@ export const ShellLayer = memo(function ShellLayer({
   shellSnap: PlayerSnapshot;
   snapRef: RefObject<PlayerSnapshot>;
   bridgeRef: RefObject<PlayerBridge | null>;
-  engine: "html5" | "mpv";
+  engine: "html5" | "mpv" | "avplay";
   visible: boolean;
   fullscreen: boolean;
   drawMode: boolean;

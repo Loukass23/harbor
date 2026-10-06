@@ -77,7 +77,7 @@ export type StremioRenderCtx = {
   canPickAnother: boolean;
   hasPrevEp: boolean;
   hasNextEp: boolean;
-  engine: "html5" | "mpv";
+  engine: "html5" | "mpv" | "avplay";
   useOverlayPopups?: boolean;
   editing?: boolean;
   customIcons?: CustomIconMap;

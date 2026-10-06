@@ -4,7 +4,7 @@ import type { GeneratedSubtitleGroup } from "@/lib/subtitles/types";
 
 export type SubtitleMenuProps = {
   generated?: GeneratedSubtitleGroup[];
-  engine?: "html5" | "mpv";
+  engine?: "html5" | "mpv" | "avplay";
   tracks: TrackInfo[];
   selectedId: string | null;
   delaySec: number;

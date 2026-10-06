@@ -7,6 +7,7 @@ import { useKeyboardShortcuts } from "./use-keyboard-shortcuts";
 import { useLiveChannelOverlay } from "./use-live-channel-overlay";
 import { useSleepTimer } from "./use-sleep-timer";
 import { useVideoFill } from "./use-video-fill";
+import { isTizen } from "@/lib/platform";
 
 export function usePlayerHotkeys(params: {
   bridgeRef: RefObject<PlayerBridge | null>;
@@ -83,7 +84,7 @@ export function usePlayerHotkeys(params: {
     onVolumeFeedback,
   } = params;
 
-  const [showStats, setShowStats] = useState(false);
+  const [showStats, setShowStats] = useState(() => isTizen());
   const { holdSpeedActive, subtitleOffsetSec } = useKeyboardShortcuts({
     bridgeRef,
     snap,

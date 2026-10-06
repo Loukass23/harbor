@@ -22,7 +22,7 @@ import {
 } from "@/lib/player/subtitle-fps";
 
 type Props = {
-  engine: "html5" | "mpv";
+  engine: "html5" | "mpv" | "avplay";
   track: TrackInfo | null;
   hasSecondary: boolean;
   autoSyncActive: boolean;

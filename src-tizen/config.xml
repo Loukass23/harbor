@@ -10,6 +10,7 @@
    <tizen:privilege name="http://tizen.org/privilege/internet"></tizen:privilege>
    <tizen:privilege name="http://tizen.org/privilege/tv.inputdevice"></tizen:privilege>
    <tizen:privilege name="http://developer.samsung.com/privilege/avplay"></tizen:privilege>
+   <tizen:privilege name="http://developer.samsung.com/privilege/productinfo"></tizen:privilege>
    <access origin="*" subdomains="true"></access>
    <tizen:metadata key="http://samsung.com/tv/metadata/prelaunch.support" value="true"></tizen:metadata>
    <tizen:metadata key="http://tizen.org/metadata/app_ui_type/base_screen_resolution" value="extensive"></tizen:metadata>

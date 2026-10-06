@@ -30,7 +30,7 @@ export function round2(v: number): number {
 }
 
 export function embedFlags(
-  engine: "html5" | "mpv",
+  engine: "html5" | "mpv" | "avplay",
   mpvEmbed: boolean,
   videoWidth: number,
   videoHeight: number,
@@ -40,7 +40,7 @@ export function embedFlags(
   const hasFrame = videoWidth > 0 && videoHeight > 0;
   const macShowing = embedOn && isMacDesktop() && hasFrame;
   const linuxShowing = embedOn && isLinuxDesktop() && hasFrame;
-  const tizenShowing = isTizen();
+  const tizenShowing = isTizen() || engine === "avplay";
   return {
     mpvEmbedWindowsActive,
     stageBg: mpvEmbedWindowsActive || macShowing || linuxShowing || tizenShowing ? "" : "bg-black",
@@ -55,7 +55,7 @@ export function formatNames(names: string[]): string {
 }
 
 export async function pickBridge(
-  want: "auto" | "html5" | "mpv",
+  want: "auto" | "html5" | "mpv" | "avplay",
   notWebReady: boolean,
   mpvOpts: {
     anime4k: boolean;
@@ -75,9 +75,9 @@ export async function pickBridge(
     cacheDir?: string;
     getEmbedRect?: () => Promise<MpvRect | null> | MpvRect | null;
   },
-): Promise<{ bridge: PlayerBridge; engine: "html5" | "mpv" }> {
+): Promise<{ bridge: PlayerBridge; engine: "html5" | "mpv" | "avplay" }> {
   if (want === "html5") return { bridge: createHtml5Bridge(), engine: "html5" };
-  if (isTizen()) return { bridge: createAvplayBridge(), engine: "html5" };
+  if (want === "avplay" || isTizen()) return { bridge: createAvplayBridge(), engine: "avplay" };
   if (want === "mpv") {
     const probe = await probeMpv();
     if (probe.available) return { bridge: createMpvBridge(mpvOpts), engine: "mpv" };

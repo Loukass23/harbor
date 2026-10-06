@@ -7,6 +7,7 @@ import {
 } from "@/lib/player/playback-clock";
 import { isTruncatedEnd } from "@/lib/player/playback-end";
 import { isLocalUrl } from "@/lib/player/local-url";
+import { isTizen } from "@/lib/platform";
 import { clearOnePickerCache } from "@/lib/picker-cache";
 import { resolveViaDebrids } from "@/lib/streams/resolve";
 import { registerStreamProxy } from "@/lib/stream-proxy";
@@ -262,28 +263,30 @@ export function useAutoRetry(params: {
         false,
         {},
         hint,
-      ).then(async (r) => {
-        if (!current()) return;
-        if (r.ok) {
-          let url = r.data.url;
-          if (r.data.headers && Object.keys(r.data.headers).length > 0) {
-            try {
-              url = (await registerStreamProxy(r.data.url, r.data.headers)).url;
-            } catch {
-              /* fall back to the raw debrid url */
-            }
-          }
+      )
+        .then(async (r) => {
           if (!current()) return;
-          console.warn(`[player] debrid failover via ${r.via}`);
-          void recoveryBridge.load({
-            url,
-            subtitles: src.subtitles,
-            notWebReady: r.data.notWebReady ?? src.notWebReady,
-          });
-        } else {
-          retry();
-        }
-      }).catch(retry);
+          if (r.ok) {
+            let url = r.data.url;
+            if (r.data.headers && Object.keys(r.data.headers).length > 0) {
+              try {
+                url = (await registerStreamProxy(r.data.url, r.data.headers)).url;
+              } catch {
+                /* fall back to the raw debrid url */
+              }
+            }
+            if (!current()) return;
+            console.warn(`[player] debrid failover via ${r.via}`);
+            void recoveryBridge.load({
+              url,
+              subtitles: src.subtitles,
+              notWebReady: r.data.notWebReady ?? src.notWebReady,
+            });
+          } else {
+            retry();
+          }
+        })
+        .catch(retry);
       return cancel;
     }
     if (!sameUrlRetriedRef.current) {
@@ -315,7 +318,11 @@ export function useAutoRetry(params: {
         void registerStreamProxy(src.url, src.headers)
           .then((p) => {
             if (current())
-              void recoveryBridge.load({ url: p.url, subtitles: src.subtitles, notWebReady: src.notWebReady });
+              void recoveryBridge.load({
+                url: p.url,
+                subtitles: src.subtitles,
+                notWebReady: src.notWebReady,
+              });
           })
           .catch(retry);
         return cancel;
@@ -349,17 +356,19 @@ export function useAutoRetry(params: {
       transcodedUrl == null
     ) {
       transcodedTriedRef.current = true;
-      void probeStremioServer().then((ok) => {
-        if (!current()) return;
-        if (ok) {
-          console.warn("[player] decode error — retrying via p2p transcoding");
-          recoveryBridge.destroy();
-          bridgeRef.current = null;
-          setTranscodedUrl(buildTranscodedUrl(src.url));
-        } else {
-          retry();
-        }
-      }).catch(retry);
+      void probeStremioServer()
+        .then((ok) => {
+          if (!current()) return;
+          if (ok) {
+            console.warn("[player] decode error — retrying via p2p transcoding");
+            recoveryBridge.destroy();
+            bridgeRef.current = null;
+            setTranscodedUrl(buildTranscodedUrl(src.url));
+          } else {
+            retry();
+          }
+        })
+        .catch(retry);
       return cancel;
     }
     triggerAutoRetry(`playback error "${snap.errorCode}"`);
@@ -490,7 +499,7 @@ export function useAutoRetry(params: {
       ? Math.max(BLACK_SCREEN_GRACE_MS, ENGINE_FIRST_FRAME_GRACE_MS)
       : BLACK_SCREEN_GRACE_MS;
     if (Date.now() - noVideoSinceRef.current > graceMs) {
-      if (!isP2pEngine || engineFailure) {
+      if (!isTizen() && (!isP2pEngine || engineFailure)) {
         triggerAutoRetry("audio plays but no video frames (black screen)");
       }
     }

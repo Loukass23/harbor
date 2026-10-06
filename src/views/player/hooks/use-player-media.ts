@@ -48,7 +48,7 @@ const HDR_NATIVE_GAMMAS = new Set(["pq", "hlg"]);
 export function usePlayerMedia(params: {
   src: PlayerSrc;
   snap: PlayerSnapshot;
-  engine: "html5" | "mpv";
+  engine: "html5" | "mpv" | "avplay";
   settings: ReturnType<typeof useSettings>["settings"];
   authKey: ReturnType<typeof useAuth>["authKey"];
   bridgeRef: RefObject<PlayerBridge | null>;

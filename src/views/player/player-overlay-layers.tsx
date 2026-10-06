@@ -43,7 +43,7 @@ export type PlayerOverlayLayersProps = {
   // transports on two independent timers shipped that way once.
   tenFoot: boolean;
   snap: PlayerSnapshot;
-  engine: "html5" | "mpv";
+  engine: "html5" | "mpv" | "avplay";
   src: PlayerSrc;
   adStreamRef: PlayerSrc["streamRef"];
   adUrl: string;

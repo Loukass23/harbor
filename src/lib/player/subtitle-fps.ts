@@ -75,7 +75,7 @@ export function formatSubtitleFps(value: number | null | undefined, digits = 3):
 }
 
 export function subtitleFpsAvailability(input: {
-  engine: "html5" | "mpv";
+  engine: "html5" | "mpv" | "avplay";
   hasTrack: boolean;
   textBased: boolean;
   hasSecondary: boolean;

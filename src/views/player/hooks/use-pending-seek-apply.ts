@@ -12,14 +12,20 @@ export function usePendingSeekApply(params: {
   const { pendingSeekSec, clearPendingSeek, durationSec, bridgeRef, inRoomRef } = params;
   useEffect(() => {
     if (pendingSeekSec == null) return;
-    if (durationSec <= 0) return;
     const b = bridgeRef.current;
     if (!b) return;
     const target = pendingSeekSec;
     clearPendingSeek();
-    const t = target <= 5 || target >= durationSec - 20 ? 0 : Math.min(target, durationSec - 1);
+    const t =
+      durationSec > 0
+        ? target <= 5 || target >= durationSec - 20
+          ? 0
+          : Math.min(target, durationSec - 1)
+        : target <= 5
+          ? 0
+          : target;
     b.seek(t);
     notifyMediaSeeked(t);
     if (!inRoomRef.current) b.play().catch(() => {});
-  }, [pendingSeekSec, durationSec, clearPendingSeek]);
+  }, [pendingSeekSec, durationSec, clearPendingSeek, bridgeRef, inRoomRef]);
 }

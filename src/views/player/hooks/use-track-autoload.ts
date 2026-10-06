@@ -41,7 +41,7 @@ export function useTrackAutoload(params: {
   bridgeRef: RefObject<PlayerBridge | null>;
   src: PlayerSrc;
   snap: PlayerSnapshot;
-  engine: "html5" | "mpv";
+  engine: "html5" | "mpv" | "avplay";
   settings: Settings;
   authKey: string | null;
 }) {

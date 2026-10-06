@@ -208,25 +208,30 @@ export class TizenAVPlayer implements IPlayer {
         }
 
         // 1. Enters IDLE state
+        console.log("[tizen-avplay] Opening URL:", url);
         avplay.open(url);
         this.state = "IDLE";
         this.callbacks.onStateChange?.("IDLE");
 
         // 2. Enable 4K if supported (must be in IDLE state)
         try {
-          if (productinfo?.isUdPanelSupported?.()) {
+          const isUd = productinfo?.isUdPanelSupported ? productinfo.isUdPanelSupported() : true;
+          if (isUd) {
             avplay.setStreamingProperty("SET_MODE_4K", "TRUE");
           }
         } catch (e) {
           console.warn("[tizen-avplay] Failed setting 4K mode:", e);
         }
 
-        // 3. Adaptive Streaming config (must be in IDLE state)
-        try {
-          const adaptive = options?.adaptiveInfo ?? "STARTBITRATE=HIGHEST";
-          avplay.setStreamingProperty("ADAPTIVE_INFO", adaptive);
-        } catch (e) {
-          console.warn("[tizen-avplay] Failed setting ADAPTIVE_INFO:", e);
+        // 3. Adaptive Streaming config (only for HLS / DASH / adaptive streams)
+        const isAdaptive = Boolean(options?.adaptiveInfo) || /\.(m3u8|mpd)($|\?)/i.test(url);
+        if (isAdaptive) {
+          try {
+            const adaptive = options?.adaptiveInfo ?? "STARTBITRATE=HIGHEST";
+            avplay.setStreamingProperty("ADAPTIVE_INFO", adaptive);
+          } catch (e) {
+            console.warn("[tizen-avplay] Failed setting ADAPTIVE_INFO:", e);
+          }
         }
 
         // 4. External subtitles (must be set in IDLE state)
@@ -249,7 +254,9 @@ export class TizenAVPlayer implements IPlayer {
             this.displayRect.width,
             this.displayRect.height,
           );
-          avplay.setDisplayMethod(options?.displayMethod ?? "PLAYER_DISPLAY_MODE_LETTER_BOX");
+          avplay.setDisplayMethod(
+            options?.displayMethod ?? "PLAYER_DISPLAY_MODE_AUTO_ASPECT_RATIO",
+          );
         } catch (e) {
           console.warn("[tizen-avplay] Failed setting display geometry:", e);
         }
@@ -257,23 +264,27 @@ export class TizenAVPlayer implements IPlayer {
         // 6. Set event listener callbacks
         avplay.setListener({
           onbufferingstart: () => {
+            console.log("[tizen-avplay] onbufferingstart");
             this.callbacks.onBufferingStart?.();
           },
           onbufferingprogress: (percent) => {
             this.callbacks.onBufferingProgress?.(percent);
           },
           onbufferingcomplete: () => {
+            console.log("[tizen-avplay] onbufferingcomplete");
             this.callbacks.onBufferingComplete?.();
           },
           oncurrentplaytime: (currentTimeMs) => {
             this.callbacks.onTimeUpdate?.(currentTimeMs);
           },
           onstreamcompleted: () => {
+            console.log("[tizen-avplay] onstreamcompleted");
             this.state = "IDLE";
             this.callbacks.onStateChange?.("IDLE");
             this.callbacks.onEnded?.();
           },
           onerror: (errorType) => {
+            console.error("[tizen-avplay] onerror callback:", errorType);
             this.state = "NONE";
             this.callbacks.onStateChange?.("NONE");
             this.callbacks.onError?.(errorType);
@@ -287,8 +298,10 @@ export class TizenAVPlayer implements IPlayer {
         this.setupVisibilityListener(avplay);
 
         // 8. Prepare async to enter READY state
+        console.log("[tizen-avplay] Calling prepareAsync()...");
         avplay.prepareAsync(
           () => {
+            console.log("[tizen-avplay] prepareAsync SUCCESS! state -> READY");
             this.state = "READY";
             this.callbacks.onStateChange?.("READY");
             this.callbacks.onReady?.();
@@ -300,6 +313,7 @@ export class TizenAVPlayer implements IPlayer {
             resolve();
           },
           (error) => {
+            console.error("[tizen-avplay] prepareAsync FAILED:", error);
             this.state = "NONE";
             this.callbacks.onStateChange?.("NONE");
             this.callbacks.onError?.(error);
@@ -307,6 +321,7 @@ export class TizenAVPlayer implements IPlayer {
           },
         );
       } catch (err) {
+        console.error("[tizen-avplay] initialize threw exception:", err);
         this.state = "NONE";
         this.callbacks.onError?.(err);
         reject(err);
@@ -336,18 +351,44 @@ export class TizenAVPlayer implements IPlayer {
 
   public play(): void {
     if (!this.avplay) return;
-    if (this.state !== "READY" && this.state !== "PAUSED") return;
-    this.avplay.play();
-    this.state = "PLAYING";
-    this.callbacks.onStateChange?.("PLAYING");
+    console.log("[tizen-avplay] play() requested. Current state:", this.state);
+    if (this.state !== "READY" && this.state !== "PAUSED") {
+      console.warn("[tizen-avplay] play() ignored because state is:", this.state);
+      return;
+    }
+    try {
+      this.avplay.play();
+      this.state = "PLAYING";
+      this.callbacks.onStateChange?.("PLAYING");
+      if (this.pendingSeekMs !== null) {
+        const targetMs = this.pendingSeekMs;
+        this.pendingSeekMs = null;
+        try {
+          this.avplay.seekTo(
+            Math.max(0, Math.round(targetMs)),
+            () => console.log("[tizen-avplay] Pending seek completed to:", targetMs),
+            (e) => console.error("[tizen-avplay] Pending seek failed:", e),
+          );
+        } catch (e) {
+          console.error("[tizen-avplay] Pending seek threw:", e);
+        }
+      }
+    } catch (e) {
+      console.error("[tizen-avplay] play() threw error:", e);
+    }
   }
 
   public pause(): void {
     if (!this.avplay) return;
+    console.log("[tizen-avplay] pause() requested. Current state:", this.state);
     if (this.state !== "PLAYING") return;
-    this.avplay.pause();
-    this.state = "PAUSED";
-    this.callbacks.onStateChange?.("PAUSED");
+    try {
+      this.avplay.pause();
+      this.state = "PAUSED";
+      this.callbacks.onStateChange?.("PAUSED");
+    } catch (e) {
+      console.error("[tizen-avplay] pause() threw error:", e);
+    }
   }
 
   public stop(): void {
@@ -373,9 +414,15 @@ export class TizenAVPlayer implements IPlayer {
     this.callbacks.onStateChange?.("NONE");
   }
 
+  private pendingSeekMs: number | null = null;
+
   public seek(timeMs: number): void {
     if (!this.avplay) return;
-    if (this.state !== "READY" && this.state !== "PLAYING" && this.state !== "PAUSED") return;
+    if (this.state === "READY") {
+      this.pendingSeekMs = timeMs;
+      return;
+    }
+    if (this.state !== "PLAYING" && this.state !== "PAUSED") return;
     this.avplay.seekTo(
       Math.max(0, Math.round(timeMs)),
       () => {},
@@ -390,6 +437,15 @@ export class TizenAVPlayer implements IPlayer {
       this.avplay.setDisplayRect(x, y, width, height);
     } catch (e) {
       console.warn("[tizen-avplay] Failed to update display rect:", e);
+    }
+  }
+
+  public setDisplayMethod(mode: AVPlayDisplayMode): void {
+    if (!this.avplay || this.state === "NONE") return;
+    try {
+      this.avplay.setDisplayMethod(mode);
+    } catch (e) {
+      console.warn("[tizen-avplay] Failed to set display method:", e);
     }
   }
 
@@ -433,6 +489,16 @@ export class TizenAVPlayer implements IPlayer {
     }
   }
 
+  public getCurrentStreamInfo(): AVPlayTrackInfo[] {
+    if (!this.avplay) return [];
+    if (this.state === "NONE" || this.state === "IDLE") return [];
+    try {
+      return this.avplay.getCurrentStreamInfo() || [];
+    } catch {
+      return [];
+    }
+  }
+
   public setSelectTrack(trackType: AVPlayTrackType | string, trackIndex: number): void {
     if (!this.avplay) return;
     if (this.state === "NONE" || this.state === "IDLE") return;
@@ -463,6 +529,7 @@ export function createAvplayBridge(bridgeOptions?: CreateAvplayBridgeOptions): P
   let snap: PlayerSnapshot = initialPlayerSnapshot();
   const listeners = new Set<(s: PlayerSnapshot) => void>();
   let host: HTMLElement | null = null;
+  let avplayerObj: HTMLObjectElement | null = null;
   let activeTraceId: string | null = null;
   let mediaRevision = 0;
   let pendingVolume = 1;
@@ -647,6 +714,16 @@ export function createAvplayBridge(bridgeOptions?: CreateAvplayBridgeOptions): P
       },
       onTimeUpdate: (timeMs) => {
         snap.positionSec = timeMs / 1000;
+        if (snap.status !== "playing" && snap.status !== "paused") {
+          snap.status = "playing";
+        }
+        if (snap.durationSec <= 0) {
+          const durMs = player.getDuration();
+          if (durMs > 0) {
+            snap.durationSec = durMs / 1000;
+          }
+        }
+        updateVideoDimensions();
         tickCues();
         emit();
       },
@@ -673,6 +750,9 @@ export function createAvplayBridge(bridgeOptions?: CreateAvplayBridgeOptions): P
         const durMs = player.getDuration();
         snap.durationSec = durMs > 0 ? durMs / 1000 : 0;
         snap.firstFrameReady = true;
+        snap.videoWidth = 1920;
+        snap.videoHeight = 1080;
+        updateVideoDimensions();
 
         const native = readNativeTracks(player.getTotalTrackInfo());
         if (native.audio.length > 0) {
@@ -784,16 +864,71 @@ export function createAvplayBridge(bridgeOptions?: CreateAvplayBridgeOptions): P
     return loadingPromise;
   };
 
-  const updateDisplayGeometry = () => {
-    if (!host) return;
+  const updateVideoDimensions = () => {
     try {
+      const streams = player.getCurrentStreamInfo();
+      for (const t of streams) {
+        if (t.type === "VIDEO") {
+          let info: Record<string, unknown> | null = null;
+          if (typeof t.extra_info === "string") {
+            try {
+              info = JSON.parse(t.extra_info);
+            } catch {}
+          } else if (typeof t.extra_info === "object" && t.extra_info !== null) {
+            info = t.extra_info as Record<string, unknown>;
+          }
+          if (info) {
+            const w = Number(info.Width || info.width || info.video_width || 0);
+            const h = Number(info.Height || info.height || info.video_height || 0);
+            if (w > 0 && h > 0) {
+              snap.videoWidth = w;
+              snap.videoHeight = h;
+              return;
+            }
+          }
+        }
+      }
+      if (!snap.videoWidth || !snap.videoHeight) {
+        snap.videoWidth = 1920;
+        snap.videoHeight = 1080;
+      }
+    } catch {
+      if (!snap.videoWidth || !snap.videoHeight) {
+        snap.videoWidth = 1920;
+        snap.videoHeight = 1080;
+      }
+    }
+  };
+
+  const updateDisplayGeometry = () => {
+    try {
+      const sw = typeof window !== "undefined" ? window.screen?.width || 1920 : 1920;
+      const sh = typeof window !== "undefined" ? window.screen?.height || 1080 : 1080;
+      if (!host) {
+        player.setDisplayRect(0, 0, sw, sh);
+        player.setDisplayMethod("PLAYER_DISPLAY_MODE_AUTO_ASPECT_RATIO");
+        return;
+      }
       const rect = host.getBoundingClientRect();
-      const w = Math.round(rect.width) || 1920;
-      const h = Math.round(rect.height) || 1080;
-      const x = Math.round(rect.left) || 0;
-      const y = Math.round(rect.top) || 0;
-      player.setDisplayRect(x, y, w, h);
-    } catch {}
+      const vw = typeof window !== "undefined" ? window.innerWidth || sw : sw;
+      const vh = typeof window !== "undefined" ? window.innerHeight || sh : sh;
+
+      // Fullscreen stage: if host occupies at least 80% of window width and height
+      if (rect.width >= vw * 0.8 && rect.height >= vh * 0.8) {
+        player.setDisplayRect(0, 0, sw, sh);
+      } else {
+        const scaleX = sw / (vw || 1);
+        const scaleY = sh / (vh || 1);
+        const w = Math.round(rect.width * scaleX) || sw;
+        const h = Math.round(rect.height * scaleY) || sh;
+        const x = Math.round(rect.left * scaleX) || 0;
+        const y = Math.round(rect.top * scaleY) || 0;
+        player.setDisplayRect(x, y, w, h);
+      }
+      player.setDisplayMethod("PLAYER_DISPLAY_MODE_AUTO_ASPECT_RATIO");
+    } catch (e) {
+      console.warn("[tizen-avplay] updateDisplayGeometry error:", e);
+    }
   };
 
   return {
@@ -802,10 +937,30 @@ export function createAvplayBridge(bridgeOptions?: CreateAvplayBridgeOptions): P
       // AVPlay renders video to a native hardware plane underneath the webview.
       // Make host transparent so the native video plane is fully visible.
       host.style.backgroundColor = "transparent";
+
+      if (!avplayerObj && typeof document !== "undefined") {
+        avplayerObj = document.createElement("object");
+        avplayerObj.type = "application/avplayer";
+        avplayerObj.style.position = "absolute";
+        avplayerObj.style.top = "0px";
+        avplayerObj.style.left = "0px";
+        avplayerObj.style.width = "100%";
+        avplayerObj.style.height = "100%";
+        avplayerObj.style.pointerEvents = "none";
+        avplayerObj.style.zIndex = "0";
+      }
+      if (avplayerObj && !host.contains(avplayerObj)) {
+        host.appendChild(avplayerObj);
+      }
+
       updateDisplayGeometry();
     },
 
     detach() {
+      if (avplayerObj && host?.contains(avplayerObj)) {
+        avplayerObj.remove();
+      }
+      avplayerObj = null;
       host = null;
     },
 
@@ -879,9 +1034,27 @@ export function createAvplayBridge(bridgeOptions?: CreateAvplayBridgeOptions): P
 
       updateDisplayGeometry();
 
-      await player.initialize(src.url, {
+      let playUrl = src.url;
+      if (/^https?:/i.test(playUrl)) {
+        try {
+          console.log("[tizen-avplay] Resolving redirects for URL:", playUrl);
+          const headRes = await fetch(playUrl, { method: "HEAD", redirect: "follow" });
+          if (headRes.url && headRes.url !== playUrl) {
+            console.log("[tizen-avplay] Resolved final URL:", headRes.url);
+            playUrl = headRes.url;
+          }
+        } catch (e) {
+          console.warn(
+            "[tizen-avplay] HEAD redirect resolve failed, falling back to original URL:",
+            e,
+          );
+        }
+      }
+
+      await player.initialize(playUrl, {
         startAtMs: src.startAtSec ? Math.round(src.startAtSec * 1000) : undefined,
         displayRect: bridgeOptions?.defaultDisplayRect,
+        displayMethod: "PLAYER_DISPLAY_MODE_AUTO_ASPECT_RATIO",
       });
     },
 

@@ -8,7 +8,7 @@ import { SubtitleFpsControl } from "./subtitle-fps-control";
 import { SyncControl } from "./sync-control";
 
 type Props = {
-  engine: "html5" | "mpv";
+  engine: "html5" | "mpv" | "avplay";
   count: number;
   selectedTrack: TrackInfo | null;
   hasSecondary: boolean;

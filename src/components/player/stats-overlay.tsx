@@ -41,46 +41,93 @@ async function getProp<T = unknown>(name: string): Promise<T | null> {
   }
 }
 
-export function StatsOverlay({ snap, engine }: { snap: PlayerSnapshot; engine: "html5" | "mpv" }) {
+export function StatsOverlay({
+  snap,
+  engine,
+}: {
+  snap: PlayerSnapshot;
+  engine: "html5" | "mpv" | "avplay";
+}) {
   const tr = useT();
   const [stats, setStats] = useState<MpvStats>(EMPTY_STATS);
 
   useEffect(() => {
-    if (engine !== "mpv") return;
-    let cancelled = false;
-    const tick = async () => {
-      const [vb, ab, fdd, fdo, fps, vc, ac, hw, cfps, cb] = await Promise.all([
-        getProp<number>("video-bitrate"),
-        getProp<number>("audio-bitrate"),
-        getProp<number>("decoder-frame-drop-count"),
-        getProp<number>("frame-drop-count"),
-        getProp<number>("estimated-vf-fps"),
-        getProp<string>("video-codec"),
-        getProp<string>("audio-codec"),
-        getProp<string>("hwdec-current"),
-        getProp<number>("container-fps"),
-        getProp<number>("cache-buffering-state"),
-      ]);
-      if (cancelled) return;
-      setStats({
-        videoBitrate: vb,
-        audioBitrate: ab,
-        frameDropDecoder: fdd,
-        frameDropOutput: fdo,
-        estimatedFps: fps,
-        videoCodec: vc,
-        audioCodec: ac,
-        hwdec: hw,
-        containerFps: cfps,
-        cacheBufferingState: cb,
-      });
-    };
-    void tick();
-    const id = window.setInterval(() => void tick(), 1000);
-    return () => {
-      cancelled = true;
-      window.clearInterval(id);
-    };
+    if (engine === "mpv") {
+      let cancelled = false;
+      const tick = async () => {
+        const [vb, ab, fdd, fdo, fps, vc, ac, hw, cfps, cb] = await Promise.all([
+          getProp<number>("video-bitrate"),
+          getProp<number>("audio-bitrate"),
+          getProp<number>("decoder-frame-drop-count"),
+          getProp<number>("frame-drop-count"),
+          getProp<number>("estimated-vf-fps"),
+          getProp<string>("video-codec"),
+          getProp<string>("audio-codec"),
+          getProp<string>("hwdec-current"),
+          getProp<number>("container-fps"),
+          getProp<number>("cache-buffering-state"),
+        ]);
+        if (cancelled) return;
+        setStats({
+          videoBitrate: vb,
+          audioBitrate: ab,
+          frameDropDecoder: fdd,
+          frameDropOutput: fdo,
+          estimatedFps: fps,
+          videoCodec: vc,
+          audioCodec: ac,
+          hwdec: hw,
+          containerFps: cfps,
+          cacheBufferingState: cb,
+        });
+      };
+      void tick();
+      const id = window.setInterval(() => void tick(), 1000);
+      return () => {
+        cancelled = true;
+        window.clearInterval(id);
+      };
+    }
+    if (engine === "avplay") {
+      let cancelled = false;
+      const tick = () => {
+        if (cancelled || typeof window === "undefined" || !window.webapis?.avplay) return;
+        try {
+          const av = window.webapis.avplay;
+          const streamInfo = av.getCurrentStreamInfo?.() || [];
+          let vCodec: string | null = null;
+          let aCodec: string | null = null;
+          streamInfo.forEach((t) => {
+            if (t.type === "VIDEO") {
+              if (typeof t.extra_info === "string") {
+                try {
+                  const p = JSON.parse(t.extra_info) as { fourCC?: string };
+                  if (p.fourCC) vCodec = p.fourCC;
+                } catch {}
+              }
+            } else if (t.type === "AUDIO") {
+              if (typeof t.extra_info === "string") {
+                try {
+                  const p = JSON.parse(t.extra_info) as { fourCC?: string };
+                  if (p.fourCC) aCodec = p.fourCC;
+                } catch {}
+              }
+            }
+          });
+          setStats((prev) => ({
+            ...prev,
+            videoCodec: vCodec,
+            audioCodec: aCodec,
+          }));
+        } catch {}
+      };
+      tick();
+      const id = window.setInterval(tick, 1000);
+      return () => {
+        cancelled = true;
+        window.clearInterval(id);
+      };
+    }
   }, [engine]);
 
   const audioTrack = snap.audioTracks.find((t) => t.selected) ?? null;
@@ -88,7 +135,19 @@ export function StatsOverlay({ snap, engine }: { snap: PlayerSnapshot; engine: "
   const fps = stats.estimatedFps ?? stats.containerFps;
 
   const rows: Array<[string, string]> = [];
-  rows.push([tr("Engine"), engine === "mpv" ? "libmpv" : "HTML5"]);
+  rows.push([
+    tr("Engine"),
+    engine === "mpv" ? "libmpv" : engine === "avplay" ? "AVPlay (Tizen)" : "HTML5",
+  ]);
+  if (engine === "avplay") {
+    rows.push([tr("AVPlay status"), snap.status]);
+    if (snap.durationSec > 0 || snap.positionSec > 0) {
+      rows.push([
+        tr("Time"),
+        `${Math.round(snap.positionSec)}s / ${Math.round(snap.durationSec)}s`,
+      ]);
+    }
+  }
   rows.push([
     tr("Resolution"),
     snap.videoWidth && snap.videoHeight ? `${snap.videoWidth}×${snap.videoHeight}` : "—",
@@ -120,7 +179,7 @@ export function StatsOverlay({ snap, engine }: { snap: PlayerSnapshot; engine: "
   rows.push([tr("Volume"), `${Math.round(snap.volume * 100)}%${snap.muted ? tr(" · muted") : ""}`]);
 
   return (
-    <div className="pointer-events-none absolute start-6 top-20 z-20 max-w-[320px] animate-fade-in rounded-2xl border border-edge-soft bg-canvas/85 p-4 font-mono text-[11.5px] leading-relaxed text-ink shadow-[0_18px_50px_-15px_rgba(0,0,0,0.7)] backdrop-blur-md">
+    <div className="pointer-events-none fixed start-6 top-20 z-[9999] max-w-[320px] animate-fade-in rounded-2xl border border-edge-soft bg-canvas/85 p-4 font-mono text-[11.5px] leading-relaxed text-ink shadow-[0_18px_50px_-15px_rgba(0,0,0,0.7)] backdrop-blur-md">
       <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-ink-subtle">
         {tr("Playback stats · press I to hide")}
       </p>

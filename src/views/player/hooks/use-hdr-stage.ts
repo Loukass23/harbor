@@ -27,7 +27,7 @@ async function displayHdrActive(): Promise<boolean> {
 
 export function useHdrStage(params: {
   sourceKey: string;
-  engine: "html5" | "mpv";
+  engine: "html5" | "mpv" | "avplay";
   embedActive: boolean;
   hdrGamma: string;
   playerHdrStage: Settings["playerHdrStage"];

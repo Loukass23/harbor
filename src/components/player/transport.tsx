@@ -148,7 +148,7 @@ export function Transport({
   tmdbKey?: string | null;
   season?: number | null;
   episode?: number | null;
-  engine: "html5" | "mpv";
+  engine: "html5" | "mpv" | "avplay";
   useOverlayPopups?: boolean;
   onMenuOpenChange?: (open: boolean) => void;
   download?: DownloadStatus;

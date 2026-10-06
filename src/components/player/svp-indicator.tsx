@@ -14,7 +14,7 @@ export function SvpIndicator({
   chromeVisible,
   suppressed = false,
 }: {
-  engine: "html5" | "mpv";
+  engine: "html5" | "mpv" | "avplay";
   chromeVisible: boolean;
   suppressed?: boolean;
 }) {
