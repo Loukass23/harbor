@@ -1,8 +1,9 @@
 import { createHtml5Bridge } from "@/lib/player/html5";
+import { createAvplayBridge } from "@/lib/player/tizen-avplay";
 import { createMpvBridge, probeMpv, type MpvRect } from "@/lib/player/mpv";
 import type { PlayerBridge } from "@/lib/player/bridge";
 import type { MonitorInfo } from "@/lib/monitors";
-import { isLinuxDesktop, isMacDesktop, isWindowsDesktop } from "@/lib/platform";
+import { isLinuxDesktop, isMacDesktop, isTizen, isWindowsDesktop } from "@/lib/platform";
 
 export const SYNC_DRIFT_TOLERANCE_S = 0.6;
 export const SYNC_SUPPRESS_MS = 1400;
@@ -39,9 +40,10 @@ export function embedFlags(
   const hasFrame = videoWidth > 0 && videoHeight > 0;
   const macShowing = embedOn && isMacDesktop() && hasFrame;
   const linuxShowing = embedOn && isLinuxDesktop() && hasFrame;
+  const tizenShowing = isTizen();
   return {
     mpvEmbedWindowsActive,
-    stageBg: mpvEmbedWindowsActive || macShowing || linuxShowing ? "" : "bg-black",
+    stageBg: mpvEmbedWindowsActive || macShowing || linuxShowing || tizenShowing ? "" : "bg-black",
   };
 }
 
@@ -75,6 +77,7 @@ export async function pickBridge(
   },
 ): Promise<{ bridge: PlayerBridge; engine: "html5" | "mpv" }> {
   if (want === "html5") return { bridge: createHtml5Bridge(), engine: "html5" };
+  if (isTizen()) return { bridge: createAvplayBridge(), engine: "html5" };
   if (want === "mpv") {
     const probe = await probeMpv();
     if (probe.available) return { bridge: createMpvBridge(mpvOpts), engine: "mpv" };

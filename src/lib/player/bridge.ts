@@ -156,7 +156,7 @@ export type PlayerBridge = {
 };
 
 export type PlayerCapabilities = {
-  engine: "html5" | "mpv";
+  engine: "html5" | "mpv" | "avplay";
   pictureInPicture: boolean;
   airplay: boolean;
   chromecast: boolean;
