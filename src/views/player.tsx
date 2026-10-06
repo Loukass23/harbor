@@ -186,7 +186,10 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
     hostSource,
   } = useTogether();
   const stageRef = useRef<HTMLDivElement>(null);
-  const refreshDockGeometry = useCallback(() => window.dispatchEvent(new Event("harbor:mpv-refresh-geom")), []);
+  const refreshDockGeometry = useCallback(
+    () => window.dispatchEvent(new Event("harbor:mpv-refresh-geom")),
+    [],
+  );
   const dockDrag = useDockDrag(stageRef, docked, refreshDockGeometry);
   const videoMountRef = useRef<HTMLDivElement>(null);
   const bridgeRef = useRef<PlayerBridge | null>(null);
@@ -1037,7 +1040,11 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
     const unsub = subscribePlaybackClock(() => {
       const livePos = getPlaybackPosition();
       const currentSnap = snapRef.current;
-      if (currentSnap.status === "idle" || currentSnap.status === "ended" || currentSnap.status === "error") {
+      if (
+        currentSnap.status === "idle" ||
+        currentSnap.status === "ended" ||
+        currentSnap.status === "error"
+      ) {
         clearMediaControls();
         return;
       }
@@ -1146,14 +1153,14 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
   });
 
   const cancelToPicker = useCallback(() => {
-    if (isLocalSrc || src.meta.id?.startsWith("iptv:")) {
+    if (isLocalSrc || src.meta.id?.startsWith("iptv:") || bigPictureActive) {
       void closePlayer();
       return;
     }
     bridgeRef.current?.destroy();
     bridgeRef.current = null;
     openPicker(src.meta, src.episode, { autoPlay: false });
-  }, [bridgeRef, closePlayer, isLocalSrc, openPicker, src.episode, src.meta]);
+  }, [bigPictureActive, bridgeRef, closePlayer, isLocalSrc, openPicker, src.episode, src.meta]);
   const { variant: streamPillVariant, dismiss: dismissStreamPill } = useStreamPill({
     srcUrl: src.url,
     snap,

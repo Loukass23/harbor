@@ -212,7 +212,7 @@ function stepPackage() {
   }
 
   // Copy template files into dist for packaging
-  const filesToCopy = ["config.xml", "icon.png", ".project", ".tproject"];
+  const filesToCopy = ["config.xml", "icon.png"];
   for (const file of filesToCopy) {
     const src = join(TIZEN_DIR, file);
     const dest = join(DIST_DIR, file);

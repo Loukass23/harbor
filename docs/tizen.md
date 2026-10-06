@@ -65,32 +65,36 @@ Samsung Smart TVs enforce strict sandboxing. The manifest declares necessary pri
 
 All operations are run through `pnpm`:
 
-| Command                                         | Description                                                                            |
-| :---------------------------------------------- | :------------------------------------------------------------------------------------- |
-| `pnpm run tizen:build`                          | Compiles TypeScript (`tsc -b`) and bundles web assets via Vite in `tizen` mode.        |
-| `pnpm run tizen:package`                        | Stages `config.xml` & `icon.png` into `dist/` and creates signed `.wgt` via `tz pack`. |
-| `pnpm run tizen:install`                        | Deploys the `.wgt` package to the target device via `tz install`.                      |
-| `pnpm run tizen:deploy`                         | End-to-end deployment: runs build, package, and install sequentially.                  |
-| `pnpm run tizen:run`                            | Launches the installed Harbor application on the target TV.                            |
-| `pnpm run tizen:debug`                          | Launches the app in debug mode (`tz run -d`), opening the Web Inspector.               |
-| `pnpm run tizen:diag [counts\|bigimgs\|layers]` | Runs Harbor's CDP diagnostics suite against the active TV session.                     |
-| `pnpm run tizen:seed`                           | Injects the latest `.harbx` backup into the TV's `localStorage` over CDP.              |
+| Command                                         | Description                                                                             |
+| :---------------------------------------------- | :-------------------------------------------------------------------------------------- |
+| `pnpm run tizen:build`                          | Compiles TypeScript (`tsc -b`) and bundles web assets via Vite in `tizen` mode.         |
+| `pnpm run tizen:deploy`                         | End-to-end deployment: runs build, packages signed `.wgt`, and installs onto target TV. |
+| `pnpm run tizen:debug`                          | Launches app in debug mode (`tz run -d`), opens CDP port forward, and outputs URL.      |
+| `pnpm run tizen:seed`                           | Injects the latest `.harbx` backup into the TV's `localStorage` over CDP and reloads.   |
+| `pnpm run tizen:diag [counts\|bigimgs\|layers]` | Runs Harbor's CDP diagnostics suite against the active TV session.                      |
+
+> **Advanced / Granular usage:**
+> Individual lifecycle steps are also accessible directly via script flags:
+> `node scripts/tizen-pipeline.mjs --package` (package only), `--install` (install only), `--run` (launch without debugger).
 
 ---
 
 ## 5. Configuration & Environment Overrides
 
-The pipeline script (`scripts/tizen-pipeline.mjs`) automatically detects attached devices and forwarded ports, but supports overrides via `.env` or environment variables:
+Copy `.env.example` to `.env` to configure your development setup. The pipeline script (`scripts/tizen-pipeline.mjs`) automatically detects attached devices and forwarded ports, but honors overrides from `.env`:
 
 ```env
 # Target TV serial, IP or DUID (defaults to auto-detection from 'sdb devices')
 HARBOR_TIZEN_TARGET=GU43DU7199UXZG
 
+# SDB serial address for Wi-Fi or USB connected TV (defaults to auto-detection)
+HARBOR_TIZEN_SERIAL=192.168.178.26:26101
+
 # Samsung certificate signing profile (defaults to SwormHarbor)
 HARBOR_TIZEN_PROFILE=SwormHarbor
 
 # Chrome DevTools Protocol port (defaults to auto-detection from 'sdb forward --list')
-HARBOR_CDP_PORT=40405
+HARBOR_CDP_PORT=45159
 
 # Custom backup path for dev seeding
 HARBOR_TIZEN_BACKUP=harbor-backups/my-backup.harbx
@@ -104,7 +108,17 @@ node scripts/tizen-pipeline.mjs --target <TARGET> --profile <PROFILE> --deploy
 
 ---
 
-## 6. Developer Workflows
+## 6. Remote Control & Navigation Behavior
+
+- **Remote Keys Registered**: When launched on Tizen, Harbor registers Samsung TV remote keys (`MediaPlayPause`, `MediaPlay`, `MediaPause`, `MediaStop`, `MediaFastForward`, `MediaRewind`, `Search`, `Back`) via the Tizen TV InputDevice API.
+- **Back Key Flow**:
+  - In Big Picture menus/detail screens, the remote Back key steps back through history or closes modals.
+  - When pressed on the top-level home screen, Tizen prompts to exit the application cleanly via `tizen.application.getCurrentApplication().exit()`.
+  - During stream loading or playback, pressing Back or clicking Cancel safely tears down the player bridge and returns cleanly to Big Picture without UI freezes or leaving the shell hidden.
+
+---
+
+## 7. Developer Workflows
 
 ### Live Debugging & Web Inspector
 
@@ -138,4 +152,4 @@ pnpm run tizen:diag layers
 To quickly populate settings, accounts, or test data without retyping on a TV remote:
 
 - **Live Seeding (Instant)**: Run `pnpm run tizen:seed` while the app is running in debug mode. It will inject the latest `.harbx` backup from `harbor-backups/` and reload the page.
-- **Build Preloading**: Run `pnpm run tizen:deploy --seed` to bundle the backup into `dist/dev-seed.js`, auto-applying it on the TV's very first launch.
+- **Build Preloading**: Run `node scripts/tizen-pipeline.mjs --deploy --seed` to bundle the backup into `dist/dev-seed.js`, auto-applying it on the TV's very first launch.
