@@ -101,10 +101,21 @@ function detectTarget() {
   return "GU43DU7199UXZG";
 }
 
+function ensureSdbConnected() {
+  const serial = getArg("--serial", process.env.HARBOR_TIZEN_SERIAL || "192.168.178.26:26101");
+  try {
+    const out = execSync("sdb devices", { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] });
+    if (!out.includes(serial) && serial.includes(":")) {
+      execSync(`sdb connect ${serial}`, { stdio: "ignore" });
+    }
+  } catch {}
+}
+
 function detectSerial() {
   const override = getArg("--serial", process.env.HARBOR_TIZEN_SERIAL);
   if (override) return override;
 
+  ensureSdbConnected();
   try {
     const out = execSync("sdb devices", { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] });
     const lines = out
@@ -360,13 +371,20 @@ async function stepLiveSeed() {
   const cdp = await Cdp.connect();
 
   let count = 0;
-  for (const [k, v] of Object.entries(raw.data)) {
-    if (typeof v === "string") {
-      await cdp.send("Runtime.evaluate", {
-        expression: `localStorage.setItem(${JSON.stringify(k)}, ${JSON.stringify(v)})`,
-      });
-      count++;
-    }
+  const entries = Object.entries(raw.data).filter(([, v]) => typeof v === "string");
+  const chunkSize = 25;
+  for (let i = 0; i < entries.length; i += chunkSize) {
+    const chunk = entries.slice(i, i + chunkSize);
+    const chunkObj = Object.fromEntries(chunk);
+    await cdp.send("Runtime.evaluate", {
+      expression: `(() => {
+        const items = ${JSON.stringify(chunkObj)};
+        for (const [k, v] of Object.entries(items)) {
+          try { localStorage.setItem(k, v); } catch(e) {}
+        }
+      })()`,
+    });
+    count += chunk.length;
   }
   await cdp.send("Runtime.evaluate", { expression: `location.reload()` });
   cdp.close();
