@@ -576,6 +576,7 @@ Directional, not a set of promises. Priorities shift with feedback.
 - [x] First class anime room with Kitsu and AniZip
 - [x] Theme studio with custom layouts
 - [x] macOS, Windows, and web launch builds
+- [x] Samsung Tizen Smart TV platform support (`webapis.avplay` native 4K engine)
 - [ ] Official Linux packages
 - [ ] Expanded casting device matrix (AirPlay 2, more Roku and Chromecast targets)
 - [ ] More translations

@@ -4,6 +4,7 @@ import type { StreamingService } from "@/lib/settings";
 import type { Settings } from "@/lib/settings/types";
 import { ALL_LANGUAGE_NAMES } from "@/lib/subtitles/language";
 import { mediaServerConnections } from "@/lib/media-server/connections";
+import { isTizen } from "@/lib/platform";
 
 export type BpCatId =
   | "picture"
@@ -249,12 +250,17 @@ export function bpSettingsControls(
         id: "engine",
         label: t("Player engine"),
         value: s.playerEngine,
-        options: [
-          { value: "auto", label: t("Auto") },
-          { value: "mpv", label: "mpv" },
-          { value: "html5", label: "HTML5" },
-          { value: "avplay", label: "AVPlay (Tizen)" },
-        ],
+        options: isTizen()
+          ? [
+              { value: "auto", label: t("Auto") },
+              { value: "avplay", label: "AVPlay (Tizen)" },
+              { value: "html5", label: "HTML5" },
+            ]
+          : [
+              { value: "auto", label: t("Auto") },
+              { value: "mpv", label: "mpv" },
+              { value: "html5", label: "HTML5" },
+            ],
       },
       {
         kind: "options",

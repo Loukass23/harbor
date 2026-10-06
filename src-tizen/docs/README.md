@@ -9,6 +9,7 @@ This document covers the build, deployment, debugging, and diagnostics pipeline 
 Harbor on Tizen runs as a native Tizen Web Application (packaged as a `.wgt` widget):
 
 - **Shared TV UI**: Reuses Harbor's Big Picture TV interface (`index-tv.html` / `src/main-tv.tsx`) built with standard React, Tailwind CSS, and TanStack Router.
+- **Native AVPlay Engine**: Uses Samsung's hardware-accelerated `webapis.avplay` for seamless 4K HDR playback and debrid stream streaming (see [AVPlay Integration Guide](avplay-integration.md)).
 - **Isolated Platform Wrapper**: Following the project's separation pattern (`src-tauri/` for desktop, `android-native/` for mobile), all Tizen-specific packaging metadata resides in `src-tizen/`.
 - **Relative Path Bundling**: In `tizen` build mode, Vite targets `base: "./"` and outputs to `src-tizen/dist/`. This ensures local script, style, and asset references resolve under Tizen's `file:///` widget sandbox.
 - **Clean Source Tree**: All developer utilities (backup preloading, device targeting, CDP diagnostics) are decoupled from `src/` and orchestrated via Node scripts in `scripts/`.
