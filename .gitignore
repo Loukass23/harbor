@@ -105,6 +105,8 @@ installer/src-tauri/payload/
 installer/payload-stage/
 !installer/**/*.md
 !docs/**/*.md
+!tizen-src/**/*.md
+!src-tizen/**/*.md
 
 # Tizen build artifacts
 src-tizen/dist/
