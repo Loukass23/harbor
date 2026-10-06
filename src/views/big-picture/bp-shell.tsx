@@ -15,7 +15,7 @@ import type { HomeRow } from "@/views/home/home-types";
 import { SFX } from "@/lib/sfx";
 import { useView, type PlayEpisode } from "@/lib/view";
 import { useActiveKid } from "@/lib/profiles";
-import { isAndroidTv } from "@/lib/platform";
+import { isAndroidTv, isTizen } from "@/lib/platform";
 import {
   exitBigPicture,
   goBigPictureTab,
@@ -529,6 +529,20 @@ export function BigPictureShell() {
             <BpExitConfirm
               onConfirm={() => {
                 setConfirmExit(false);
+                if (isTizen()) {
+                  try {
+                    (
+                      window as unknown as {
+                        tizen?: {
+                          application?: { getCurrentApplication: () => { exit: () => void } };
+                        };
+                      }
+                    ).tizen?.application
+                      ?.getCurrentApplication()
+                      ?.exit();
+                    return;
+                  } catch {}
+                }
                 exitBigPicture();
               }}
               onCancel={() => setConfirmExit(false)}

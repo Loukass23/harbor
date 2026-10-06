@@ -555,14 +555,14 @@ export function useBpFocusRoot(params: {
         focusBpTopBar(rootRef.current);
         return;
       }
-      if (e.key === "Enter" || e.key === " ") {
+      if (e.key === "Enter" || e.key === " " || e.keyCode === 13) {
         if (editing()) return;
         e.preventDefault();
         e.stopPropagation();
         select();
         return;
       }
-      if (e.key === "Escape" || e.key === "Backspace") {
+      if (e.key === "Escape" || e.key === "Backspace" || e.keyCode === 10009 || e.which === 10009) {
         if (e.key === "Backspace" && editing()) return;
         e.preventDefault();
         e.stopPropagation();

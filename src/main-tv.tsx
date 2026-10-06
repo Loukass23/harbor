@@ -17,12 +17,55 @@ import "@/index.css";
 
 applyOsDataset();
 
-// No startup-ready ping here, and that is deliberate. Desktop sets
-// visible:false on its window and reveals it from on_page_load inside the
-// #[cfg(desktop)] run(); harbor_startup_ready only calls set_focus and is not
-// registered in mobile.rs at all. Android is visible purely because
-// tauri.android.conf.json replaces the whole windows array and omits the flag.
-// Add visible:false there and the TV stays black forever, because none of the
+// Register Samsung Tizen remote keys so media controls and numpad emit standard keyboard events
+function registerTizenKeys() {
+  if (typeof window === "undefined") return;
+  try {
+    const tizenInput = (
+      window as unknown as {
+        tizen?: {
+          tvinputdevice?: {
+            registerKey: (name: string) => void;
+          };
+        };
+      }
+    ).tizen?.tvinputdevice;
+    if (!tizenInput) return;
+
+    const keysToRegister = [
+      "MediaPlay",
+      "MediaPause",
+      "MediaPlayPause",
+      "MediaStop",
+      "MediaFastForward",
+      "MediaRewind",
+      "MediaTrackPrevious",
+      "MediaTrackNext",
+      "ColorF0Red",
+      "ColorF1Green",
+      "ColorF2Yellow",
+      "ColorF3Blue",
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+    ];
+
+    for (const key of keysToRegister) {
+      try {
+        tizenInput.registerKey(key);
+      } catch {}
+    }
+  } catch {}
+}
+
+registerTizenKeys();
 // reveal machinery is compiled into the Android binary.
 
 async function mount() {
@@ -43,9 +86,7 @@ async function mount() {
   // stream plays, and importing it up here put the whole subtitle stack in
   // front of the television's first paint. Loaded after the root is handed to
   // React so it parses on an idle frame instead of a critical one.
-  void import("@/lib/subtitles/subtitle-cache")
-    .then((m) => m.initSubtitleCache())
-    .catch(() => {});
+  void import("@/lib/subtitles/subtitle-cache").then((m) => m.initSubtitleCache()).catch(() => {});
 }
 
 void mount();

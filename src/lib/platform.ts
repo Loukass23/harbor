@@ -54,9 +54,26 @@ export function isAndroid(): boolean {
 const TV_UA = /\b(tv|leanback|androidtv|aft[a-z]*|bravia|firetv|googletv|shield)\b/;
 
 let cachedTv: boolean | null = null;
+let cachedTizen: boolean | null = null;
+
+export function isTizen(): boolean {
+  if (cachedTizen !== null) return cachedTizen;
+  if (typeof window === "undefined") {
+    cachedTizen = false;
+    return false;
+  }
+  const hasTizenApi = typeof (window as unknown as { tizen?: unknown }).tizen !== "undefined";
+  const ua = (navigator.userAgent || "").toLowerCase();
+  cachedTizen = hasTizenApi || ua.includes("tizen") || ua.includes("smart-tv");
+  return cachedTizen;
+}
 
 export function isAndroidTv(): boolean {
   if (cachedTv !== null) return cachedTv;
+  if (isTizen()) {
+    cachedTv = true;
+    return true;
+  }
   if (!isAndroid() || typeof navigator === "undefined") {
     cachedTv = false;
     return false;
@@ -75,7 +92,10 @@ export function isMobileDevice(): boolean {
   const ua = navigator.userAgent || "";
   if (/Android|webOS|iPhone|iPod|BlackBerry|IEMobile|Opera Mini|iPad/i.test(ua)) return true;
   if (/Macintosh/i.test(ua) && (navigator.maxTouchPoints ?? 0) > 1) return true;
-  if ((navigator.maxTouchPoints ?? 0) > 0 && Math.min(window.innerWidth, window.innerHeight) < 640) {
+  if (
+    (navigator.maxTouchPoints ?? 0) > 0 &&
+    Math.min(window.innerWidth, window.innerHeight) < 640
+  ) {
     return true;
   }
   return false;
