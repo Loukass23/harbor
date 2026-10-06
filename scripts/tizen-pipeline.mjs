@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { execSync, spawnSync } from "node:child_process";
 import { copyFileSync, existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import http from "node:http";
 import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -78,7 +79,7 @@ function getManifestInfo() {
   };
 }
 
-// Auto-detect connected device target
+// Auto-detect connected device target (name for tz, serial for sdb)
 function detectTarget() {
   const override = getArg("--target", process.env.HARBOR_TIZEN_TARGET);
   if (override) return override;
@@ -100,8 +101,46 @@ function detectTarget() {
   return "GU43DU7199UXZG";
 }
 
+function detectSerial() {
+  const override = getArg("--serial", process.env.HARBOR_TIZEN_SERIAL);
+  if (override) return override;
+
+  try {
+    const out = execSync("sdb devices", { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] });
+    const lines = out
+      .split("\n")
+      .map((l) => l.trim())
+      .filter((l) => l && !l.startsWith("List of"));
+    if (lines.length > 0) {
+      const parts = lines[0].split(/\s+/);
+      return parts[0] || "192.168.178.26:26101";
+    }
+  } catch {
+    // SDB not available
+  }
+  return "192.168.178.26:26101";
+}
+
+// Probe an HTTP URL with a short timeout
+function probePort(port) {
+  return new Promise((resolve) => {
+    const req = http.get(`http://127.0.0.1:${port}/json/list`, { timeout: 400 }, (res) => {
+      if (res.statusCode === 200) {
+        resolve(true);
+      } else {
+        resolve(false);
+      }
+    });
+    req.on("error", () => resolve(false));
+    req.on("timeout", () => {
+      req.destroy();
+      resolve(false);
+    });
+  });
+}
+
 // Auto-detect forwarded debugging port
-function detectDebugPort() {
+async function detectDebugPort() {
   const override = getArg("--port", process.env.HARBOR_CDP_PORT);
   if (override) return override;
 
@@ -110,12 +149,22 @@ function detectDebugPort() {
       encoding: "utf8",
       stdio: ["ignore", "pipe", "ignore"],
     });
-    const match = out.match(/LOCAL\s+tcp:(\d+)/i) || out.match(/tcp:(\d+)/);
-    if (match) return match[1];
+    const matches = [...out.matchAll(/LOCAL\s+tcp:(\d+)/gi)].map((m) => m[1]);
+    if (matches.length === 0) {
+      const fallbackMatches = [...out.matchAll(/tcp:(\d+)/g)].map((m) => m[1]);
+      matches.push(...fallbackMatches);
+    }
+    const uniquePorts = [...new Set(matches)];
+    for (const port of uniquePorts) {
+      if (await probePort(port)) {
+        return port;
+      }
+    }
+    if (uniquePorts.length > 0) return uniquePorts[0];
   } catch {
     // SDB not available
   }
-  return "40405";
+  return "34181";
 }
 
 function getSigningProfile() {
@@ -248,14 +297,42 @@ function stepRun(debug = false) {
   console.log(`\n--- Launching App on ${target} (${debug ? "Debug" : "Normal"} Mode) ---`);
   console.log(`Application ID: ${appId} (Package: ${pkgId})`);
 
-  const args = ["run", "-t", target, "-p", pkgId];
-  if (debug) args.push("-d");
-  runCommand("tz", args);
+  if (debug) {
+    const serial = detectSerial();
+    // Terminate existing instance first so a fresh debug port is reliably bound
+    try {
+      execSync(`sdb -s ${serial} shell 0 was_kill ${pkgId}.dist`, { stdio: "ignore" });
+    } catch {
+      // Ignore if not running
+    }
+
+    try {
+      const out = execSync(`sdb -s ${serial} shell 0 debug ${pkgId}.dist`, { encoding: "utf8" });
+      console.log(out.trim());
+      const m = out.match(/port:\s*(\d+)/i);
+      if (m) {
+        const port = m[1];
+        console.log(`Forwarding debug port ${port}...`);
+        try {
+          execSync(`sdb -s ${serial} forward tcp:${port} tcp:${port}`, { stdio: "ignore" });
+        } catch {
+          // Ignore
+        }
+        console.log(`\n✓ Web Inspector active on: http://127.0.0.1:${port}/json/list`);
+        console.log(`Open in Chrome: http://127.0.0.1:${port}/devtools/inspector.html`);
+      }
+    } catch {
+      // Fallback to tz run if direct sdb debug fails
+      runCommand("tz", ["run", "-t", target, "-p", pkgId, "-d"]);
+    }
+  } else {
+    runCommand("tz", ["run", "-t", target, "-p", pkgId]);
+  }
 }
 
 // 5. Diagnostics step
-function stepDiag() {
-  const port = detectDebugPort();
+async function stepDiag() {
+  const port = await detectDebugPort();
   console.log(`\n--- Running Diagnostics against Tizen TV on port :${port} ---`);
   const diagArgs = process.argv.slice(process.argv.indexOf("--diag") + 1);
   if (diagArgs.length === 0) diagArgs.push("counts");
@@ -264,8 +341,8 @@ function stepDiag() {
   runCommand("node", ["scripts/harbor-diag.mjs", ...diagArgs], { env });
 }
 
-// 6. Live Seeding step via CDP
-function stepLiveSeed() {
+// 6. Live Seeding step via CDP WebSocket (bypasses OS command-line character limits)
+async function stepLiveSeed() {
   const backupPath = findBackupFile();
   if (!backupPath) {
     throw new Error("No backup file found in harbor-backups/ or specified with --backup");
@@ -275,22 +352,26 @@ function stepLiveSeed() {
     throw new Error("Invalid backup format: missing 'data' field");
   }
 
-  const port = detectDebugPort();
+  const port = await detectDebugPort();
+  process.env.HARBOR_CDP_PORT = port;
   console.log(`\n--- Live Seeding Backup (${basename(backupPath)}) via CDP on port :${port} ---`);
-  const expr = `(() => {
-    const data = ${JSON.stringify(raw.data)};
-    let count = 0;
-    for (const [k, v] of Object.entries(data)) {
-      try { localStorage.setItem(k, v); count++; } catch (e) {}
+
+  const { Cdp } = await import("./harbor-diag.mjs");
+  const cdp = await Cdp.connect();
+
+  let count = 0;
+  for (const [k, v] of Object.entries(raw.data)) {
+    if (typeof v === "string") {
+      await cdp.send("Runtime.evaluate", {
+        expression: `localStorage.setItem(${JSON.stringify(k)}, ${JSON.stringify(v)})`,
+      });
+      count++;
     }
-    location.reload();
-    return { count, keys: Object.keys(data).length };
-  })()`;
-  const env = { ...process.env, HARBOR_CDP_PORT: port };
-  runCommand("node", ["scripts/harbor-diag.mjs", "eval", expr], { env });
-  console.log(
-    `✓ Successfully seeded ${Object.keys(raw.data).length} keys into TV localStorage and reloaded.`,
-  );
+  }
+  await cdp.send("Runtime.evaluate", { expression: `location.reload()` });
+  cdp.close();
+
+  console.log(`✓ Successfully seeded ${count} keys into TV localStorage and reloaded.`);
 }
 
 // CLI Orchestration
@@ -305,12 +386,12 @@ async function main() {
   const isLiveSeed = hasFlag("--live-seed", "--seed-live");
 
   if (isLiveSeed) {
-    stepLiveSeed();
+    await stepLiveSeed();
     return;
   }
 
   if (isDiag) {
-    stepDiag();
+    await stepDiag();
     return;
   }
 
