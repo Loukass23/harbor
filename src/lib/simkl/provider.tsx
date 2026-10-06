@@ -55,13 +55,13 @@ export function SimklProvider({ children }: { children: ReactNode }) {
   const [connectState, setConnectState] = useState<ConnectState>({ kind: "idle" });
   const pollHandleRef = useRef<PollHandle | null>(null);
 
-  useEffect(
-    () =>
-      subscribeSession(() => {
-        setLocalSession(getSession());
-      }),
-    [],
-  );
+  useEffect(() => {
+    const syncSession = () => setLocalSession(getSession());
+    const unsubscribe = subscribeSession(syncSession);
+    // Profile restoration can finish after render but before this subscription.
+    syncSession();
+    return unsubscribe;
+  }, []);
 
   useEffect(() => {
     return () => {

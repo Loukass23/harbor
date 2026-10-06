@@ -2350,6 +2350,7 @@ export function DetailView({
             railSections.push({
               key: "mediaGallery",
               label: t("Media"),
+              minHeight: 210,
               node: <MediaGallery detail={detail} title={title} logo={logo} metaId={meta.id} />,
             });
           }
