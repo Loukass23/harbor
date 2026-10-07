@@ -1171,6 +1171,7 @@ pub fn run() {
             games::games_discard_save_restore,
             games::games_source_browser_choose, games::games_source_browser_close,
             games::games_source_verify, games::games_source_verify_cancel, games::games_source_verified_fetch,
+            games::games_source_verify_report,
             games::games_source_http_fetch, games::games_source_http_cancel,
             games::games_add_transfer,
             games::games_add_transfer_batch,

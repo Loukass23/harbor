@@ -627,6 +627,30 @@ function ensureFocusStyles() {
     html:not([data-input-modality="pointer"]) [data-tv-search-editing-focused="true"] [data-search-editing="true"] {
       box-shadow: none !important;
     }
+
+    /*
+     * A typed field never carries the navigation ring. The markers are set from
+     * several paths (nav engine, exported tvFocus, programmatic focus from a
+     * dialog), so gating the writers is not enough; this removes the ring at the
+     * only place that draws it.
+     *
+     * The repeated attribute is deliberate. The ring rules above carry both
+     * !important and a :not() prefix, so a plainer selector here loses on
+     * specificity and the ring survives. Repeating the marker outranks them.
+     */
+    html input[data-tv-focused="true"][data-tv-focused][data-tv-focused][data-tv-focused],
+    html textarea[data-tv-focused="true"][data-tv-focused][data-tv-focused][data-tv-focused],
+    html [contenteditable="true"][data-tv-focused="true"][data-tv-focused][data-tv-focused][data-tv-focused],
+    html label[data-tv-focused="true"][data-tv-focused][data-tv-focused][data-tv-focused]:has(input, textarea),
+    html [data-tv-text-field][data-tv-focused="true"][data-tv-focused][data-tv-focused][data-tv-focused],
+    html [data-tv-focus-container][data-tv-focused="true"][data-tv-focused][data-tv-focused][data-tv-focused]:has(input, textarea),
+    html [data-tv-search-nav-focused="true"][data-tv-search-nav-focused][data-tv-search-nav-focused][data-tv-search-nav-focused],
+    html [data-tv-search-editing-focused="true"][data-tv-search-editing-focused][data-tv-search-editing-focused][data-tv-search-editing-focused],
+    html [data-search-editing="true"][data-search-editing][data-search-editing][data-search-editing],
+    html [data-search-nav-mode="true"][data-search-nav-mode][data-search-nav-mode][data-search-nav-mode] {
+      outline: none !important;
+      box-shadow: none !important;
+    }
   `;
   document.head.appendChild(style);
 }

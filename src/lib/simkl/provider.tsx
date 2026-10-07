@@ -8,6 +8,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { subscribeSecretsReady } from "@/lib/secret-store";
 import {
   completeAuthorization,
   pollForToken,
@@ -60,7 +61,12 @@ export function SimklProvider({ children }: { children: ReactNode }) {
     const unsubscribe = subscribeSession(syncSession);
     // Profile restoration can finish after render but before this subscription.
     syncSession();
-    return unsubscribe;
+    // The persisted store also loads after mount; re-read when it lands.
+    const stopSecrets = subscribeSecretsReady(syncSession);
+    return () => {
+      stopSecrets();
+      unsubscribe();
+    };
   }, []);
 
   useEffect(() => {
