@@ -3,8 +3,7 @@
 //! the server demands Sec-CH-UA client hints (Critical-CH) that a native request does
 //! not send, so a reqwest retry carrying the cookie is challenged again and returns
 //! 403. The body is therefore read in the window that cleared the challenge. That page
-//! can reach IPC, so like every other Harbor command the callback refuses any window
-//! that is not the live verification window for this session.
+//! is read by native evaluation; remote pages do not need access to Harbor commands.
 use super::source_verification_policy as policy;
 use crate::http_fetch::{public_http_client, HarborFetchResponse};
 use base64::Engine;
@@ -28,7 +27,6 @@ struct State {
     grants: policy::Grants,
     // Catalog bodies read by the verification window, keyed by profile and address.
     bodies: HashMap<(String, String), (String, Instant)>,
-    captured: HashMap<String, String>,
     // A cancel can arrive before the asynchronous start command is dispatched.
     canceled: Vec<(String, String, Instant)>,
 }
@@ -43,32 +41,11 @@ const BODY_TTL: Duration = Duration::from_secs(300);
 
 /// Reads the catalog from inside the window that cleared the challenge, so the request
 /// carries the same client hints, cookie jar and TLS identity the challenge was issued to.
-const READ_SCRIPT: &str = r#"
-(function () {
-  if (window.__harborSourceRead) return;
-  window.__harborSourceRead = true;
-  var done = false;
-  function challenged() {
-    var t = (document.title || '').toLowerCase();
-    if (t.indexOf('just a moment') >= 0 || t.indexOf('attention required') >= 0) return true;
-    return !!document.querySelector('#challenge-form, #challenge-running, #cf-please-wait, .cf-turnstile');
-  }
-  function read() {
-    if (done || challenged()) return;
-    done = true;
-    fetch(location.href, { credentials: 'include', headers: { Accept: 'application/json, text/plain, */*' } })
-      .then(function (r) { return r.ok ? r.text() : Promise.reject(r.status); })
-      .then(function (t) {
-        try { window.__TAURI_INTERNALS__.invoke('games_source_verify_report', { body: t }); } catch (e) {}
-      })
-      .catch(function () { done = false; });
-  }
-  var tries = 0;
-  var timer = setInterval(function () { tries += 1; read(); if (done || tries > 200) clearInterval(timer); }, 400);
-  document.addEventListener('DOMContentLoaded', read);
-  window.addEventListener('load', read);
-})();
-"#;
+const READ_SCRIPT: &str = include_str!("source_verification_read.js");
+
+#[derive(serde::Deserialize)]
+#[serde(tag = "status", rename_all = "snake_case")]
+enum BrowserRead { Ready { body: String }, Error { error: String } }
 
 fn label(profile: &str, id: &str) -> String { format!("source-verification-{:x}-{id}", Sha256::digest(profile.as_bytes())) }
 
@@ -77,6 +54,22 @@ fn reserve(profile: &str, id: &str, now: Instant) -> Result<CancellationToken> {
 }
 
 impl State {
+    fn complete(&mut self, profile: &str, id: &str, url: &reqwest::Url, agent: &str,
+        clearance: Option<String>, read: Option<BrowserRead>, now: Instant) -> Result<bool> {
+        if !matches(&self.active, profile, id) { return Err("source_verify_canceled"); }
+        let body = match read {
+            None => return Ok(false),
+            Some(BrowserRead::Error { error }) => return Err(if error == "source_limit" { "source_limit" } else { "source_verify_failed" }),
+            Some(BrowserRead::Ready { body }) => body,
+        };
+        if body.len() > policy::MAX_BYTES { return Err("source_limit"); }
+        self.bodies.retain(|_, (_, stored)| now.duration_since(*stored) < BODY_TTL);
+        self.bodies.insert((profile.into(), url.to_string()), (body, now));
+        if let Some(clearance) = clearance {
+            self.grants.insert(profile, url, clearance, agent.into(), id.into(), now);
+        }
+        Ok(true)
+    }
     fn reserve(&mut self, profile: &str, id: &str, now: Instant) -> Result<CancellationToken> {
         self.canceled.retain(|(_, _, until)| *until > now);
         if self.canceled.iter().any(|(p, i, _)| p == profile && i == id) { return Err("source_verify_canceled"); }
@@ -118,7 +111,9 @@ fn create_window(app: &tauri::AppHandle, profile: &str, id: &str, url: &reqwest:
         .title(format!("{} · Harbor", url.host_str().unwrap_or("Harbor")))
         .inner_size(900.0, 680.0).min_inner_size(460.0, 400.0)
         .visible(false).focused(false).incognito(true).user_agent(agent)
-        .initialization_script(READ_SCRIPT)
+        .initialization_script(READ_SCRIPT
+            .replace("__HARBOR_SOURCE_MAX_BYTES__", &policy::MAX_BYTES.to_string())
+            .replace("__HARBOR_SOURCE_URL__", &serde_json::to_string(url.as_str()).unwrap()))
         .on_navigation(move |next| next.as_str() == "about:blank" || policy::same_origin(&origin, next))
         .on_new_window(|_, _| tauri::webview::NewWindowResponse::Deny)
         .on_download(move |_, event| {
@@ -182,40 +177,26 @@ async fn verify_inner(app: tauri::AppHandle, profile: String, id: String, url: r
                 .find(|cookie| cookie.name() == "cf_clearance" && cookie.secure() == Some(true) && cookie.path() == Some("/") && policy::cookie(cookie.value()))
                 .map(|cookie| format!("cf_clearance={}", cookie.value())))
         }).await.map_err(|error| browser_failure("verification result task", error))??;
-        let window_label = label(&profile, &id);
-        let captured = {
-            let mut state = state().lock().map_err(|_| "source_verify_failed")?;
-            state.captured.remove(&window_label)
-        };
-        if let Some(body) = captured {
-            let mut state = state().lock().map_err(|_| "source_verify_failed")?;
-            if !matches(&state.active, &profile, &id) { return Err("source_verify_canceled"); }
-            let now = Instant::now();
-            state.bodies.retain(|_, (_, stored)| now.duration_since(*stored) < BODY_TTL);
-            state.bodies.insert((profile.clone(), url.to_string()), (body, now));
-            if let Some(clearance) = clearance {
-                state.grants.insert(&profile, &url, clearance, agent, id, now);
-            }
-            return Ok(());
-        }
-        if let Some(clearance) = clearance {
-            let mut state = state().lock().map_err(|_| "source_verify_failed")?;
-            if !matches(&state.active, &profile, &id) { return Err("source_verify_canceled"); }
-            state.grants.insert(&profile, &url, clearance, agent, id, Instant::now());
-            return Ok(());
-        }
+        let read = read_browser(&window).await?;
+        if state().lock().map_err(|_| "source_verify_failed")?
+            .complete(&profile, &id, &url, &agent, clearance, read, Instant::now())? { return Ok(()); }
     }
 }
 
-/// Refuses every window except the one this session opened, so no other page can
-/// deliver a catalog body, and caps the body at the same limit the native path uses.
-pub fn report(window_label: &str, body: String) -> Result<()> {
-    if body.len() > policy::MAX_BYTES { return Err("source_limit"); }
-    let mut state = state().lock().map_err(|_| "source_verify_failed")?;
-    let expected = state.active.as_ref().map(|active| label(&active.profile, &active.id));
-    if expected.as_deref() != Some(window_label) { return Err("source_verify_failed"); }
-    state.captured.insert(window_label.to_owned(), body);
-    Ok(())
+async fn read_browser(window: &WebviewWindow) -> Result<Option<BrowserRead>> {
+    let (send, received) = tokio::sync::oneshot::channel();
+    let send = Mutex::new(Some(send));
+    window.eval_with_callback("window.__harborSourceResult || null", move |value| {
+        if let Ok(mut send) = send.lock() {
+            if let Some(send) = send.take() { let _ = send.send(value); }
+        }
+    }).map_err(|error| browser_failure("read catalog", error))?;
+    let value = match tokio::time::timeout(Duration::from_secs(5), received).await {
+        Ok(value) => value.map_err(|_| "source_verify_failed")?,
+        Err(_) => return Ok(None),
+    };
+    if value.trim().is_empty() { return Ok(None); }
+    serde_json::from_str(&value).map_err(|_| "source_verify_failed")
 }
 
 pub async fn fetch(profile: String, url: String, max_bytes: usize) -> Result<Option<HarborFetchResponse>> {

@@ -360,10 +360,6 @@ pub fn games_source_verify_cancel(app: tauri::AppHandle, window: tauri::WebviewW
     if window.label() == "main" { source_verification::cancel(&app, &profile, &session); }
 }
 #[tauri::command]
-pub fn games_source_verify_report(window: tauri::WebviewWindow, body: String) -> Result<(), String> {
-    source_verification::report(window.label(), body).map_err(String::from)
-}
-#[tauri::command]
 pub async fn games_source_verified_fetch(window: tauri::WebviewWindow, profile: String, url: String, max_bytes: usize) -> Result<Option<crate::http_fetch::HarborFetchResponse>, String> {
     if window.label() != "main" { return Err("source_verify_failed".into()); }
     source_verification::fetch(profile, url, max_bytes).await.map_err(String::from)
