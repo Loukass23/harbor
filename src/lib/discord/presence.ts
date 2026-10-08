@@ -1,5 +1,7 @@
 import { HARBOR_API_BASE } from "@/lib/config/endpoints";
 import type { MangaReadingState } from "@/lib/manga-reading-state";
+import { stripColorTag } from "@/lib/manga/title";
+import { mangaDiscordCover, onMangaCoverResolved } from "./manga-cover";
 
 const IS_TAURI = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
 
@@ -51,6 +53,8 @@ export type BrowsePresence = {
   state?: string;
   largeImage?: string;
   largeText?: string;
+  /** Marks a manga hint so the presence can substitute a Discord-safe cover. */
+  kind?: "manga";
 };
 
 export type PartyPresence = {
@@ -178,14 +182,16 @@ function computeBase(): Base {
       };
     }
     const state = `${reading.chapterLabel}, page ${reading.page}/${reading.totalPages}`;
+    const title = stripColorTag(reading.title);
+    const poster = config.showPoster ? mangaDiscordCover(reading.cover, title) : undefined;
     return {
       payload: {
-        details: reading.title,
+        details: title,
         state,
-        posterUrl: (config.showPoster && reading.cover) || HARBOR_LOGO,
-        largeText: reading.title,
+        posterUrl: poster || HARBOR_LOGO,
+        largeText: title,
       },
-      key: `read:${reading.title}|${state}|${reading.cover ?? ""}`,
+      key: `read:${reading.title}|${state}|${poster ?? ""}`,
     };
   }
   if (browse && config.showWhenBrowsing) {
@@ -194,14 +200,25 @@ function computeBase(): Base {
         payload: { details: "Browsing Harbor", posterUrl: HARBOR_LOGO },
         key: "browse:hide",
       };
+    const isManga = browse.kind === "manga";
+    const details = isManga
+      ? stripColorTag(browse.details ?? "Browsing Harbor")
+      : (browse.details ?? "Browsing Harbor");
+    const largeText = isManga
+      ? stripColorTag(browse.largeText ?? browse.details ?? "")
+      : (browse.largeText ?? browse.details);
+    const poster =
+      (config.showPoster &&
+        (isManga ? mangaDiscordCover(browse.largeImage, largeText) : browse.largeImage)) ||
+      HARBOR_LOGO;
     return {
       payload: {
-        details: browse.details ?? "Browsing Harbor",
+        details,
         state: browse.state,
-        posterUrl: (config.showPoster && browse.largeImage) || HARBOR_LOGO,
-        largeText: browse.largeText ?? browse.details,
+        posterUrl: poster,
+        largeText,
       },
-      key: `browse:${browse.details ?? ""}|${browse.state ?? ""}|${browse.largeImage ?? ""}`,
+      key: `browse:${browse.details ?? ""}|${browse.state ?? ""}|${poster}`,
     };
   }
   if (party) {
@@ -266,6 +283,10 @@ function schedule(): void {
     flush();
   }, 800);
 }
+
+// An async AniList cover lookup landing after the first send must re-flush so
+// the poster shows without waiting for the next page turn.
+onMangaCoverResolved(schedule);
 
 export function configureDiscord(next: DiscordConfig): void {
   config = next;

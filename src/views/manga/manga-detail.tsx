@@ -277,6 +277,7 @@ export function MangaDetail({
     return pushActivityHint({
       details: `Browsing ${detail.title}`,
       state: "Manga",
+      kind: "manga",
       largeImage: detail.cover,
       largeText: detail.title,
     });
