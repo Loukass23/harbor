@@ -55,6 +55,8 @@ export type BrowsePresence = {
   largeText?: string;
   /** Marks a manga hint so the presence can substitute a Discord-safe cover. */
   kind?: "manga";
+  /** Manga id, used to disambiguate a common title's poster by author. */
+  id?: string;
 };
 
 export type PartyPresence = {
@@ -183,7 +185,9 @@ function computeBase(): Base {
     }
     const state = `${reading.chapterLabel}, page ${reading.page}/${reading.totalPages}`;
     const title = stripColorTag(reading.title);
-    const poster = config.showPoster ? mangaDiscordCover(reading.cover, title) : undefined;
+    const poster = config.showPoster
+      ? mangaDiscordCover(reading.cover, title, reading.mangaId)
+      : undefined;
     return {
       payload: {
         details: title,
@@ -209,7 +213,7 @@ function computeBase(): Base {
       : (browse.largeText ?? browse.details);
     const poster =
       (config.showPoster &&
-        (isManga ? mangaDiscordCover(browse.largeImage, largeText) : browse.largeImage)) ||
+        (isManga ? mangaDiscordCover(browse.largeImage, largeText, browse.id) : browse.largeImage)) ||
       HARBOR_LOGO;
     return {
       payload: {

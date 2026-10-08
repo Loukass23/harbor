@@ -278,6 +278,7 @@ export function MangaDetail({
       details: `Browsing ${detail.title}`,
       state: "Manga",
       kind: "manga",
+      id: mangaId,
       largeImage: detail.cover,
       largeText: detail.title,
     });
