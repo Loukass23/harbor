@@ -524,7 +524,12 @@ export function MangaDetail({
                   aria-label={isFavorite ? t("Remove favorite") : t("Add favorite")}
                   onClick={() =>
                     detail &&
-                    favorites.toggle({ id: mangaId, title: detail.title, cover: detail.cover })
+                    favorites.toggle({
+                      id: mangaId,
+                      title: detail.title,
+                      altTitle: detail.altTitle,
+                      cover: detail.cover,
+                    })
                   }
                   className={`group flex h-12 w-12 shrink-0 items-center justify-center rounded-full transition-[transform,background-color] duration-200 active:scale-[0.94] ${
                     isFavorite
@@ -550,6 +555,7 @@ export function MangaDetail({
                 <MangaAddToListButton
                   mangaId={mangaId}
                   title={detail?.title ?? ""}
+                  altTitle={detail?.altTitle}
                   cover={detail?.cover}
                 />
                 {onOpenDownloads && (
