@@ -51,9 +51,9 @@ fn build_leveldb(snappy_prefix: Option<PathBuf>) {
         .define("CMAKE_INSTALL_LIBDIR", &libdir);
     if let Some(snappy_prefix) = snappy_prefix {
         #[cfg(target_env = "msvc")]
-        let ldflags = format!("/LIBPATH:{}", snappy_prefix.join(LIBDIR).display());
+        let ldflags = format!("/LIBPATH:\"{}\"", snappy_prefix.join(LIBDIR).display());
         #[cfg(not(target_env = "msvc"))]
-        let ldflags = format!("-L{}", snappy_prefix.join(LIBDIR).display());
+        let ldflags = format!("-L\"{}\"", snappy_prefix.join(LIBDIR).display());
     
         env::set_var(
             "LDFLAGS",
@@ -62,8 +62,8 @@ fn build_leveldb(snappy_prefix: Option<PathBuf>) {
 
         config
             .define("HAVE_SNAPPY", "ON")
-            .cflag(format!("-I{}", snappy_prefix.join("include").display()))
-            .cxxflag(format!("-I{}", snappy_prefix.join("include").display()));
+            .cflag(format!("-I\"{}\"", snappy_prefix.join("include").display()))
+            .cxxflag(format!("-I\"{}\"", snappy_prefix.join("include").display()));
     } else {
         config.define("HAVE_SNAPPY", "OFF");
     }
