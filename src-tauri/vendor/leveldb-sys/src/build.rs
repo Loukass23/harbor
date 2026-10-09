@@ -46,6 +46,11 @@ fn build_leveldb(snappy_prefix: Option<PathBuf>) {
         cmake::Config::new(Path::new("deps").join(format!("leveldb-{}", LEVELDB_VERSION)));
     config
         .define("CMAKE_POLICY_VERSION_MINIMUM", "3.10")
+        // Skip leveldb's Clang-only -Wthread-safety probe. Predefining the cache
+        // variable stops check_cxx_source_compiles from running, avoiding a CMake
+        // 4.4 error where the leaked flag is rejected as an unknown warning
+        // category. The check is meaningless for MSVC and GCC builds anyway.
+        .define("HAVE_CLANG_THREAD_SAFETY", "OFF")
         .define("LEVELDB_BUILD_TESTS", "OFF")
         .define("LEVELDB_BUILD_BENCHMARKS", "OFF")
         .define("CMAKE_INSTALL_LIBDIR", &libdir);
