@@ -3,6 +3,11 @@ import { invoke } from "@tauri-apps/api/core";
 export type BpPlatform = {
   lanAddress: () => Promise<string | null>;
   fetchImageBytes: (url: string) => Promise<Blob | null>;
+  /**
+   * Close the whole app. Only set where Big Picture is the app itself and the
+   * platform owns the process; without it, confirming exit leaves Big Picture.
+   */
+  exit?: () => void;
 };
 
 type HarborFetchResponse = { ok: boolean; body: string; contentType?: string | null };

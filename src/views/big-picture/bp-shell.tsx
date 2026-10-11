@@ -29,6 +29,7 @@ import { bpOverscan } from "./bp-safe-area";
 import { useBpFocusRoot } from "./use-bp-focus";
 import { BpAmbient } from "./bp-ambient";
 import { BpExitConfirm } from "./bp-exit-confirm";
+import { bpPlatform } from "./bp-platform";
 import { BpPhoneTyping } from "./bp-phone-typing";
 import { BpTopBar, bpTabKinds, useBpTabGate } from "./bp-top-bar";
 import { BpHintBar, type BpAction } from "./bp-hint-bar";
@@ -529,7 +530,9 @@ export function BigPictureShell() {
             <BpExitConfirm
               onConfirm={() => {
                 setConfirmExit(false);
-                exitBigPicture();
+                const exit = bpPlatform().exit;
+                if (exit) exit();
+                else exitBigPicture();
               }}
               onCancel={() => setConfirmExit(false)}
             />
