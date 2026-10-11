@@ -88,6 +88,7 @@ function wgtPath() {
 
 function build() {
   run("pnpm", ["exec", "vite", "build", "--config", "src-tizen/vite.config.ts"]);
+  run("node", ["scripts/check-tizen-budget.mjs"]);
 }
 
 // Writes config.xml and the icon next to the build output. Enough for the Web

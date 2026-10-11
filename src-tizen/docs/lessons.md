@@ -160,6 +160,21 @@ Do not relearn them. If a rule turns out to be wrong, change it here in the same
 - Desktop-only payloads (games, music, face detection, onnx, mediapipe) must stay out of the
   Tizen module graph.
 - Measure heap, image and layer counts over CDP (`sdb forward`). Don't guess.
+  `scripts/tizen-cdp.mjs measure` does it over a fixed key path; see `performance.md`.
+- `performance.memory` is bucketed in Chromium: two different heaps read the same. Read
+  `Runtime.getHeapUsage` over CDP instead.
+- Compare builds only in the same app state. Every install wipes the app, and a seeded,
+  onboarded profile has more rows and art than an empty one (idle heap 17 MB against 28 MB).
+  Seed and onboard the same way before each measurement.
+- `tizen.mjs seed` right after an install can find no profile yet. Wait about ten seconds and run it again.
+  The seed reload then opens onboarding.
+- Size, not heap, was the cost of the unused payloads: X-Ray's face engine (mp-wasm, ort,
+  models) and the 14 non-English catalogs were never loaded at runtime, but they made up most
+  of the 90 MB `.wgt`. The Tizen build stubs them (`src-tizen/build/`) and leaves those public
+  folders out (`PUBLIC_EXCLUDED` in `vite.config.ts`). Face matching can't work here anyway: the
+  AVPlay plane can't be captured into a canvas.
+- Turning Vite's `publicDir` off to filter `public/` also stops it rewriting `/favicon.png`-style
+  URLs to relative ones, which file:// needs. Remove the excluded entries after the copy instead.
 
 ## Process
 
