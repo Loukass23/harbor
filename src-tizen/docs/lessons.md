@@ -148,11 +148,18 @@ Do not relearn them. If a rule turns out to be wrong, change it here in the same
   before adding any proxy, and keep the `<access>` element.
 - The remote Stremio server URL is the shared `remoteStreamServerUrl` setting, set from Big
   Picture → Settings → Setup → Remote streaming server.
-- The TV can't receive UDP or mDNS. Find the companion with an HTTP sweep of the subnet,
-  which needs the `network.public` privilege.
-- Typing on a remote is painful. Get configuration onto the TV by pairing or import. The
-  Remote streaming server pane is the standalone fallback until companion discovery (phase 6)
-  fills `remoteStreamServerUrl`.
+- The TV can't receive UDP or mDNS. Find the companion with an HTTP sweep of the subnet
+  (`src-tizen/net/`). Reading the TV's own address (`webapis.network.getIp()`) needs the
+  `network.public` privilege; `tizen.systeminfo` `ETHERNET_NETWORK`/`WIFI_NETWORK` is the
+  fallback. The sweep is capped at the TV's /24, 24 probes at a time, 700 ms each.
+- Typing on a remote is painful. Configuration arrives by pairing with Harbor on a computer
+  (Settings → Setup → Pair with a computer, or the onboarding step). The Remote streaming
+  server pane stays as the manual fallback.
+- The pairing payload (Stremio auth key, debrid keys) crosses the LAN as plain HTTP, like the
+  phone hand-off. It is sent only after someone approves the matching code on the computer,
+  and only once per approval.
+- The computer only answers while Serve Harbor on your network is on. Its torrent engine on
+  `:11470` is started by the approval, and again by the TV at launch with its pairing token.
 
 ## Memory and performance
 
