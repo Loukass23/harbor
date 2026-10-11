@@ -12,6 +12,7 @@
 | `debug`     | restarts the app in debug mode, runs `sdb forward` and prints the CDP port                       |
 | `logs`      | `sdb dlog` filtered to console messages (emulator only; empty on a retail TV, use `debug`)       |
 | `simulator` | writes `config.xml` into `dist` and opens it in the Samsung TV Web Simulator (`tz run -r`)       |
+| `seed`      | signs in to Stremio and writes API keys into the installed app (see below)                       |
 | `deploy`    | `build package install launch`                                                                   |
 
 ## Settings
@@ -23,6 +24,21 @@ environment override it.
 - `HARBOR_TIZEN_PROFILE`: signing profile from Certificate Manager (`tz security-profiles list`).
   Empty means the active profile.
 - `HARBOR_TIZEN_SERIAL`: `sdb` serial. Empty means the only connected device.
+- `STREMIO_EMAIL`, `STREMIO_PASSWORD`, `TORBOX_API_KEY`, `TMDB_API_KEY`: optional, read only by
+  `seed`.
+
+## Seeding a test install
+
+Every `install` resets the app, and typing an account on a remote is slow. After an install:
+
+1. Skip or finish onboarding on the TV, so the app has an active profile.
+2. Run `node scripts/tizen.mjs seed`. It restarts the app in debug mode, or reuses the inspector
+   on `HARBOR_CDP_PORT` if that is set.
+
+The script signs in to Stremio from this PC and sends only the resulting session to the TV,
+never the password. It writes `TORBOX_API_KEY` and `TMDB_API_KEY` into the active profile's
+settings and reloads the app. It prints which items it seeded, never their values. Use it for
+development only. Real users sign in through the app.
 
 ## Targets
 

@@ -14,6 +14,7 @@ import { homedir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { readApplicationId, renderManifest } from "./tizen-manifest.mjs";
+import { seed } from "./tizen-seed.mjs";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const TIZEN_DIR = join(ROOT, "src-tizen");
@@ -163,6 +164,7 @@ function debug() {
   if (!port) throw new Error(`no inspector port in debug output:\n${out.trim()}`);
   run("sdb", ["-s", target, "forward", `tcp:${port}`, `tcp:${port}`]);
   console.log(`\nCDP: http://127.0.0.1:${port}/json/list  (HARBOR_CDP_PORT=${port})`);
+  return port;
 }
 
 function logs() {
@@ -177,6 +179,8 @@ const commands = {
   simulator,
   debug,
   logs,
+  // Reuses a forwarded inspector when HARBOR_CDP_PORT is set; otherwise restarts in debug mode.
+  seed: () => seed(process.env.HARBOR_CDP_PORT || debug(), process.env),
   deploy() {
     build();
     pack();
@@ -194,7 +198,7 @@ if (requested.length === 0 || unknown.length) {
 
 loadEnv();
 try {
-  for (const command of requested) commands[command]();
+  for (const command of requested) await commands[command]();
 } catch (err) {
   console.error(`\ntizen: ${err.message}`);
   process.exit(1);
