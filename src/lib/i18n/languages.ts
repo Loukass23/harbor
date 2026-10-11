@@ -61,9 +61,28 @@ const BY_CODE = Object.fromEntries(
   LANGUAGES.map((language) => [language.code, language]),
 ) as Record<UiLanguage, LanguageOption>;
 
+let allowed: ReadonlySet<UiLanguage> | null = null;
+
+/**
+ * Limit the interface to these languages, for a build that ships only their
+ * catalogs. The default language always stays available as the fallback.
+ * Callers should go through restrictUiLanguages in the store, which also moves
+ * an already-loaded language that is no longer allowed.
+ */
+export function setAllowedUiLanguages(codes: readonly UiLanguage[] | null): void {
+  allowed = codes ? new Set<UiLanguage>([DEFAULT_LANGUAGE, ...codes]) : null;
+}
+
+/** The languages a picker may offer. */
+export function uiLanguageOptions(): LanguageOption[] {
+  const only = allowed;
+  return only ? LANGUAGES.filter((l) => only.has(l.code)) : LANGUAGES;
+}
+
 export function normalizeLanguage(lang: unknown): UiLanguage {
   if (typeof lang !== "string") return DEFAULT_LANGUAGE;
   const code = lang.trim().toLowerCase().split(/[-_]/, 1)[0] as UiLanguage;
+  if (allowed && !allowed.has(code)) return DEFAULT_LANGUAGE;
   return BY_CODE[code]?.code === code ? code : DEFAULT_LANGUAGE;
 }
 

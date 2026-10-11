@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from "react";
-import { isRtl, normalizeLanguage, type UiLanguage } from "./languages";
+import { isRtl, normalizeLanguage, setAllowedUiLanguages, type UiLanguage } from "./languages";
 import { resolveUiRegion } from "./regional-labels";
 
 function applyDocument(lang: UiLanguage) {
@@ -70,6 +70,15 @@ export function setUiLanguage(lang: UiLanguage, region: string | undefined = cur
   for (const l of listeners) l();
   if (next !== "en")
     void import("./load-locale").then(({ ensureUiLocale }) => ensureUiLocale(next));
+}
+
+/**
+ * Offer only these interface languages (the default always stays). A language
+ * that was already loaded but is no longer allowed falls back to the default.
+ */
+export function restrictUiLanguages(codes: readonly UiLanguage[]): void {
+  setAllowedUiLanguages(codes);
+  setUiLanguage(current);
 }
 
 export function subscribe(cb: () => void): () => void {
