@@ -144,9 +144,17 @@ Each phase is a separate session or worktree, with its own PR into the Tizen bra
    - Big Picture → Setup → Remote streaming server edits the shared `remoteStreamServerUrl`.
      `normalizeStreamServerUrl()` moved into `src/lib/stremio-server.ts` for both settings UIs.
    - `src-tizen/platform/bp-platform.ts`: no LAN address; image bytes via `safeFetch`.
-   - Follow-ups: the phone-typing dialog still offers a QR for a server the TV doesn't run (hide it
-     when `lanAddress` is null); a "Connected" check against a real Stremio server on the LAN.
+   - Verified on the TV with a seeded account (`scripts/tizen.mjs seed`): library and "Jump back
+     in" load. TorBox is auto-added from `tbKey`. Torrentio TB and other addons return streams
+     with no proxy. The server pane shows "Connected" against a LAN Stremio server.
+   - Follow-up: the phone-typing dialog and the onboarding phone hand-off need a server on the TV
+     (`:11471`), which Tizen can't run. Hide them when `lanAddress` is null; phase 6 replaces them.
 4. **AVPlay player**
+   - **First, mount a player in the TV entry.** `index-tv.html` → `BpTvApp` renders only
+     `BigPictureShell`; `PlayerView` (and `BpTenFootLayer` inside it) is mounted only by the
+     desktop `App.tsx`. Opening a stream hides the shell (`chrome.hidden` from `useView().player`)
+     and nothing draws, so the screen goes white and Back is dead. Android TV loads the same
+     entry, so check there and fix it as a shared seam, not a Tizen patch.
    - Add `src-tizen/player/avplay-bridge.ts` implementing `PlayerBridge`, ported from `beta-tizen:src/lib/player/tizen-avplay.ts` with every lesson applied.
    - Add the engine registry seam and the score modifier.
    - Write unit tests with a `webapis` stub.
