@@ -119,6 +119,9 @@ Do not relearn them. If a rule turns out to be wrong, change it here in the same
 - `setSelectTrack("AUDIO", n)` throws `InvalidStateError` in `READY`, which is exactly when the
   player picks the preferred language. Hold the choice and apply it on the first
   `oncurrentplaytime` once the state is `PLAYING` or `PAUSED`.
+- Every `webapis.productinfo` call (`isUdPanelSupported`, `getModel`, ...) throws `SecurityError`
+  without `http://developer.samsung.com/privilege/productinfo` in `config.xml`. Wrap panel
+  queries on their own: inside the open sequence a throw failed every HLS/DASH stream.
 - `getCurrentStreamInfo()` throws `InvalidStateError` while AVPlay is still preparing. Call it on
   its own: a throw that also empties the track list stops the player choosing the preferred
   audio language, and the viewer gets the container default (Russian, on one Silo release).

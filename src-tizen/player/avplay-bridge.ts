@@ -284,6 +284,17 @@ export function createAvplayBridge(api: Webapis, deps: AvplayDeps): PlayerBridge
     }
   };
 
+  // productinfo throws SecurityError without its privilege in config.xml. A
+  // panel query must never stop a stream from opening.
+  const udPanel = () => {
+    try {
+      return api.productinfo?.isUdPanelSupported?.() === true;
+    } catch (err) {
+      console.warn("[avplay] panel query failed", err);
+      return false;
+    }
+  };
+
   const applyPendingAudio = () => {
     if (pendingAudio == null) return;
     const s = state();
@@ -478,9 +489,7 @@ export function createAvplayBridge(api: Webapis, deps: AvplayDeps): PlayerBridge
         ([k]) => k.toLowerCase() === "user-agent",
       )?.[1];
       if (ua) av.setStreamingProperty?.("USER_AGENT", ua);
-      if (adaptive && api.productinfo?.isUdPanelSupported?.()) {
-        av.setStreamingProperty?.("SET_MODE_4K", "TRUE");
-      }
+      if (adaptive && udPanel()) av.setStreamingProperty?.("SET_MODE_4K", "TRUE");
     } catch (err) {
       console.warn("[avplay] open failed", err);
       fail(g, avplayErrorCode(err), "open failed");

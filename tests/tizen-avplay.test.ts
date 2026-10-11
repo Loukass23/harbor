@@ -381,3 +381,18 @@ test("the audio list survives getCurrentStreamInfo throwing, so the preferred la
   );
   done(bridge);
 });
+
+test("a panel query that throws never stops an adaptive stream from opening", async () => {
+  const { av, bridge, snap } = setup();
+  Object.assign(av.api, {
+    productinfo: {
+      isUdPanelSupported: () => {
+        throw Object.assign(new Error("SecurityError"), { name: "SecurityError" });
+      },
+    },
+  });
+  await bridge.load({ url: "https://x.example/master.m3u8" });
+  assert.ok(av.names().includes("prepareAsync"));
+  assert.equal(snap().status, "loading");
+  done(bridge);
+});
