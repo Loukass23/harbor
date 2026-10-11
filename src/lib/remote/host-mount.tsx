@@ -44,6 +44,7 @@ import {
 } from "./manga-session";
 import { subscribeMangaBookmarks } from "@/lib/manga-bookmarks";
 import { installTextEntryListeners } from "./text-entry";
+import { CompanionPairPrompt } from "@/components/companion-pair-prompt";
 import {
   REMOTE_PROTO,
   parseClientMessage,
@@ -60,7 +61,10 @@ function broadcast(msg: RemoteServerMessage) {
 }
 
 function pushSnapshot(force = false) {
-  const snapshot = { ...buildRemoteSnapshot(getPlaybackPosition()), manga: buildRemoteMangaState() };
+  const snapshot = {
+    ...buildRemoteSnapshot(getPlaybackPosition()),
+    manga: buildRemoteMangaState(),
+  };
   if (!force) {
     const { updatedAt: _ignored, ...rest } = snapshot;
     void _ignored;
@@ -586,5 +590,6 @@ export function RemoteHostMount() {
     };
   }, [enabled]);
 
-  return null;
+  // Pair requests arrive over the same LAN server this plane runs on.
+  return <CompanionPairPrompt />;
 }

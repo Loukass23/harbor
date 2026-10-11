@@ -214,8 +214,8 @@ export function BpSettings() {
                           : control.pane === "platform"
                             ? control.detail
                             : settings.iptvPlaylists.length > 0
-                            ? t("{count} added", { count: settings.iptvPlaylists.length })
-                            : control.detail
+                              ? t("{count} added", { count: settings.iptvPlaylists.length })
+                              : control.detail
                     }
                     autofocus={i === 0}
                     onPress={() => setPane(control.pane)}
