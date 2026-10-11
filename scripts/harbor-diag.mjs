@@ -8,9 +8,10 @@ const PORT = Number(process.env.HARBOR_CDP_PORT || 9333);
 const BASE = `http://127.0.0.1:${PORT}`;
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 
-export async function listTargets() {
-  const res = await fetch(`${BASE}/json/list`).catch(() => null);
-  if (!res || !res.ok) throw new Error(`no CDP endpoint on :${PORT} (launch Harbor via scripts/dev-diag.ps1 or with WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS=--remote-debugging-port=${PORT})`);
+export async function listTargets(port = PORT) {
+  const base = port === PORT ? BASE : `http://127.0.0.1:${port}`;
+  const res = await fetch(`${base}/json/list`).catch(() => null);
+  if (!res || !res.ok) throw new Error(`no CDP endpoint on :${port} (launch Harbor via scripts/dev-diag.ps1 or with WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS=--remote-debugging-port=${port})`);
   const all = await res.json();
   return all.filter((t) => t.type === "page" && !t.url.startsWith("devtools://"));
 }
@@ -27,8 +28,8 @@ export class Cdp {
     this.pending = new Map();
     this.listeners = new Map();
   }
-  static async connect() {
-    const target = pickTarget(await listTargets());
+  static async connect(port = PORT) {
+    const target = pickTarget(await listTargets(port));
     if (!target) throw new Error("no page target found");
     const ws = new WebSocket(target.webSocketDebuggerUrl);
     await new Promise((ok, no) => {
