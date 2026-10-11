@@ -148,7 +148,8 @@ Each phase is a separate session or worktree, with its own PR into the Tizen bra
      in" load. TorBox is auto-added from `tbKey`. Torrentio TB and other addons return streams
      with no proxy. The server pane shows "Connected" against a LAN Stremio server.
    - Follow-up: the phone-typing dialog and the onboarding phone hand-off need a server on the TV
-     (`:11471`), which Tizen can't run. Hide them when `lanAddress` is null; phase 6 replaces them.
+     (`:11471`), which Tizen can't run. The dialog is hidden by `servesPhone: false`; phase 6
+     puts "Pair with a computer" in the onboarding phone step's slot.
 4. **AVPlay player** (done)
    - Seams, one commit each: `BpTvRoot` mounts `PlayerView` and `PlayPicker` (keys shared via
      `playerViewKey()`/`playPickerKey()`), `setWebPlayerEngine()` and `setPlatformScoreModifier()`.
@@ -183,12 +184,33 @@ Each phase is a separate session or worktree, with its own PR into the Tizen bra
      - The boot chunk still holds `@tauri-apps/api`, the manga prelude and the Together client.
      - Starting a title through "Choose a source instead" began at 0:00 rather than the
        "Almost done" position. Not compared against the previous build; check before phase 6.
-6. **Companion (optional features)**
-   - LAN discovery via HTTP sweep (`network.public` privilege), with pairing by code or QR.
-     Discovery fills `remoteStreamServerUrl`; no CORS proxy is needed.
-   - Torrents through the companion's Stremio server.
-   - Settings import from desktop/phone instead of typing on the remote.
-   - Requires a small upstream endpoint in `src-tauri/src/web_server.rs`.
+6. **Companion (optional features)** (done)
+   - Desktop, upstreamable: `src-tauri/src/companion.rs` and routes on the `:11471` web
+     server: `GET /api/companion/identity`, `POST /api/companion/pair`,
+     `GET`/`DELETE /api/companion/pair/{id}` (long-poll, cancel) and
+     `POST /api/companion/stream-server` (token). No CORS headers. The desktop shows an "Allow ... to pair?" dialog with the TV's 4-digit code and
+     checkboxes for what to send. Settings → Remotes lists paired devices with Forget.
+   - Shared seams, one commit each: `directStreamAvailable()` allows torrents on the web path
+     when `remoteStreamServerUrl` is set; `BpPlatform.setup` (a Setup pane that can also take
+     the onboarding phone step's slot) and `BpPlatform.Runner`.
+   - `src-tizen/net/`: subnet sweep, pairing, applying the payload (Stremio sign-in and TMDB
+     through `useHandoffApply`, debrid keys, addons), and a runner that re-finds a moved computer
+     by `instanceId` and starts its streaming server. Plain Stremio servers found by the sweep
+     can be picked to fill `remoteStreamServerUrl` without pairing.
+   - Phone import is deferred: a phone can't host the pages either.
+   - Needs Serve Harbor on your network turned on on the computer.
+   - Verified on GU43DU7199UXZG against `pnpm tauri dev` on Windows: `network.public` gives
+     the TV's address and mask, the sweep finds the desktop and a LAN Stremio server, code
+     pairing, TMDB, TorBox, Stremio sign-in and the server URL arrive, and a torrent streams
+     through the desktop engine.
+   - Open:
+     - The Harbor account and theme are not sent (out of scope). Adding them is one more
+       section; the TV would apply the Harbor session as the phone hand-off does.
+     - Re-find after an address change and the desktop prompt from a gamepad are unit-tested
+       or untested only.
+     - Testing with `pnpm tauri dev`: its webview origin is `localhost:1420`, so it has its
+       own localStorage. Settings come from the shared settings file, but the Stremio sign-in
+       and addons do not; sign in inside the dev window before pairing.
 7. **CI and release**
    - Workflow that builds an unsigned `.wgt` and runs `tests/tizen-*`.
    - Signed builds stay local.

@@ -15,7 +15,7 @@
 // thumbnails, transcode, DVR, subtitle extract, autosync or trailers.
 
 use crate::{
-    crash_report, diagnostics, download, ebook_tts, fonts, gamepad, http_fetch, local_lib,
+    companion, crash_report, diagnostics, download, ebook_tts, fonts, gamepad, http_fetch, local_lib,
     media_server, power, proc_mem, settings_store, stream_proxy, streams, stremio_auth,
     subtitle_credentials, temp_prune, torrent_engine, transcode, web_server,
 };
@@ -118,6 +118,9 @@ pub fn run() {
             web_server::web_serve_status,
             web_server::remote_ws_broadcast,
             web_server::remote_ws_client_count,
+            companion::companion_pair_resolve,
+            companion::companion_paired_list,
+            companion::companion_forget,
             streams::streams_run_pipeline,
             streams::streams_parse,
             streams::streams_core_version,

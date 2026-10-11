@@ -17,6 +17,10 @@ test("pins the Tizen 9.0 floor", () => {
   assert.match(template, /required_version="9\.0"/);
 });
 
+test("declares network.public, which the companion sweep's own address needs", () => {
+  assert.match(template, /privilege\/network\.public"/);
+});
+
 test("rejects package ids the TV refuses to install", () => {
   for (const packageId of ["AbCdE1234", "AbCdE123456", "AbCdE-1234", "", undefined]) {
     assert.throws(() => renderManifest(template, { packageId, version: "1.0.0" }), /118,-4/);

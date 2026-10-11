@@ -14,6 +14,7 @@ import {
   type BpOnboardStepProps,
 } from "./bp-onboarding-frame";
 import { BpHandoffProvider } from "./onboarding/bp-handoff-context";
+import { bpPlatform } from "./bp-platform";
 import { useBpPageModal } from "./use-bp-page-modal";
 import { currentBpFocus, setBpFocus } from "./use-bp-focus";
 
@@ -115,7 +116,9 @@ function BpOnboardLeave({
             {t("Leave setup?")}
           </h2>
           <p className="text-[clamp(17px,2.2vh,22px)] leading-relaxed text-ink-subtle">
-            {t("Nothing you have already set is lost. Harbor picks this back up where you left it.")}
+            {t(
+              "Nothing you have already set is lost. Harbor picks this back up where you left it.",
+            )}
           </p>
         </div>
 
@@ -250,7 +253,21 @@ export function BpOnboarding({
   const indexRef = useRef(index);
   indexRef.current = index;
 
-  const step = BP_ONBOARD_STEPS[index];
+  const platformStep = bpPlatform().setup?.onboarding;
+  const listed = BP_ONBOARD_STEPS[index];
+  // The platform's own setup takes the phone step's slot, so the step ids, the
+  // count and the resume cursor stay the same everywhere.
+  const step =
+    listed.id === "phone" && platformStep
+      ? {
+          ...listed,
+          eyebrow: platformStep.eyebrow,
+          headline: platformStep.headline,
+          body: platformStep.body,
+          primary: platformStep.primary,
+          primaryDone: platformStep.primaryDone,
+        }
+      : listed;
   const satisfied = satisfiedAt === index;
 
   // Keyed on the index rather than reset by an effect. An effect racing the
@@ -331,7 +348,7 @@ export function BpOnboarding({
     [leaveOpen],
   );
 
-  const View = steps?.[step.id];
+  const View = step.id === "phone" && platformStep ? platformStep.Step : steps?.[step.id];
 
   return (
     <div

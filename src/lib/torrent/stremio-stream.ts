@@ -164,13 +164,18 @@ export function directTorrentEnabled(): boolean {
 export function directStreamAvailable(stream: { infoHash?: string | null }): boolean {
   if (torrentsDisabled()) return false;
   if (!stream.infoHash) return false;
-  if (!("__TAURI_INTERNALS__" in window)) return false;
+  // Outside Tauri there is no local engine, but a configured remote server
+  // streams torrents just the same.
+  if (!("__TAURI_INTERNALS__" in window) && !remoteStreamServerUrl()) return false;
   return directTorrentEnabled();
 }
 
 const P2P_MIN_SEEDERS = 2;
 
-export function engineP2pEligible(stream: { infoHash?: string | null; seeders?: number | null }): boolean {
+export function engineP2pEligible(stream: {
+  infoHash?: string | null;
+  seeders?: number | null;
+}): boolean {
   if (torrentsDisabled()) return false;
   if (!directStreamAvailable(stream)) return false;
   if (stream.seeders != null && stream.seeders < P2P_MIN_SEEDERS) return false;

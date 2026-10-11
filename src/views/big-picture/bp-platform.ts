@@ -1,4 +1,29 @@
+import type { ComponentType } from "react";
 import { invoke } from "@tauri-apps/api/core";
+import type { BpOnboardStepProps } from "./bp-onboarding-frame";
+
+/**
+ * A setup surface the platform brings itself, such as pairing with another
+ * device. Strings are English keys and go through the Big Picture translator.
+ */
+export type BpPlatformSetup = {
+  /** Settings, Setup: the row and the pane it opens. */
+  label: string;
+  detail: string;
+  Pane: ComponentType<{ onBack: () => void }>;
+  /**
+   * Takes the onboarding phone step's slot. Meant for platforms that set
+   * `servesPhone: false`, where that step has nothing to offer.
+   */
+  onboarding?: {
+    eyebrow: string;
+    headline: string;
+    body: string;
+    primary: string;
+    primaryDone?: string;
+    Step: ComponentType<BpOnboardStepProps>;
+  };
+};
 
 export type BpPlatform = {
   lanAddress: () => Promise<string | null>;
@@ -19,6 +44,12 @@ export type BpPlatform = {
    * reaches the top bar.
    */
   remoteNavKey?: boolean;
+  setup?: BpPlatformSetup;
+  /**
+   * Rendered once by the TV app inside all of its providers, for platform work
+   * that needs app state (settings, auth) for the whole session. Renders nothing.
+   */
+  Runner?: ComponentType;
 };
 
 type HarborFetchResponse = { ok: boolean; body: string; contentType?: string | null };

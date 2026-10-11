@@ -7,6 +7,7 @@ import { ROW_ACTION, ROW_DESC } from "./kit";
 import { Section, ToggleRow } from "./shared";
 import { isTauri } from "./player-panel/internals";
 import { RemoteCard } from "./remotes-panel/remote-card";
+import { PairedDevicesSection } from "./remotes-panel/paired-devices";
 import type { DeviceKind } from "./remotes-panel/device-art";
 
 const WEB_PORT = 11471;
@@ -48,9 +49,14 @@ export function RemotesPanel() {
         .then((ok) => {
           if (!cancelled) setWebError(!ok);
         })
-        .catch(() => { if (!cancelled) setWebError(true); });
+        .catch(() => {
+          if (!cancelled) setWebError(true);
+        });
     }, 800);
-    return () => { cancelled = true; window.clearTimeout(timer); };
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
   }, [enabled, retry]);
 
   if (!isTauri) {
@@ -110,12 +116,11 @@ export function RemotesPanel() {
         />
 
         {webError && (
-          <div role="status" className="flex items-center gap-3 rounded-[10px] bg-elevated px-4 py-3">
-            <AlertTriangle
-              size={18}
-              strokeWidth={2.2}
-              className="mt-[2px] shrink-0 text-danger"
-            />
+          <div
+            role="status"
+            className="flex items-center gap-3 rounded-[10px] bg-elevated px-4 py-3"
+          >
+            <AlertTriangle size={18} strokeWidth={2.2} className="mt-[2px] shrink-0 text-danger" />
             <p className="min-w-0 flex-1 text-[15.5px] font-normal leading-[22px] text-danger">
               {t(
                 "Harbor's remote server isn't responding on port {WEB_PORT}. Check that the desktop server is running, or turn this setting off and on to restart it.",
@@ -123,7 +128,8 @@ export function RemotesPanel() {
               )}
             </p>
             <button type="button" onClick={() => setRetry((v) => v + 1)} className={ROW_ACTION}>
-              <RotateCw size={17} />{t("Check again")}
+              <RotateCw size={17} />
+              {t("Check again")}
             </button>
           </div>
         )}
@@ -147,6 +153,8 @@ export function RemotesPanel() {
             probed={probed}
           />
         ))}
+
+      <PairedDevicesSection enabled={enabled} />
     </>
   );
 }
