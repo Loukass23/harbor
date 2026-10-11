@@ -1,12 +1,13 @@
 use axum::body::Body;
 use axum::extract::ws::{Message, WebSocket, WebSocketUpgrade};
-use axum::extract::State;
+use axum::extract::{Path, State};
 use axum::http::{header, HeaderMap, HeaderName, HeaderValue, Response, StatusCode};
 use axum::response::IntoResponse;
-use axum::routing::get;
+use axum::routing::{get, post};
 use futures_util::{SinkExt, StreamExt};
 use std::collections::HashSet;
 use std::net::SocketAddr;
+use std::time::Duration;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::{Arc, Mutex, OnceLock};
 use tauri::{AppHandle, Emitter};
@@ -239,6 +240,113 @@ async fn serve_http(State(state): State<ServeState>, uri: axum::http::Uri) -> Re
     serve_bundled_asset(&state.app, uri.path())
 }
 
+fn companion_json(status: StatusCode, body: serde_json::Value) -> Response<Body> {
+    Response::builder()
+        .status(status)
+        .header(header::CONTENT_TYPE, "application/json")
+        .header(header::CACHE_CONTROL, "no-store")
+        .header(header::ACCESS_CONTROL_ALLOW_ORIGIN, "*")
+        .body(Body::from(body.to_string()))
+        .unwrap()
+}
+
+async fn companion_preflight() -> Response<Body> {
+    Response::builder()
+        .status(StatusCode::NO_CONTENT)
+        .header(header::ACCESS_CONTROL_ALLOW_ORIGIN, "*")
+        .header(header::ACCESS_CONTROL_ALLOW_METHODS, "GET, POST, OPTIONS")
+        .header(
+            header::ACCESS_CONTROL_ALLOW_HEADERS,
+            "content-type, authorization",
+        )
+        .header(header::ACCESS_CONTROL_MAX_AGE, "600")
+        .body(Body::empty())
+        .unwrap()
+}
+
+async fn companion_identity(State(state): State<ServeState>) -> Response<Body> {
+    companion_json(StatusCode::OK, crate::companion::identity(&state.app))
+}
+
+#[derive(serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct PairBody {
+    device_id: String,
+    device_name: String,
+    code: String,
+}
+
+async fn companion_pair(State(state): State<ServeState>, body: axum::body::Bytes) -> Response<Body> {
+    let Ok(req) = serde_json::from_slice::<PairBody>(&body) else {
+        return companion_json(
+            StatusCode::BAD_REQUEST,
+            serde_json::json!({ "error": "invalid" }),
+        );
+    };
+    match crate::companion::request(&state.app, &req.device_id, &req.device_name, &req.code) {
+        Ok(request_id) => companion_json(
+            StatusCode::OK,
+            serde_json::json!({ "requestId": request_id }),
+        ),
+        Err(crate::companion::RequestError::Invalid) => companion_json(
+            StatusCode::BAD_REQUEST,
+            serde_json::json!({ "error": "invalid" }),
+        ),
+        Err(crate::companion::RequestError::Busy) => companion_json(
+            StatusCode::TOO_MANY_REQUESTS,
+            serde_json::json!({ "error": "busy" }),
+        ),
+    }
+}
+
+async fn companion_pair_poll(
+    State(state): State<ServeState>,
+    Path(request_id): Path<String>,
+) -> Response<Body> {
+    use crate::companion::PollState;
+    let state =
+        crate::companion::poll_wait(&state.app, &request_id, Duration::from_secs(25)).await;
+    let body = match state {
+        PollState::Pending => serde_json::json!({ "status": "pending" }),
+        PollState::Denied => serde_json::json!({ "status": "denied" }),
+        PollState::Expired => serde_json::json!({ "status": "expired" }),
+        PollState::Approved { token, payload } => serde_json::json!({
+            "status": "approved",
+            "token": token,
+            "payload": payload,
+        }),
+    };
+    companion_json(StatusCode::OK, body)
+}
+
+async fn companion_stream_server(
+    State(state): State<ServeState>,
+    headers: HeaderMap,
+) -> Response<Body> {
+    let token = headers
+        .get(header::AUTHORIZATION)
+        .and_then(|v| v.to_str().ok())
+        .and_then(|v| v.strip_prefix("Bearer "))
+        .unwrap_or("");
+    if token.is_empty() || !crate::companion::authorize(&state.app, token) {
+        return companion_json(
+            StatusCode::UNAUTHORIZED,
+            serde_json::json!({ "error": "unpaired" }),
+        );
+    }
+    let port = match crate::torrent_engine::lan_status() {
+        (true, Some(port), _) => Ok(port),
+        _ => crate::torrent_engine::start_lan_server(&state.app).await,
+    };
+    match port {
+        Ok(port) => companion_json(StatusCode::OK, serde_json::json!({ "port": port })),
+        Err(e) => companion_json(
+            StatusCode::SERVICE_UNAVAILABLE,
+            serde_json::json!({ "error": e }),
+        ),
+    }
+}
+
 async fn remote_ws_handler(
     ws: WebSocketUpgrade,
     State(state): State<ServeState>,
@@ -324,6 +432,22 @@ pub async fn web_serve_start(app: AppHandle) -> Result<u16, String> {
     let router = axum::Router::new()
         .route("/api/remote", get(remote_ws_handler))
         .route("/manga-img", get(manga_img_proxy))
+        .route(
+            "/api/companion/identity",
+            get(companion_identity).options(companion_preflight),
+        )
+        .route(
+            "/api/companion/pair",
+            post(companion_pair).options(companion_preflight),
+        )
+        .route(
+            "/api/companion/pair/{request_id}",
+            get(companion_pair_poll).options(companion_preflight),
+        )
+        .route(
+            "/api/companion/stream-server",
+            post(companion_stream_server).options(companion_preflight),
+        )
         .fallback(serve_http)
         .with_state(state);
 

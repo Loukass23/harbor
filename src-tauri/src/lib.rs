@@ -9,6 +9,7 @@ mod ytmusic;
 mod binary_lookup;
 mod cast_hls;
 mod cast_subs;
+mod companion;
 mod crash_report;
 mod diagnostics;
 mod download;
@@ -1242,6 +1243,9 @@ pub fn run() {
             web_server::web_serve_status,
             web_server::remote_ws_broadcast,
             web_server::remote_ws_client_count,
+            companion::companion_pair_resolve,
+            companion::companion_paired_list,
+            companion::companion_forget,
             anime4k::anime4k_download,
             anime4k::anime4k_dir,
             asr_model::asr_ensure_model,
