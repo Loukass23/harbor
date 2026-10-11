@@ -147,11 +147,23 @@ const noCues = (() => ({
   destroy() {},
 })) as unknown as AvplayDeps["cues"];
 
-function setup(opts: { tracks?: AvplayTrack[]; current?: number[] } = {}) {
+function setup(
+  opts: {
+    tracks?: AvplayTrack[];
+    current?: number[];
+    cues?: AvplayDeps["cues"];
+    now?: () => number;
+  } = {},
+) {
   mock.timers.enable({ apis: ["setTimeout", "setInterval"] });
   const av = avplayStub(opts.tracks, opts.current);
   const e = env();
-  const bridge = createAvplayBridge(av.api, { doc: e.doc, win: e.win, cues: noCues, now: () => 0 });
+  const bridge = createAvplayBridge(av.api, {
+    doc: e.doc,
+    win: e.win,
+    cues: opts.cues ?? noCues,
+    now: opts.now ?? (() => 0),
+  });
   let snap: PlayerSnapshot | null = null;
   bridge.subscribe((s) => (snap = s));
   bridge.attach(e.host);
@@ -440,5 +452,76 @@ test("reopened paused with duration 0, the resume seek still lands without playb
   mock.timers.tick(250);
   assert.deepEqual(av.calls.at(-1), ["seekTo", 445_000]);
   assert.ok(!av.names().includes("play"));
+  done(bridge);
+});
+
+test("a suspend() that throws during prepare still reopens on return", async () => {
+  const { av, e, bridge } = setup();
+  Object.assign(av.api.avplay, {
+    suspend: () => {
+      throw new Error("PLAYER_ERROR_INVALID_STATE");
+    },
+  });
+  await bridge.load({ url: "https://x.example/a.mkv" });
+  e.setVisibility("hidden");
+  e.setVisibility("visible");
+  assert.equal(av.calls.filter((c) => c[0] === "open").length, 2);
+  done(bridge);
+});
+
+test("an ended source is left alone when the app comes back", async () => {
+  const { av, e, bridge, snap } = setup();
+  await bridge.load({ url: "https://x.example/a.mkv" });
+  av.ready();
+  av.listener().onstreamcompleted?.();
+  av.restoreLosesStream();
+  e.setVisibility("hidden");
+  e.setVisibility("visible");
+  assert.equal(av.calls.filter((c) => c[0] === "open").length, 1);
+  assert.equal(snap().status, "ended");
+  done(bridge);
+});
+
+test("play after the end reopens and starts from the sought position", async () => {
+  const { av, bridge } = setup();
+  await bridge.load({ url: "https://x.example/a.mkv" });
+  av.ready();
+  av.listener().onstreamcompleted?.();
+  bridge.seek(2);
+  await bridge.play();
+  assert.equal(av.calls.filter((c) => c[0] === "open").length, 2);
+  av.setDuration(3_000_000);
+  av.ready();
+  assert.ok(
+    av.calls.some((c) => c[0] === "seekTo" && c[1] === 2_000),
+    "no resume edge guard",
+  );
+  assert.equal(av.names().at(-1), "play");
+  done(bridge);
+});
+
+test("the subtitle clock stops while AVPlay buffers", async () => {
+  let t = 0;
+  const ticks: number[] = [];
+  const cues = ((onChange: () => void) => ({
+    ...(noCues(onChange) as object),
+    tick: (pos: number) => {
+      ticks.push(pos);
+      return false;
+    },
+  })) as unknown as AvplayDeps["cues"];
+  const { av, bridge } = setup({ cues, now: () => t });
+  await bridge.load({ url: "https://x.example/a.mkv" });
+  av.ready();
+  await bridge.play();
+  av.listener().oncurrentplaytime?.(10_000);
+  av.listener().onbufferingstart?.();
+  t = 8_000;
+  mock.timers.tick(100);
+  assert.equal(ticks.at(-1), 10, "frozen at the stall");
+  av.listener().onbufferingcomplete?.();
+  t = 9_000;
+  mock.timers.tick(100);
+  assert.equal(ticks.at(-1), 11);
   done(bridge);
 });

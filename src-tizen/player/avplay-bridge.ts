@@ -141,6 +141,8 @@ export function createAvplayBridge(api: Webapis, deps: AvplayDeps): PlayerBridge
   let prepared = false;
   let wantPlay = false;
   let pendingStartSec: number | null = null;
+  /** The pending start is the viewer's own seek, not a resume: no edge guard. */
+  let pendingExact = false;
   let watchdog: ReturnType<typeof setTimeout> | null = null;
   let resumeRetry: ReturnType<typeof setTimeout> | null = null;
   let resizeObserver: { disconnect(): void } | null = null;
@@ -170,14 +172,21 @@ export function createAvplayBridge(api: Webapis, deps: AvplayDeps): PlayerBridge
     }
   };
 
+  // AVPlay reports time about twice a second; in between the clock runs on its
+  // own, but never through a stall, or subtitles race ahead of a frozen picture.
   const positionSec = () =>
-    snap.status === "playing" ? clockSec + (now() - clockAt) / 1000 : clockSec;
+    snap.status === "playing" && !snap.buffering ? clockSec + (now() - clockAt) / 1000 : clockSec;
 
-  const syncCues = () => {
+  const syncCueText = () => {
     cues.tick(positionSec());
     snap.subText = cues.text.subText;
     snap.subStartSec = cues.text.subStartSec;
     snap.secondarySubText = cues.text.secondarySubText;
+  };
+
+  /** Text plus the track list and delay, which change only through the cue tracks. */
+  const syncCues = () => {
+    syncCueText();
     snap.subDelaySec = cues.delaySec();
     snap.subtitleTracks = cues.list();
   };
@@ -186,7 +195,7 @@ export function createAvplayBridge(api: Webapis, deps: AvplayDeps): PlayerBridge
     if (cueTimer != null) return;
     cueTimer = setInterval(() => {
       const before = snap.subText + "\u0000" + snap.secondarySubText;
-      syncCues();
+      syncCueText();
       if (snap.subText + "\u0000" + snap.secondarySubText !== before) emit();
     }, CUE_TICK_MS);
   };
@@ -259,8 +268,12 @@ export function createAvplayBridge(api: Webapis, deps: AvplayDeps): PlayerBridge
       return;
     }
     const start = pendingStartSec;
+    const exact = pendingExact;
     pendingStartSec = null;
-    if (start <= RESUME_EDGE_SEC || start >= dur - RESUME_EDGE_SEC) return;
+    pendingExact = false;
+    if (exact) {
+      if (start <= 0) return;
+    } else if (start <= RESUME_EDGE_SEC || start >= dur - RESUME_EDGE_SEC) return;
     clockSec = start;
     clockAt = now();
     try {
@@ -336,11 +349,13 @@ export function createAvplayBridge(api: Webapis, deps: AvplayDeps): PlayerBridge
   const listenerFor = (g: number): AvplayListener => ({
     onbufferingstart: () => {
       if (g !== gen) return;
+      clockSec = positionSec();
       snap.buffering = true;
       emit();
     },
     onbufferingcomplete: () => {
       if (g !== gen) return;
+      clockAt = now();
       snap.buffering = false;
       emit();
     },
@@ -402,9 +417,11 @@ export function createAvplayBridge(api: Webapis, deps: AvplayDeps): PlayerBridge
       clearWatchdog();
       clockSec = positionSec();
       if (snap.status === "playing") snap.status = "paused";
+      // Set even if suspend() throws: the return path must still check the
+      // state and reopen, since the watchdog is already gone.
+      suspended = true;
       try {
         av.suspend?.();
-        suspended = true;
       } catch (err) {
         console.warn("[avplay] suspend failed", err);
       }
@@ -421,6 +438,8 @@ export function createAvplayBridge(api: Webapis, deps: AvplayDeps): PlayerBridge
     }
     // On GU43DU7199UXZG restore() leaves AVPlay in IDLE at 0:00 with nothing
     // prepared, so the stream is reopened at the saved position, paused.
+    // An ended or failed source stays as it was: the player is showing that.
+    if (snap.status === "ended" || snap.status === "error") return;
     const s = state();
     if (current && (!prepared || (s !== "READY" && s !== "PAUSED" && s !== "PLAYING"))) {
       openSource(current, at, true);
@@ -452,11 +471,17 @@ export function createAvplayBridge(api: Webapis, deps: AvplayDeps): PlayerBridge
    * Opens `src` and prepares it. A reopen after resume keeps the subtitles and
    * the audio track the viewer had; a new load starts both from the source.
    */
-  const openSource = (src: PlayerSource, startAtSec: number | null, reopen: boolean) => {
+  const openSource = (
+    src: PlayerSource,
+    startAtSec: number | null,
+    reopen: boolean,
+    exact = false,
+  ) => {
     teardown();
     const g = gen;
     current = src;
     pendingStartSec = startAtSec;
+    pendingExact = exact;
     clockSec = startAtSec ?? 0;
     clockAt = now();
     snap = {
@@ -580,6 +605,12 @@ export function createAvplayBridge(api: Webapis, deps: AvplayDeps): PlayerBridge
       openSource(src, src.startAtSec ?? null, false);
     },
     async play() {
+      // AVPlay can't play again after the end; reopen where the viewer sought to.
+      if (snap.status === "ended" && current) {
+        openSource(current, pendingStartSec ?? 0, true, true);
+        wantPlay = true;
+        return;
+      }
       wantPlay = true;
       if (!prepared) return;
       const s = state();
@@ -599,8 +630,12 @@ export function createAvplayBridge(api: Webapis, deps: AvplayDeps): PlayerBridge
       emit();
     },
     seek(sec) {
-      if (!prepared) {
+      if (!prepared || snap.status === "ended") {
         pendingStartSec = sec;
+        pendingExact = true;
+        clockSec = sec;
+        snap.positionSec = sec;
+        emit();
         return;
       }
       const dur = durationSec();
