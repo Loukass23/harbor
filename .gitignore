@@ -99,6 +99,10 @@ audit-rest.txt
 installer/src-tauri/payload/
 installer/payload-stage/
 !installer/**/*.md
+# Tizen rules and lessons must be committed; earlier attempts lost fixes in ignored notes.
+!src-tizen/**/*.md
+!.claude/**/*.md
+!.env.tizen.example
 # local design references and perf captures, not for distribution
 tools/tv-refs/
 docs/tv-perf/

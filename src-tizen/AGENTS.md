@@ -1,0 +1,47 @@
+# src-tizen AGENTS.md
+
+Samsung Tizen TV target for Harbor. The root `AGENTS.md` still applies; this file adds the
+Tizen rules. Read `docs/lessons.md` before changing anything in this folder.
+
+## Target
+
+- Tizen 7.0+ (2022 TVs, Chromium 94), packaged as a `.wgt` web widget loaded over `file://`.
+- Same Big Picture UI as Android TV (`BpTvApp`). There is no Tauri and no Rust at runtime.
+- Playback: `webapis.avplay` behind Harbor's `PlayerBridge`, with the HTML5 bridge as fallback.
+- Optional companion (desktop Harbor or Stremio server on the LAN) for torrents, a CORS proxy and
+  remote control. The app must work without it.
+
+## Boundary rule
+
+- `src/` is shared with upstream Harbor and never imports `src-tizen/` or touches Tizen APIs
+  (`webapis`, `tizen.*`, `tizenhwkey`, AVPlay). `pnpm check:tizen-boundary` enforces this.
+- `src-tizen/` may import from `src/` via `@/`.
+- When Tizen needs something from shared code, add a small **generic** seam in `src/`
+  (a registry, setter or option) that any platform could use, then fill it from `src-tizen/`.
+  Keep each seam in its own commit so it can be contributed upstream on its own.
+- Never add `isTizen()` branches to shared code.
+
+## Layout
+
+- `main.tsx`: Tizen entry. Installs the platform, then mounts the shared TV app.
+- `platform/`: key registration, back and exit, lifecycle, `BpPlatform` implementation.
+- `player/`: AVPlay `PlayerBridge`, codec capabilities, watchdogs.
+- `net/`: companion discovery and pairing, fetch proxy resolver.
+- `streams/`: platform score modifier.
+- `config.xml.tpl`: manifest template, filled from `.env.tizen` at package time.
+- `docs/`: lessons and integration notes. Committed.
+
+## Commands
+
+- `pnpm run check`, `pnpm run typecheck`, `pnpm test`, `pnpm check:tizen-boundary` after every change.
+- Device pipeline (`scripts/tizen.mjs`): build, package, install, launch, logs, debug.
+  Settings come from `.env.tizen`; see `.env.tizen.example`.
+- `pnpm build` and `pnpm build:tv` must still produce unchanged desktop and Android bundles.
+
+## Working rules
+
+- AVPlay changes need a real TV. The emulator only covers boot, UI and focus.
+- Every AVPlay or key-handling fix gets a unit test with a `webapis`/`tizen` stub in
+  `tests/tizen-*.test.ts`.
+- When you learn a new platform quirk, add it to `docs/lessons.md` in the same commit.
+- Don't port code from `origin/tizen-beta` or `beta-tizen` wholesale. Read it, apply the lessons, and rewrite it.

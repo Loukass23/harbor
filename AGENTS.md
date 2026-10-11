@@ -47,6 +47,7 @@ When trade-offs are required, prefer predictable behavior over clever or tempora
 - `src-tauri/`: Tauri application and native Rust integrations.
 - `src-tauri/src/`: Native commands, playback, window management, and platform-specific code.
 - `harbor-core/`: Shared Rust stream parsing and ranking logic.
+- `src-tizen/`: Samsung Tizen TV target. See `src-tizen/AGENTS.md`. `src/` must not depend on it.
 
 Keep business logic outside React components when it can be expressed as a reusable module.
 

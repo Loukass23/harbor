@@ -84,6 +84,9 @@ jobs:
       - name: Typecheck
         run: vp run typecheck
 
+      - name: Tizen boundary
+        run: vp run check:tizen-boundary
+
       - name: Test
         run: vp run test
 
