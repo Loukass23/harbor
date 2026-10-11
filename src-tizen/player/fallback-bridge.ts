@@ -1,4 +1,9 @@
-import type { PlayerBridge, PlayerSnapshot, PlayerSource } from "@/lib/player/bridge";
+import {
+  emptySnapshot,
+  type PlayerBridge,
+  type PlayerSnapshot,
+  type PlayerSource,
+} from "@/lib/player/bridge";
 
 type AddSubtitleArgs = Parameters<PlayerBridge["addSubtitle"]>;
 
@@ -29,13 +34,19 @@ export function createFallbackBridge(
   let switched = false;
   let addedSubs: AddSubtitleArgs[] = [];
   const listeners = new Set<(s: PlayerSnapshot) => void>();
-  const settings: { [K in keyof PlayerBridge]?: () => void } = {};
+  /** Viewer settings, replayed on whichever bridge plays. Keyed so a newer value replaces an older one. */
+  const settings = new Map<string, () => void>();
+  /** Subtitle selections, replayed once the fallback has the same tracks. */
+  const selections = new Map<string, () => void>();
   let off: (() => void) | null = null;
+  /** Bumped by every load and destroy, so an unfinished switch stops touching the player. */
+  let switchToken = 0;
 
-  const remember = <K extends keyof PlayerBridge>(key: K, apply: () => void) => {
-    settings[key] = apply;
+  const remember = (key: string, apply: () => void) => {
+    settings.set(key, apply);
     apply();
   };
+  const applySettings = () => settings.forEach((apply) => apply());
 
   const onSnap = (s: PlayerSnapshot) => {
     if (s.firstFrameReady) sawFrame = true;
@@ -50,18 +61,38 @@ export function createFallbackBridge(
 
   const switchToFallback = async () => {
     switched = true;
-    const resumeAt = last && last.positionSec > 0 ? last.positionSec : source?.startAtSec;
-    off?.();
-    current.destroy();
-    current = fallback();
-    onPrimary = false;
-    if (host) current.attach(host);
-    off = current.subscribe(onSnap);
-    for (const apply of Object.values(settings)) apply?.();
-    if (!source) return;
-    await current.load({ ...source, startAtSec: resumeAt });
-    for (const args of addedSubs) void current.addSubtitle(...args);
-    if (wantPlay) await current.play();
+    const token = ++switchToken;
+    const src = source;
+    const resumeAt = last && last.positionSec > 0 ? last.positionSec : src?.startAtSec;
+    try {
+      off?.();
+      current.destroy();
+      current = fallback();
+      onPrimary = false;
+      if (host) current.attach(host);
+      off = current.subscribe(onSnap);
+      if (!src) return;
+      await current.load({ ...src, startAtSec: resumeAt });
+      if (token !== switchToken) return;
+      // The HTML5 load() resets sub delay, mute and speed, so settings go on after it.
+      applySettings();
+      const subs = addedSubs.map((args) => current.addSubtitle(...args).catch(() => false));
+      void Promise.all(subs).then(() => {
+        if (token === switchToken) selections.forEach((apply) => apply());
+      });
+      if (wantPlay) await current.play();
+    } catch (err) {
+      console.error("[avplay] HTML5 fallback failed", err);
+      if (token !== switchToken) return;
+      const failed: PlayerSnapshot = {
+        ...(last ?? emptySnapshot),
+        status: "error",
+        errorCode: "decode",
+        errorMessage: "fallback failed",
+      };
+      last = failed;
+      listeners.forEach((l) => l(failed));
+    }
   };
 
   off = current.subscribe(onSnap);
@@ -76,7 +107,9 @@ export function createFallbackBridge(
       current.detach();
     },
     async load(src) {
+      switchToken += 1;
       source = src;
+      selections.clear();
       sawFrame = false;
       wantPlay = false;
       addedSubs = [];
@@ -88,7 +121,7 @@ export function createFallbackBridge(
         onPrimary = true;
         if (host) current.attach(host);
         off = current.subscribe(onSnap);
-        for (const apply of Object.values(settings)) apply?.();
+        applySettings();
       }
       switched = false;
       await current.load(src);
@@ -107,18 +140,25 @@ export function createFallbackBridge(
     setMuted: (m) => remember("setMuted", () => current.setMuted(m)),
     setRate: (r) => remember("setRate", () => current.setRate(r)),
     setAudioTrack: (id) => current.setAudioTrack(id),
-    setSubtitleTrack: (id, origin) => current.setSubtitleTrack(id, origin),
+    setSubtitleTrack(id, origin) {
+      selections.set("main", () => current.setSubtitleTrack(id, origin));
+      current.setSubtitleTrack(id, origin);
+    },
     canAutoSelectSubtitle: () => current.canAutoSelectSubtitle?.() ?? true,
-    setSecondarySubtitleTrack: (id) => current.setSecondarySubtitleTrack(id),
+    setSecondarySubtitleTrack(id) {
+      selections.set("secondary", () => current.setSecondarySubtitleTrack(id));
+      current.setSecondarySubtitleTrack(id);
+    },
     setSubVisible: (v) => remember("setSubVisible", () => current.setSubVisible(v)),
     setSubHideSdh: (on) => remember("setSubHideSdh", () => current.setSubHideSdh?.(on)),
     setSubDelay: (sec) => remember("setSubDelay", () => current.setSubDelay(sec)),
     setAudioDelay: (sec) => remember("setAudioDelay", () => current.setAudioDelay(sec)),
-    setPanscan: (v) => current.setPanscan(v),
-    setVideoZoom: (v) => current.setVideoZoom(v),
-    setAspectOverride: (v) => current.setAspectOverride(v),
-    setStretch: (on) => current.setStretch(on),
-    setVideoEq: (name, value) => current.setVideoEq(name, value),
+    setPanscan: (v) => remember("setPanscan", () => current.setPanscan(v)),
+    setVideoZoom: (v) => remember("setVideoZoom", () => current.setVideoZoom(v)),
+    setAspectOverride: (v) => remember("setAspectOverride", () => current.setAspectOverride(v)),
+    setStretch: (on) => remember("setStretch", () => current.setStretch(on)),
+    setVideoEq: (name, value) =>
+      remember(`setVideoEq:${name}`, () => current.setVideoEq(name, value)),
     setAnime4kShaders: (paths) => current.setAnime4kShaders(paths),
     async addSubtitle(...args) {
       addedSubs.push(args);
@@ -143,6 +183,7 @@ export function createFallbackBridge(
       };
     },
     destroy() {
+      switchToken += 1;
       off?.();
       off = null;
       current.destroy();

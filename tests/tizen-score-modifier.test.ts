@@ -38,6 +38,19 @@ test("Dolby Vision without HDR10 ranks below DV with an HDR10 base layer", () =>
   assert.ok(dvHdr.score > dvOnly.score, `${dvHdr.score} > ${dvOnly.score}`);
 });
 
+test("the usual DV.HDR and HDR.DV tags are not penalised as DV-only", () => {
+  for (const title of [
+    "Film.2020.2160p.WEB-DL.DDP5.1.DV.HDR.H.265-GRP.mkv",
+    "Film.2020.2160p.WEB-DL.DDP5.1.HDR.DV.H.265-GRP.mkv",
+  ]) {
+    const s = scored(title);
+    assert.ok(
+      !s.reasons.some((r) => r.signal === "tizen-dv-no-hdr10"),
+      `${title} keeps its HDR10 base`,
+    );
+  }
+});
+
 test("every Tizen reason adds exactly its own delta", () => {
   const s = parsed("Film.2020.1080p.BluRay.TrueHD.7.1.x265-GRP.mkv");
   const base = scoreStream(s, opts);

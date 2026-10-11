@@ -14,6 +14,7 @@ export const PREPARE_TIMEOUT_MS = 30_000;
 /** Seconds AVPlay buffers before it starts and after a stall. */
 const BUFFER_SECONDS = 5;
 const CUE_TICK_MS = 100;
+const RESUME_RETRY_MS = 250;
 /** Same window as the HTML5 bridge: no resume seek into the first or last 5s. */
 const RESUME_EDGE_SEC = 5;
 
@@ -141,6 +142,8 @@ export function createAvplayBridge(api: Webapis, deps: AvplayDeps): PlayerBridge
   let wantPlay = false;
   let pendingStartSec: number | null = null;
   let watchdog: ReturnType<typeof setTimeout> | null = null;
+  let resumeRetry: ReturnType<typeof setTimeout> | null = null;
+  let resizeObserver: { disconnect(): void } | null = null;
   let cueTimer: ReturnType<typeof setInterval> | null = null;
   let suspended = false;
   let selectedAudio: number | null = null;
@@ -245,7 +248,16 @@ export function createAvplayBridge(api: Webapis, deps: AvplayDeps): PlayerBridge
   const tryResumeSeek = () => {
     if (pendingStartSec == null || !prepared) return;
     const dur = durationSec();
-    if (dur <= 0) return;
+    if (dur <= 0) {
+      // Paused, nothing calls oncurrentplaytime, so ask again on a timer.
+      if (resumeRetry == null) {
+        resumeRetry = setTimeout(() => {
+          resumeRetry = null;
+          tryResumeSeek();
+        }, RESUME_RETRY_MS);
+      }
+      return;
+    }
     const start = pendingStartSec;
     pendingStartSec = null;
     if (start <= RESUME_EDGE_SEC || start >= dur - RESUME_EDGE_SEC) return;
@@ -305,6 +317,8 @@ export function createAvplayBridge(api: Webapis, deps: AvplayDeps): PlayerBridge
       av.setSelectTrack?.("AUDIO", index);
     } catch (err) {
       console.warn("[avplay] audio track switch failed", err);
+      // Show the track that actually plays, not the one that was asked for.
+      selectedAudio = null;
     }
     readTracks();
   };
@@ -383,6 +397,9 @@ export function createAvplayBridge(api: Webapis, deps: AvplayDeps): PlayerBridge
         } catch {}
       }
       wantPlay = false;
+      // A prepare still running when the app hides must not time out in the
+      // background; the source is reopened, with a fresh watchdog, on return.
+      clearWatchdog();
       clockSec = positionSec();
       if (snap.status === "playing") snap.status = "paused";
       try {
@@ -405,7 +422,7 @@ export function createAvplayBridge(api: Webapis, deps: AvplayDeps): PlayerBridge
     // On GU43DU7199UXZG restore() leaves AVPlay in IDLE at 0:00 with nothing
     // prepared, so the stream is reopened at the saved position, paused.
     const s = state();
-    if (current && s !== "READY" && s !== "PAUSED" && s !== "PLAYING") {
+    if (current && (!prepared || (s !== "READY" && s !== "PAUSED" && s !== "PLAYING"))) {
       openSource(current, at, true);
     }
   };
@@ -413,6 +430,8 @@ export function createAvplayBridge(api: Webapis, deps: AvplayDeps): PlayerBridge
   const unhook = () => {
     doc.removeEventListener("visibilitychange", onVisibility);
     win.removeEventListener("resize", applyRect);
+    resizeObserver?.disconnect();
+    resizeObserver = null;
     doc.documentElement.classList.remove(AVPLAY_CLASS);
     if (surface?.parentElement) surface.parentElement.removeChild(surface);
     surface = null;
@@ -421,6 +440,8 @@ export function createAvplayBridge(api: Webapis, deps: AvplayDeps): PlayerBridge
 
   const teardown = () => {
     gen += 1;
+    if (resumeRetry != null) clearTimeout(resumeRetry);
+    resumeRetry = null;
     wantPlay = false;
     suspended = false;
     stopCueTicker();
@@ -503,24 +524,29 @@ export function createAvplayBridge(api: Webapis, deps: AvplayDeps): PlayerBridge
       fail(g, "decode", "prepare timed out");
     }, PREPARE_TIMEOUT_MS);
 
-    av.prepareAsync(
-      () => {
-        if (g !== gen) return;
-        clearWatchdog();
-        prepared = true;
-        readTracks();
-        applyRect();
-        snap.durationSec = durationSec();
-        snap.status = "ready";
-        tryResumeSeek();
-        if (wantPlay) startPlayback();
-        emit();
-      },
-      (err) => {
-        console.warn("[avplay] prepareAsync failed", err);
-        fail(g, avplayErrorCode(err), "prepare failed");
-      },
-    );
+    try {
+      av.prepareAsync(
+        () => {
+          if (g !== gen) return;
+          clearWatchdog();
+          prepared = true;
+          readTracks();
+          applyRect();
+          snap.durationSec = durationSec();
+          snap.status = "ready";
+          tryResumeSeek();
+          if (wantPlay) startPlayback();
+          emit();
+        },
+        (err) => {
+          console.warn("[avplay] prepareAsync failed", err);
+          fail(g, avplayErrorCode(err), "prepare failed");
+        },
+      );
+    } catch (err) {
+      console.warn("[avplay] prepareAsync threw", err);
+      fail(g, avplayErrorCode(err), "prepare failed");
+    }
   };
 
   return {
@@ -537,6 +563,13 @@ export function createAvplayBridge(api: Webapis, deps: AvplayDeps): PlayerBridge
       doc.documentElement.classList.add(AVPLAY_CLASS);
       doc.addEventListener("visibilitychange", onVisibility);
       win.addEventListener("resize", applyRect);
+      // The host also changes size without a window resize: docking, overscan.
+      const Observer = (globalThis as { ResizeObserver?: typeof ResizeObserver }).ResizeObserver;
+      if (Observer) {
+        const ro = new Observer(() => applyRect());
+        ro.observe(h);
+        resizeObserver = ro;
+      }
     },
     detach() {
       teardown();

@@ -396,3 +396,49 @@ test("a panel query that throws never stops an adaptive stream from opening", as
   assert.equal(snap().status, "loading");
   done(bridge);
 });
+
+test("a prepareAsync that throws reports an error at once, not 30s later", async () => {
+  const { av, bridge, snap } = setup();
+  Object.assign(av.api.avplay, {
+    prepareAsync: () => {
+      throw Object.assign(new Error("PLAYER_ERROR_INVALID_STATE"), { name: "InvalidStateError" });
+    },
+  });
+  await bridge.load({ url: "https://x.example/a.mkv" });
+  assert.equal(snap().status, "error");
+  const seen: string[] = [];
+  bridge.subscribe((s) => seen.push(s.status));
+  mock.timers.tick(PREPARE_TIMEOUT_MS);
+  assert.deepEqual(seen, ["error"], "the watchdog does not fire a second error");
+  done(bridge);
+});
+
+test("hiding during prepare stops the watchdog; returning reopens with a fresh one", async () => {
+  const { av, e, bridge, snap } = setup();
+  await bridge.load({ url: "https://x.example/a.mkv" });
+  e.setVisibility("hidden");
+  mock.timers.tick(PREPARE_TIMEOUT_MS + 1);
+  assert.notEqual(snap().status, "error");
+  e.setVisibility("visible");
+  assert.equal(av.calls.filter((c) => c[0] === "open").length, 2);
+  done(bridge);
+});
+
+test("reopened paused with duration 0, the resume seek still lands without playback", async () => {
+  const { av, e, bridge } = setup();
+  await bridge.load({ url: "https://x.example/a.mkv" });
+  av.ready();
+  av.setDuration(3_000_000);
+  av.listener().oncurrentplaytime?.(445_000);
+  av.restoreLosesStream();
+  e.setVisibility("hidden");
+  e.setVisibility("visible");
+  av.setDuration(0);
+  av.ready();
+  assert.ok(!av.calls.some((c) => c[0] === "seekTo"));
+  av.setDuration(3_000_000);
+  mock.timers.tick(250);
+  assert.deepEqual(av.calls.at(-1), ["seekTo", 445_000]);
+  assert.ok(!av.names().includes("play"));
+  done(bridge);
+});

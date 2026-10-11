@@ -100,9 +100,10 @@ test("a prepare failure switches to HTML5 once, at the same position, with setti
   assert.ok(avplay.destroyed);
   assert.equal(html5.name, "html5");
   const names = html5.calls.map((c) => c[0]);
-  assert.deepEqual(names, ["attach", "setVolume", "setSubDelay", "load", "addSubtitle", "play"]);
+  // Settings follow load(): the HTML5 load resets sub delay, mute and speed.
+  assert.deepEqual(names, ["attach", "load", "setVolume", "setSubDelay", "addSubtitle", "play"]);
   assert.equal(html5.calls[0][1], host);
-  assert.equal((html5.calls[3][1] as PlayerSource).startAtSec, 600);
+  assert.equal((html5.calls[1][1] as PlayerSource).startAtSec, 600);
   assert.ok(!seen.some((s) => s.status === "error"), "the failing snapshot is never shown");
 
   html5.push({ status: "error", errorCode: "decode" });
@@ -141,4 +142,14 @@ test("the next source goes back to AVPlay", async () => {
   assert.equal(made.length, 3);
   assert.equal(made[2].name, "avplay");
   assert.ok(made[1].destroyed);
+});
+
+test("closing the player mid-switch stops the fallback from playing", async () => {
+  const { bridge, made } = setup();
+  await bridge.load({ url: "https://x.example/a.mkv" });
+  await bridge.play();
+  made[0].push({ status: "error", errorCode: "codec" });
+  bridge.destroy();
+  await flush();
+  assert.ok(!made[1].calls.some((c) => c[0] === "play"));
 });

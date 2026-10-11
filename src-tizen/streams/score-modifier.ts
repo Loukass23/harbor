@@ -11,6 +11,8 @@ const TRUEHD = -16;
 const DV_ONLY = -60;
 /** Containers AVPlay rarely opens. */
 const LEGACY_CONTAINER = -17;
+/** An HDR10 base layer named anywhere in the release, apart from "DV" itself. */
+const HDR_LAYER = /\bHDR(?:10\+?)?\b/i;
 const DDP = 4;
 const AAC = 2;
 const EFFICIENT_VIDEO = 2;
@@ -25,7 +27,13 @@ export const tizenScoreModifier: PlatformScoreModifier = (s) => {
   else if (audio === "DD+" || audio === "Atmos") out.push({ signal: "tizen-ddp", delta: DDP });
   else if (audio === "AAC") out.push({ signal: "tizen-aac", delta: AAC });
 
-  if (s.hdrFormat === "DV") out.push({ signal: "tizen-dv-no-hdr10", delta: DV_ONLY });
+  // The parser says "DV+HDR10" only when HDR10 sits right after DV, so the usual
+  // "DV.HDR" and "HDR.DV" tags (profile 8, which plays) also arrive as "DV".
+  if (
+    s.hdrFormat === "DV" &&
+    !HDR_LAYER.test(`${s.name ?? ""} ${s.title ?? ""} ${s.description ?? ""}`)
+  )
+    out.push({ signal: "tizen-dv-no-hdr10", delta: DV_ONLY });
   if (s.codec === "HEVC" || s.codec === "AV1")
     out.push({ signal: "tizen-hw-codec", delta: EFFICIENT_VIDEO });
   if (s.container === "avi" || s.container === "wmv")
