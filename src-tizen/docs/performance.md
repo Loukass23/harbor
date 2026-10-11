@@ -7,15 +7,15 @@ Budgets and how to measure them. The numbers are from GU43DU7199UXZG (Tizen 9.0)
 `pnpm build:tizen` ends with `pnpm check:tizen-budget`, which compares the build against
 `src-tizen/budget.json`. The limits are the phase 5 sizes plus about 10% headroom.
 
-| Item                       | Before phase 5 | After phase 5 | Budget   |
-| -------------------------- | -------------- | ------------- | -------- |
-| `.wgt`                     | 90.0 MB        | 37.3 MB       | n/a      |
-| dist (app files)           | 164 MB         | 51 MB         | 56 MB    |
-| Boot chunk                 | 2,430 KiB      | 1,620 KiB     | 1,780    |
-| Boot chunk, gzip           | 708 KiB        | 479 KiB       | 530      |
-| Largest lazy chunk         | 2,211 KiB      | 2,211 KiB     | 2,430    |
-| All JavaScript             | n/a            | 10,430 KiB    | 11,500   |
-| CSS                        | 869 KiB        | 869 KiB       | 960      |
+| Item               | Before phase 5 | After phase 5 | Budget |
+| ------------------ | -------------- | ------------- | ------ |
+| `.wgt`             | 90.0 MB        | 37.3 MB       | n/a    |
+| dist (app files)   | 164 MB         | 51 MB         | 56 MB  |
+| Boot chunk         | 2,430 KiB      | 1,620 KiB     | 1,780  |
+| Boot chunk, gzip   | 708 KiB        | 479 KiB       | 530    |
+| Largest lazy chunk | 2,211 KiB      | 2,211 KiB     | 2,430  |
+| All JavaScript     | n/a            | 10,430 KiB    | 11,500 |
+| CSS                | 869 KiB        | 869 KiB       | 960    |
 
 What went:
 
@@ -45,14 +45,14 @@ It needs a seeded, onboarded app. Readings are only comparable in the same app s
 
 Both builds were measured after a fresh install, the same seed and the same onboarding choices:
 
-| Reading             | Before (4 runs)   | After (5 runs)    |
-| ------------------- | ----------------- | ----------------- |
-| `render-called`     | 2.50 s (±16%)     | 2.30 s (±25%)     |
-| Home takes focus    | 24.0 s (±4%)      | 23.2 s (±11%)     |
-| Idle JS heap        | 28.6 MB (±1%)     | 28.3 MB (±2%)     |
-| Idle DOM nodes      | 1,810             | 1,792             |
-| JS heap after walk  | 45.1 MB (±1%)     | 45.3 MB (±5%)     |
-| Decoded images      | 34.1 MB           | 33.9 MB (±21%)    |
+| Reading            | Before (4 runs) | After (5 runs) |
+| ------------------ | --------------- | -------------- |
+| `render-called`    | 2.50 s (±16%)   | 2.30 s (±25%)  |
+| Home takes focus   | 24.0 s (±4%)    | 23.2 s (±11%)  |
+| Idle JS heap       | 28.6 MB (±1%)   | 28.3 MB (±2%)  |
+| Idle DOM nodes     | 1,810           | 1,792          |
+| JS heap after walk | 45.1 MB (±1%)   | 45.3 MB (±5%)  |
+| Decoded images     | 34.1 MB         | 33.9 MB (±21%) |
 
 There is no runtime change beyond the spread. The removed payloads were never loaded at
 runtime; they cost package size, install time and storage. Treat these as the heap budget:

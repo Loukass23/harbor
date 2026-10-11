@@ -49,7 +49,9 @@ export function BpHome({ onSelect }: { onSelect: (m: Meta) => void }) {
   const services = useMemo(
     () =>
       settings.tmdbKey
-        ? (Object.keys(settings.streaming) as StreamingService[]).filter((s) => settings.streaming[s])
+        ? (Object.keys(settings.streaming) as StreamingService[]).filter(
+            (s) => settings.streaming[s],
+          )
         : [],
     [settings.tmdbKey, settings.streaming],
   );
@@ -131,7 +133,9 @@ export function BpHome({ onSelect }: { onSelect: (m: Meta) => void }) {
           {t("Couldn't load your catalogs")}
         </h2>
         <p className="max-w-md text-[clamp(13px,1.85vh,21px)] text-ink-muted">
-          {t("Harbor couldn't reach the catalog servers. Check the connection and reopen Big Picture.")}
+          {t(
+            "Harbor couldn't reach the catalog servers. Check the connection and reopen Big Picture.",
+          )}
         </p>
       </div>
     );
