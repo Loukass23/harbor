@@ -136,8 +136,9 @@ Each phase is a separate session or worktree, with its own PR into the Tizen bra
      `BpPlatform.exit` and the exit confirm's `closesApp` copy.
    - The boundary check and its CI step landed in phase 0.
    - Follow-up: the hint bar and the TV performance trims key off `isAndroid()` /
-     `isAndroidTv()`, so Tizen still shows keyboard glyphs ("Esc") and desktop effects. That
-     needs a generic "television" flag in `src/lib/platform.ts`.
+     `isAndroidTv()`, so Tizen still shows keyboard glyphs ("Esc") and desktop effects. The
+     generic flag now exists (`markTelevision()` / `isTelevision()` in `src/lib/platform.ts`,
+     phase 3); those checks still need to move to it.
 3. **Network** (done)
    - Measured on the TV: no CORS for the packaged widget, so no fetch proxy (see `lessons.md`).
    - Big Picture → Setup → Remote streaming server edits the shared `remoteStreamServerUrl`.

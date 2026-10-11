@@ -72,8 +72,13 @@ Do not relearn them. If a rule turns out to be wrong, change it here in the same
   Big Picture's layers (focus, dialogs, trailer, gallery, player confirm) all close on
   Escape, so no shared key check changes. Big Picture's own window listener stops
   propagation, so a test probe on `document` never sees the Escape; probe on `window`.
-- The on-screen keyboard opens only when a field is activated with OK, not on focus. It shrinks
-  the viewport (1080 → 568 CSS px on the reference TV). Back closes the keyboard and also
+- The on-screen keyboard opens as soon as a writable input takes focus, which breaks "focus is
+  not activation". `BpOnboardField` holds the field `readOnly` with `inputmode="none"` until OK
+  on Android and on any `isTelevision()` target; `installTizenPlatform()` marks Tizen through
+  `markTelevision()`. After the lock drops, `focus()` on the input that already has focus does
+  not open the keyboard. It takes a real `blur()` and then `focus()`. The keyboard
+  shrinks `innerHeight` from 642 to 338 CSS px. Wait about a second before a screenshot: an
+  immediate one misses the keyboard. Back closes the keyboard and also
   reaches the app as Escape, so one press closes both the keyboard and the pane behind it.
   Never keep an unsaved draft that only a second Back would protect: the streaming server pane
   saves its draft when it closes.
