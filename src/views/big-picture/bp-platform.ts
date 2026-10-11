@@ -13,6 +13,12 @@ export type BpPlatform = {
    * on the LAN), so "type on your phone" has nowhere to send the phone.
    */
   servesPhone?: boolean;
+  /**
+   * False where the remote has no key that sends the top-bar jump (an Android
+   * TV remote's Menu does), so the hint bar does not advertise one. Up still
+   * reaches the top bar.
+   */
+  remoteNavKey?: boolean;
 };
 
 type HarborFetchResponse = { ok: boolean; body: string; contentType?: string | null };
