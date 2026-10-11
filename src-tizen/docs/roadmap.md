@@ -64,15 +64,15 @@ tests/tizen-*.test.ts unit tests with webapis/tizen stubs
 
 Each one is generic, small and its own PR-able commit:
 
-| Seam                                                              | Location                                               | Purpose                                                          |
-| ----------------------------------------------------------------- | ------------------------------------------------------ | ---------------------------------------------------------------- |
-| `mountTvApp()`                                                    | split out of `src/main-tv.tsx`                         | a second entry can boot the same app                             |
-| Player engine registry, `registerPlayerEngine("avplay", factory)` | next to `src/lib/player/bridge.ts` / `html5.ts`        | AVPlay plugs in without editing the player hooks                 |
-| Extra back keys and key-registration hook                         | `src/views/big-picture/bp-back.ts`, `bp-player-key.ts` | 10009 → back, colour and media keys                              |
-| ~~`setFetchProxy(resolver)`~~                                     | not needed                                             | the TV applies no CORS (phase 3 measurement, `lessons.md`)       |
-| Big Picture "Remote streaming server" pane                        | `src/views/big-picture/bp-stream-server.tsx`           | set the existing `remoteStreamServerUrl` from a remote           |
-| `setPlatformScoreModifier()`                                      | `src/lib/streams/scoring/`                             | the pattern from beta-tizen c62096b5; shared scorer untouched    |
-| `BpPlatform`                                                      | existing `setBpPlatform`                               | `lanAddress`, `fetchImageBytes` through the companion or `fetch` |
+| Seam                                       | Location                                               | Purpose                                                          |
+| ------------------------------------------ | ------------------------------------------------------ | ---------------------------------------------------------------- |
+| `mountTvApp()`                             | split out of `src/main-tv.tsx`                         | a second entry can boot the same app                             |
+| `setWebPlayerEngine(factory)`              | `src/lib/player/web-engine.ts`                         | AVPlay replaces the in-webview engine; the UI still sees "html5" |
+| Extra back keys and key-registration hook  | `src/views/big-picture/bp-back.ts`, `bp-player-key.ts` | 10009 → back, colour and media keys                              |
+| ~~`setFetchProxy(resolver)`~~              | not needed                                             | the TV applies no CORS (phase 3 measurement, `lessons.md`)       |
+| Big Picture "Remote streaming server" pane | `src/views/big-picture/bp-stream-server.tsx`           | set the existing `remoteStreamServerUrl` from a remote           |
+| `setPlatformScoreModifier()`               | `src/lib/streams/scoring/`                             | the pattern from beta-tizen c62096b5; shared scorer untouched    |
+| `BpPlatform`                               | existing `setBpPlatform`                               | `lanAddress`, `fetchImageBytes` through the companion or `fetch` |
 
 ## Lessons to encode as rules (`src-tizen/docs/lessons.md` + `src-tizen/AGENTS.md`)
 
@@ -149,15 +149,23 @@ Each phase is a separate session or worktree, with its own PR into the Tizen bra
      with no proxy. The server pane shows "Connected" against a LAN Stremio server.
    - Follow-up: the phone-typing dialog and the onboarding phone hand-off need a server on the TV
      (`:11471`), which Tizen can't run. Hide them when `lanAddress` is null; phase 6 replaces them.
-4. **AVPlay player**
-   - **First, mount a player in the TV entry.** `index-tv.html` → `BpTvApp` renders only
-     `BigPictureShell`; `PlayerView` (and `BpTenFootLayer` inside it) is mounted only by the
-     desktop `App.tsx`. Opening a stream hides the shell (`chrome.hidden` from `useView().player`)
-     and nothing draws, so the screen goes white and Back is dead. Android TV loads the same
-     entry, so check there and fix it as a shared seam, not a Tizen patch.
-   - Add `src-tizen/player/avplay-bridge.ts` implementing `PlayerBridge`, ported from `beta-tizen:src/lib/player/tizen-avplay.ts` with every lesson applied.
-   - Add the engine registry seam and the score modifier.
-   - Write unit tests with a `webapis` stub.
+4. **AVPlay player** (done)
+   - Seams, one commit each: `BpTvRoot` mounts `PlayerView` and `PlayPicker` (keys shared via
+     `playerViewKey()`/`playPickerKey()`), `setWebPlayerEngine()` and `setPlatformScoreModifier()`.
+     The player opens `PlayPicker` for next episode, retry and queue advance, so the TV entry
+     mounts it as desktop Big Picture does.
+   - `src-tizen/player/`: AVPlay bridge, an HTML5 fallback wrapper, external subtitles parsed for
+     the DOM overlay (`cue-tracks.ts`), transparency CSS. `src-tizen/streams/score-modifier.ts`.
+   - Verified on GU43DU7199UXZG with a 4K DV/HDR10 HEVC MKV: plays through AVPlay, resume, pause
+     and play, letterboxed 2.39:1, preferred (English) audio, Back → leave confirm → source list
+     with AVPlay closed, Home → relaunch comes back paused at the same spot.
+   - Open:
+     - HDR10 looks very dark on this panel, even in Dynamic mode. Nothing in the page covers the
+       video; compare an SDR source and the same title in a Samsung app before changing code.
+     - The fallback to HTML5 is unit-tested only; external subtitles and HLS are not yet seen on
+       the TV.
+     - Android TV was not run. It now mounts the same player.
+     - Dev installs don't appear in the TV's app list (reported during phase 4, unrelated to it).
 5. **Performance pass**
    - Set a bundle and heap budget, measured over CDP (reuse `docs/measure-tv.sh`).
    - Lazy-load or exclude heavy modules; add `check:tizen-budget`.
