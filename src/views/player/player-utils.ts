@@ -1,6 +1,7 @@
 import { createHtml5Bridge } from "@/lib/player/html5";
 import { createMpvBridge, probeMpv, type MpvRect } from "@/lib/player/mpv";
 import type { PlayerBridge } from "@/lib/player/bridge";
+import { webPlayerEngine } from "@/lib/player/web-engine";
 import type { MonitorInfo } from "@/lib/monitors";
 import { isLinuxDesktop, isMacDesktop, isWindowsDesktop } from "@/lib/platform";
 
@@ -52,6 +53,11 @@ export function formatNames(names: string[]): string {
   return `${names.slice(0, -1).join(", ")}, and ${names[names.length - 1]}`;
 }
 
+/** The in-webview bridge: the platform's own engine if it registered one, else HTML5. */
+function createWebBridge(): PlayerBridge {
+  return webPlayerEngine()?.() ?? createHtml5Bridge();
+}
+
 export async function pickBridge(
   want: "auto" | "html5" | "mpv",
   notWebReady: boolean,
@@ -74,7 +80,7 @@ export async function pickBridge(
     getEmbedRect?: () => Promise<MpvRect | null> | MpvRect | null;
   },
 ): Promise<{ bridge: PlayerBridge; engine: "html5" | "mpv" }> {
-  if (want === "html5") return { bridge: createHtml5Bridge(), engine: "html5" };
+  if (want === "html5") return { bridge: createWebBridge(), engine: "html5" };
   if (want === "mpv") {
     const probe = await probeMpv();
     if (probe.available) return { bridge: createMpvBridge(mpvOpts), engine: "mpv" };
@@ -82,7 +88,7 @@ export async function pickBridge(
       "[harbor] mpv requested but libmpv probe failed; falling back to in-webview html5 decode (high memory). Reason:",
       probe.error,
     );
-    return { bridge: createHtml5Bridge(), engine: "html5" };
+    return { bridge: createWebBridge(), engine: "html5" };
   }
   const isDesktop = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
   if (isDesktop || notWebReady) {
@@ -94,5 +100,5 @@ export async function pickBridge(
         probe.error,
       );
   }
-  return { bridge: createHtml5Bridge(), engine: "html5" };
+  return { bridge: createWebBridge(), engine: "html5" };
 }
