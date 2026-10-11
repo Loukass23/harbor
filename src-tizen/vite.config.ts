@@ -1,4 +1,4 @@
-import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { gzipSync } from "node:zlib";
@@ -82,6 +82,19 @@ function tizenStubs(): Plugin {
       if (locale && locale[1] !== "en") return emptyCatalog;
       return null;
     },
+    // The match above is on specifiers. One it misses would ship the real
+    // module silently, so check what actually got bundled.
+    generateBundle(_options, bundle) {
+      const leaked =
+        /\/src\/lib\/face\/face-engine\.ts$|\/src\/lib\/i18n\/locales\/(?!en[/.])[a-z]{2}[/.]/;
+      for (const item of Object.values(bundle)) {
+        if (item.type !== "chunk") continue;
+        const id = Object.keys(item.modules)
+          .map(slash)
+          .find((m) => leaked.test(m));
+        if (id) this.error(`${item.fileName} bundles ${id}, which the Tizen build stubs out`);
+      }
+    },
   };
 }
 
@@ -110,22 +123,24 @@ const PUBLIC_EXCLUDED: Record<string, string> = {
 // broken image.
 function tizenPublic(): Plugin {
   let outDir = "";
+  const referrer = (body: string) =>
+    Object.entries(PUBLIC_EXCLUDED).find(([, marker]) => body.includes(marker))?.[0];
   return {
     name: "harbor-tizen-public",
     apply: "build",
+    // After Vite's HTML plugin, so index-tv.html is scanned with the chunks.
+    enforce: "post",
     configResolved(config) {
       outDir = resolve(config.root, config.build.outDir);
     },
     generateBundle(_options, bundle) {
       for (const item of Object.values(bundle)) {
         const body = item.type === "chunk" ? item.code : item.source;
-        if (typeof body !== "string") continue;
-        for (const [entry, marker] of Object.entries(PUBLIC_EXCLUDED)) {
-          if (body.includes(marker)) {
-            this.error(
-              `${item.fileName} refers to public/${entry}, which the Tizen build leaves out`,
-            );
-          }
+        const entry = typeof body === "string" ? referrer(body) : undefined;
+        if (entry) {
+          this.error(
+            `${item.fileName} refers to public/${entry}, which the Tizen build leaves out`,
+          );
         }
       }
     },
@@ -133,6 +148,23 @@ function tizenPublic(): Plugin {
       for (const entry of Object.keys(PUBLIC_EXCLUDED)) {
         rmSync(join(outDir, entry), { recursive: true, force: true });
       }
+      // Text files copied from public/ can point at an excluded entry too.
+      const scan = (dir: string) => {
+        for (const item of readdirSync(dir, { withFileTypes: true })) {
+          const path = join(dir, item.name);
+          if (item.isDirectory()) {
+            if (path !== join(outDir, "assets")) scan(path);
+          } else if (/\.(?:json|html|css|js|svg)$/.test(item.name)) {
+            const entry = referrer(readFileSync(path, "utf8"));
+            if (entry) {
+              throw new Error(
+                `${path} refers to public/${entry}, which the Tizen build leaves out`,
+              );
+            }
+          }
+        }
+      };
+      scan(outDir);
     },
   };
 }
