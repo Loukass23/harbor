@@ -185,10 +185,10 @@ Each phase is a separate session or worktree, with its own PR into the Tizen bra
      - Starting a title through "Choose a source instead" began at 0:00 rather than the
        "Almost done" position. Not compared against the previous build; check before phase 6.
 6. **Companion (optional features)** (built; on-device check pending)
-   - Desktop, upstreamable: `src-tauri/src/companion.rs` and four routes on the `:11471` web
+   - Desktop, upstreamable: `src-tauri/src/companion.rs` and routes on the `:11471` web
      server: `GET /api/companion/identity`, `POST /api/companion/pair`,
-     `GET /api/companion/pair/{id}` (long-poll) and `POST /api/companion/stream-server`
-     (token). The desktop shows an "Allow ... to pair?" dialog with the TV's 4-digit code and
+     `GET`/`DELETE /api/companion/pair/{id}` (long-poll, cancel) and
+     `POST /api/companion/stream-server` (token). No CORS headers. The desktop shows an "Allow ... to pair?" dialog with the TV's 4-digit code and
      checkboxes for what to send. Settings → Remotes lists paired devices with Forget.
    - Shared seams, one commit each: `directStreamAvailable()` allows torrents on the web path
      when `remoteStreamServerUrl` is set; `BpPlatform.setup` (a Setup pane that can also take

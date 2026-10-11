@@ -157,7 +157,10 @@ Do not relearn them. If a rule turns out to be wrong, change it here in the same
   server pane stays as the manual fallback.
 - The pairing payload (Stremio auth key, debrid keys) crosses the LAN as plain HTTP, like the
   phone hand-off. It is sent only after someone approves the matching code on the computer,
-  and only once per approval.
+  and can be collected until the request expires (2 minutes), so a dropped response is not
+  lost. The trust model is the LAN: the torrent server, once started, answers anyone on it, and
+  the instance id the TV re-finds by is public. The companion routes send no CORS headers, so
+  a web page on the computer cannot drive pairing.
 - The computer only answers while Serve Harbor on your network is on. Its torrent engine on
   `:11470` is started by the approval, and again by the TV at launch with its pairing token.
 

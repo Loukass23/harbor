@@ -1,4 +1,5 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
+import { setBpFocus } from "@/views/big-picture/use-bp-focus";
 import { ChevronLeft } from "lucide-react";
 import { SFX } from "@/lib/sfx";
 import type { BpOnboardStepProps } from "@/views/big-picture/bp-onboarding-frame";
@@ -68,6 +69,26 @@ function foundLabel(t: T, f: Found): { title: string; detail: string } {
     : { title: t("Streaming server"), detail: f.host };
 }
 
+/**
+ * Pressing a found computer unmounts its row, which would drop the ring onto
+ * the back chip, and the next OK would leave mid-pairing. Cancel takes it
+ * instead. The onboarding Cancel is portaled a frame later, hence the retry.
+ */
+function useFocusWhileWaiting(waiting: boolean) {
+  const ref = useRef<HTMLButtonElement | null>(null);
+  useEffect(() => {
+    if (!waiting) return;
+    let frame = 0;
+    const place = (tries: number) => {
+      if (setBpFocus(ref.current, { silent: true }) || tries <= 0) return;
+      frame = requestAnimationFrame(() => place(tries - 1));
+    };
+    place(5);
+    return () => cancelAnimationFrame(frame);
+  }, [waiting]);
+  return ref;
+}
+
 function Code({ code }: { code: string }) {
   return (
     <div
@@ -84,6 +105,7 @@ export function CompanionPane({ onBack }: { onBack: () => void }) {
   const t = useBpT();
   const c = useCompanion();
   const { phase, found, saved, scan } = c;
+  const cancelRef = useFocusWhileWaiting(phase.kind === "waiting");
 
   useEffect(() => {
     if (!saved) void scan();
@@ -145,6 +167,7 @@ export function CompanionPane({ onBack }: { onBack: () => void }) {
       >
         {phase.kind === "waiting" ? (
           <button
+            ref={cancelRef}
             type="button"
             data-bp-focusable
             data-bp-chip
@@ -221,6 +244,7 @@ export function CompanionStep({ setSatisfied }: BpOnboardStepProps) {
   const t = useBpT();
   const c = useCompanion();
   const { phase, found, saved, scan } = c;
+  const cancelRef = useFocusWhileWaiting(phase.kind === "waiting");
   const done = phase.kind === "paired" || phase.kind === "server";
 
   useEffect(() => {
@@ -272,7 +296,12 @@ export function CompanionStep({ setSatisfied }: BpOnboardStepProps) {
 
       {phase.kind === "waiting" ? (
         <BpOnboardAux>
-          <BpDecisionAction label={t("Cancel")} tone="quiet" onSelect={c.cancel} />
+          <BpDecisionAction
+            label={t("Cancel")}
+            tone="quiet"
+            onSelect={c.cancel}
+            buttonRef={cancelRef}
+          />
         </BpOnboardAux>
       ) : (
         !done &&

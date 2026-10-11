@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 // @ts-expect-error Node test types are intentionally outside the browser-only tsconfig.
 import test from "node:test";
 import {
+  cancelPairing,
   pairingCode,
   requestPairing,
   streamServerUrl,
@@ -139,6 +140,19 @@ test("an approval with a malformed payload is not accepted as one", async () => 
     },
   });
   assert.deepEqual(result, { status: "expired" });
+});
+
+test("cancelling withdraws the request on the computer", async () => {
+  let call: { url: string; method?: string } | null = null;
+  const fetchImpl = (async (url: RequestInfo | URL, init?: RequestInit) => {
+    call = { url: String(url), method: init?.method };
+    return json({ status: "cancelled" });
+  }) as typeof fetch;
+  await cancelPairing({ fetchImpl, host: HOST, requestId: REQUEST });
+  assert.deepEqual(call, {
+    url: `http://${HOST}:11471/api/companion/pair/${REQUEST}`,
+    method: "DELETE",
+  });
 });
 
 test("a running streaming server is used without asking the computer", async () => {

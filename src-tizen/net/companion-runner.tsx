@@ -7,6 +7,17 @@ import { localAddress, sweepHosts } from "./network";
 import { streamServerUrl } from "./pairing";
 import { refindCompanion } from "./refind";
 
+/** The saved server address with the computer's new host, keeping its port. */
+function moved(serverUrl: string, host: string): string {
+  try {
+    const url = new URL(serverUrl);
+    url.hostname = host;
+    return url.origin;
+  } catch {
+    return serverUrl;
+  }
+}
+
 /** After boot, give the first paint room before the network work starts. */
 const START_DELAY_MS = 8000;
 
@@ -43,10 +54,14 @@ export function CompanionRunner() {
           token: saved.token,
         });
         if (ctrl.signal.aborted) return;
-        const serverUrl = raw ? normalizeStreamServerUrl(raw) : saved.serverUrl;
-        saveCompanion({ ...saved, host: found.host, name: found.identity.name, serverUrl });
-        const mine = current.current === "" || current.current === saved.serverUrl;
-        if (mine && serverUrl && serverUrl !== current.current) {
+        // Forgotten or replaced while this ran: the newer record wins.
+        const latest = loadCompanion();
+        if (latest?.instanceId !== saved.instanceId || latest.token !== saved.token) return;
+        const serverUrl = raw ? normalizeStreamServerUrl(raw) : moved(saved.serverUrl, found.host);
+        saveCompanion({ ...latest, host: found.host, name: found.identity.name, serverUrl });
+        // Only replace the address pairing wrote. One the user typed or
+        // cleared since then stays as they left it.
+        if (current.current === saved.serverUrl && serverUrl && serverUrl !== current.current) {
           update({ remoteStreamServerUrl: serverUrl });
         }
       })().catch((e) => console.warn("[companion] refresh failed", e));

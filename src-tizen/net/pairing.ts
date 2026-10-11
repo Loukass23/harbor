@@ -54,6 +54,7 @@ export async function requestPairing(opts: {
   deviceId: string;
   deviceName: string;
   code: string;
+  signal?: AbortSignal;
 }): Promise<{ requestId: string } | { error: PairError }> {
   const resp = await call(
     opts.fetchImpl,
@@ -68,6 +69,7 @@ export async function requestPairing(opts: {
       }),
     },
     REQUEST_TIMEOUT_MS,
+    opts.signal,
   );
   if (!resp) return { error: "unreachable" };
   if (resp.status === 429) return { error: "busy" };
@@ -76,6 +78,20 @@ export async function requestPairing(opts: {
   return typeof body?.requestId === "string" && /^[0-9a-f]{32}$/.test(body.requestId)
     ? { requestId: body.requestId }
     : { error: "invalid" };
+}
+
+/** Withdraws an unanswered request so the computer's dialog closes. Best effort. */
+export async function cancelPairing(opts: {
+  fetchImpl: typeof fetch;
+  host: string;
+  requestId: string;
+}): Promise<void> {
+  await call(
+    opts.fetchImpl,
+    `${base(opts.host)}/pair/${opts.requestId}`,
+    { method: "DELETE" },
+    REQUEST_TIMEOUT_MS,
+  );
 }
 
 /**
@@ -117,6 +133,7 @@ export async function streamServerUrl(opts: {
   host: string;
   identity: CompanionIdentity;
   token: string;
+  signal?: AbortSignal;
 }): Promise<string | null> {
   const { running, port } = opts.identity.streamServer;
   if (running && port) return `http://${opts.host}:${port}`;
@@ -125,6 +142,7 @@ export async function streamServerUrl(opts: {
     `${base(opts.host)}/stream-server`,
     { method: "POST", headers: { authorization: `Bearer ${opts.token}` } },
     15_000,
+    opts.signal,
   );
   if (!resp?.ok) return null;
   const body = (await resp.json().catch(() => null)) as { port?: unknown } | null;

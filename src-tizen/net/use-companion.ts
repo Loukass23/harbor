@@ -15,7 +15,13 @@ import {
 import { sweep, type Found } from "./discovery";
 import { tvName } from "./device-name";
 import { localAddress, sweepHosts } from "./network";
-import { pairingCode, requestPairing, streamServerUrl, waitForAnswer } from "./pairing";
+import {
+  cancelPairing,
+  pairingCode,
+  requestPairing,
+  streamServerUrl,
+  waitForAnswer,
+} from "./pairing";
 
 type HarborFound = Extract<Found, { kind: "harbor" }>;
 
@@ -60,10 +66,16 @@ export function useCompanion() {
   const [found, setFound] = useState<Found[]>([]);
   const [saved, setSaved] = useState<SavedCompanion | null>(() => loadCompanion());
   const run = useRef<AbortController | null>(null);
+  // An unanswered request. Leaving it open would keep the computer's dialog up
+  // and let an approval land on a TV that is no longer listening.
+  const open = useRef<{ host: string; requestId: string } | null>(null);
 
   const stop = useCallback(() => {
     run.current?.abort();
     run.current = null;
+    const req = open.current;
+    open.current = null;
+    if (req) void cancelPairing({ fetchImpl: safeFetch, ...req });
   }, []);
   useEffect(() => stop, [stop]);
 
@@ -108,12 +120,14 @@ export function useCompanion() {
         deviceId: deviceId(),
         deviceName: tvName(),
         code,
+        signal,
       });
       if (signal.aborted) return;
       if ("error" in asked) {
         setPhase({ kind: "failed", reason: asked.error });
         return;
       }
+      open.current = { host: target.host, requestId: asked.requestId };
       const answer = await waitForAnswer({
         fetchImpl: safeFetch,
         host: target.host,
@@ -121,6 +135,7 @@ export function useCompanion() {
         signal,
       });
       if (signal.aborted) return;
+      open.current = null;
       if (answer.status !== "approved") {
         setPhase({ kind: "failed", reason: answer.status === "denied" ? "denied" : "expired" });
         return;
@@ -132,6 +147,7 @@ export function useCompanion() {
           host: target.host,
           identity: target.identity,
           token: answer.token,
+          signal,
         })) ?? "";
       const serverUrl = normalizeStreamServerUrl(rawServerUrl);
       const record: SavedCompanion = {
