@@ -33,6 +33,7 @@ export function createFallbackBridge(
   let sawFrame = false;
   let wantPlay = false;
   let switched = false;
+  let seekDuringSwitch: number | null = null;
   let addedSubs: AddSubtitleArgs[] = [];
   const listeners = new Set<(s: PlayerSnapshot) => void>();
   /** Viewer settings, replayed on whichever bridge plays. Keyed so a newer value replaces an older one. */
@@ -66,7 +67,7 @@ export function createFallbackBridge(
     switched = true;
     const token = ++switchToken;
     const src = source;
-    const resumeAt = last && last.positionSec > 0 ? last.positionSec : src?.startAtSec;
+    seekDuringSwitch = null;
     try {
       const next = await fallback();
       // A load or destroy during the wait owns the player now.
@@ -74,6 +75,9 @@ export function createFallbackBridge(
         next.destroy();
         return;
       }
+      // Read after the wait: a seek made meanwhile went to the failing primary.
+      const resumeAt =
+        seekDuringSwitch ?? (last && last.positionSec > 0 ? last.positionSec : src?.startAtSec);
       off?.();
       current.destroy();
       current = next;
@@ -143,7 +147,10 @@ export function createFallbackBridge(
       wantPlay = false;
       current.pause();
     },
-    seek: (sec, precision) => current.seek(sec, precision),
+    seek(sec, precision) {
+      if (onPrimary && switched) seekDuringSwitch = sec;
+      current.seek(sec, precision);
+    },
     frameStep: (dir) => current.frameStep?.(dir),
     setVolume: (v) => remember("setVolume", () => current.setVolume(v)),
     setMuted: (m) => remember("setMuted", () => current.setMuted(m)),
