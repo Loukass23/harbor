@@ -16,6 +16,11 @@ test("the TV reports no LAN address, since nothing on it listens for a phone", a
   assert.equal(platform.servesPhone, false);
 });
 
+test("the remote has no top-bar key, so no Nav hint is offered", () => {
+  const platform = createTizenBpPlatform(fetchReturning(new Response("")));
+  assert.equal(platform.remoteNavKey, false);
+});
+
 test("image bytes come straight from fetch", async () => {
   const platform = createTizenBpPlatform(
     fetchReturning(
