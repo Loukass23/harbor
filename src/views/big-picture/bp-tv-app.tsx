@@ -32,6 +32,7 @@ import { TopRankModalProvider } from "@/lib/top-rank-modal";
 import { TraktProvider } from "@/lib/trakt/provider";
 import { ViewProvider, playPickerKey, playerViewKey, useView } from "@/lib/view";
 import { setBpTvShell } from "./bp-logic";
+import { bpPlatform } from "./bp-platform";
 import { setBpOverscanDefault, TEN_FOOT_OVERSCAN } from "./bp-safe-area";
 
 // This entry renders nothing but BigPictureShell, so Big Picture must never decline to
@@ -127,6 +128,7 @@ function BpTvSound() {
 
 function BpTvRoot() {
   const { active } = useBigPicture();
+  const PlatformRunner = bpPlatform().Runner;
 
   // The kid check that used to guard this was the second half of the black screen: the
   // shell had already exited and this refused to re-enter, so nothing was mounted at all.
@@ -150,6 +152,7 @@ function BpTvRoot() {
       <TrackerProfileBridge />
       <ProfileSyncRunner />
       <BpTvPlayback />
+      {PlatformRunner && <PlatformRunner />}
       <Suspense fallback={null}>
         <BigPictureShell />
       </Suspense>

@@ -15,7 +15,7 @@ export type BpCatId =
   | "setup"
   | "interface";
 
-export type BpPane = "connect" | "live" | "server";
+export type BpPane = "connect" | "live" | "server" | "platform";
 
 export type BpT = (key: string, vars?: Record<string, string | number>) => string;
 
@@ -146,6 +146,7 @@ export function bpSettingsControls(
   t: BpT,
   overscan: number,
   sportsShown: boolean,
+  platformSetup?: { label: string; detail: string },
 ): BpControl[] {
   if (id === "picture") {
     return [
@@ -357,6 +358,17 @@ export function bpSettingsControls(
         detail: t("Not set"),
         pane: "server",
       },
+      ...(platformSetup
+        ? [
+            {
+              kind: "push" as const,
+              id: "platform",
+              label: t(platformSetup.label),
+              detail: t(platformSetup.detail),
+              pane: "platform" as const,
+            },
+          ]
+        : []),
       {
         kind: "options",
         id: "sportsTab",

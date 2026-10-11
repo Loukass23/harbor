@@ -13,6 +13,7 @@ import { setBpFocus } from "./use-bp-focus";
 import { BpConnect } from "./bp-connect";
 import { BpLiveSetup } from "./bp-live-setup";
 import { BpStreamServer } from "./bp-stream-server";
+import { bpPlatform } from "./bp-platform";
 import { useBpOnboardFacts } from "./onboarding/use-bp-onboard-facts";
 import {
   bpConnectedNames,
@@ -63,7 +64,15 @@ export function BpSettings() {
   const connected = bpConnectedNames(facts);
   const categories = bpSettingsCategories(settings, t, overscan, connected);
   const cat: BpCatId = categories[active]?.id ?? "picture";
-  const controls = bpSettingsControls(cat, settings, t, overscan, consent.status !== "declined");
+  const platformSetup = bpPlatform().setup;
+  const controls = bpSettingsControls(
+    cat,
+    settings,
+    t,
+    overscan,
+    consent.status !== "declined",
+    platformSetup,
+  );
 
   useEffect(
     () =>
@@ -124,6 +133,8 @@ export function BpSettings() {
           <BpConnect onBack={() => setPane("root")} />
         ) : pane === "server" ? (
           <BpStreamServer onBack={() => setPane("root")} />
+        ) : pane === "platform" && platformSetup ? (
+          <platformSetup.Pane onBack={() => setPane("root")} />
         ) : (
           <BpLiveSetup onDone={() => setPane("root")} onBack={() => setPane("root")} />
         )}
@@ -200,7 +211,9 @@ export function BpSettings() {
                           : control.detail
                         : control.pane === "server"
                           ? settings.remoteStreamServerUrl || control.detail
-                          : settings.iptvPlaylists.length > 0
+                          : control.pane === "platform"
+                            ? control.detail
+                            : settings.iptvPlaylists.length > 0
                             ? t("{count} added", { count: settings.iptvPlaylists.length })
                             : control.detail
                     }
