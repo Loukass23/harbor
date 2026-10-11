@@ -13,6 +13,8 @@ export function createTizenBpPlatform(fetchImpl: typeof fetch, exit?: () => void
     // be sent to.
     lanAddress: async () => null,
     servesPhone: false,
+    // Samsung remotes have no Menu key, and Home belongs to the TV.
+    remoteNavKey: false,
     fetchImageBytes: async (url) => {
       const ctrl = new AbortController();
       const timer = setTimeout(() => ctrl.abort(), IMAGE_TIMEOUT_MS);

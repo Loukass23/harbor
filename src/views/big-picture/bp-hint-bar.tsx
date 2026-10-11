@@ -3,6 +3,7 @@ import { detectLayout } from "@/lib/gamepad/layout";
 import { ButtonGlyph, type GlyphKind } from "@/components/gamepad-button-glyph";
 import { isAndroid, isTelevision } from "@/lib/platform";
 import { BP_NAV_JUMP } from "./bp-logic";
+import { bpPlatform } from "./bp-platform";
 import { useBpT } from "./bp-i18n";
 
 export type BpAction =
@@ -128,7 +129,11 @@ export function BpHintBar({
 
   // A connected pad does not mean an absent keyboard, so an action the pad has
   // no button for still shows the key that does work rather than vanishing.
-  const usable = onTv && !usingPad ? shown.filter((a) => a in REMOTE_GLYPH) : shown;
+  const noNavKey = bpPlatform().remoteNavKey === false;
+  const usable =
+    onTv && !usingPad
+      ? shown.filter((a) => a in REMOTE_GLYPH && !(a === "nav" && noNavKey))
+      : shown;
 
   const hints = usable.map((a) => {
     const preferred = usingPad ? PAD_GLYPH[a] : onTv ? REMOTE_GLYPH[a] : undefined;
