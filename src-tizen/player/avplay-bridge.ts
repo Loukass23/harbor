@@ -74,6 +74,26 @@ function field(extra: Record<string, unknown>, ...names: string[]): string | und
   return undefined;
 }
 
+type Rect = { x: number; y: number; w: number; h: number };
+
+/** The largest rect with the video's aspect ratio centred in `box`, in whole pixels. */
+export function fitRect(box: Rect, videoW: number, videoH: number): Rect {
+  let { x, y, w, h } = box;
+  if (videoW > 0 && videoH > 0 && w > 0 && h > 0) {
+    const aspect = videoW / videoH;
+    if (w / h > aspect) {
+      const fitted = h * aspect;
+      x += (w - fitted) / 2;
+      w = fitted;
+    } else {
+      const fitted = w / aspect;
+      y += (h - fitted) / 2;
+      h = fitted;
+    }
+  }
+  return { x: Math.round(x), y: Math.round(y), w: Math.round(w), h: Math.round(h) };
+}
+
 export function readAvplayTracks(tracks: AvplayTrack[], selectedAudio: number | null) {
   const audio: TrackInfo[] = [];
   let width = 0;
@@ -124,6 +144,7 @@ export function createAvplayBridge(api: Webapis, deps: AvplayDeps): PlayerBridge
   let cueTimer: ReturnType<typeof setInterval> | null = null;
   let suspended = false;
   let selectedAudio: number | null = null;
+  let current: PlayerSource | null = null;
   let clockSec = 0;
   let clockAt = 0;
 
@@ -199,17 +220,19 @@ export function createAvplayBridge(api: Webapis, deps: AvplayDeps): PlayerBridge
   // Screen pixels, not CSS pixels (lessons.md). The webview lays out at
   // 1140 CSS px across a 1920 px screen with devicePixelRatio 1, so the ratio
   // is useless here; scale by screen width over viewport width instead.
+  // AVPlay's letterbox mode stretched a 2.39:1 picture to 16:9 on the TV, so
+  // the rect is fitted to the video's own aspect and drawn at full size.
   const applyRect = () => {
     if (!host || !opened) return;
     const r = host.getBoundingClientRect();
     const s = win.innerWidth > 0 ? win.screen.width / win.innerWidth : 1;
+    const rect = fitRect(
+      { x: r.left * s, y: r.top * s, w: r.width * s, h: r.height * s },
+      snap.videoWidth,
+      snap.videoHeight,
+    );
     try {
-      av.setDisplayRect(
-        Math.round(r.left * s),
-        Math.round(r.top * s),
-        Math.round(r.width * s),
-        Math.round(r.height * s),
-      );
+      av.setDisplayRect(rect.x, rect.y, rect.w, rect.h);
     } catch (err) {
       console.warn("[avplay] setDisplayRect failed", err);
     }
@@ -234,10 +257,17 @@ export function createAvplayBridge(api: Webapis, deps: AvplayDeps): PlayerBridge
   };
 
   const readTracks = () => {
+    // AVPlay picks the container's default audio, which is often not the first
+    // track: ask which one plays instead of assuming. Asked separately because
+    // it throws InvalidStateError at times the full list does not, and a throw
+    // must not empty the list the player picks the preferred language from.
+    let playing: number | undefined;
     try {
-      // AVPlay picks the container's default audio, which is often not the
-      // first track: ask which one plays instead of assuming.
-      const playing = av.getCurrentStreamInfo?.().find((t) => t.type === "AUDIO")?.index;
+      playing = av.getCurrentStreamInfo?.().find((t) => t.type === "AUDIO")?.index;
+    } catch (err) {
+      console.warn("[avplay] current stream info failed", err);
+    }
+    try {
       const info = readAvplayTracks(
         av.getTotalTrackInfo?.() ?? [],
         selectedAudio ?? playing ?? null,
@@ -338,11 +368,17 @@ export function createAvplayBridge(api: Webapis, deps: AvplayDeps): PlayerBridge
     }
     if (!suspended) return;
     suspended = false;
+    const at = clockSec;
     try {
       av.restore?.();
     } catch (err) {
       console.warn("[avplay] restore failed", err);
-      fail(gen, "decode", "restore failed");
+    }
+    // On GU43DU7199UXZG restore() leaves AVPlay in IDLE at 0:00 with nothing
+    // prepared, so the stream is reopened at the saved position, paused.
+    const s = state();
+    if (current && s !== "READY" && s !== "PAUSED" && s !== "PLAYING") {
+      openSource(current, at, true);
     }
   };
 
@@ -361,6 +397,110 @@ export function createAvplayBridge(api: Webapis, deps: AvplayDeps): PlayerBridge
     suspended = false;
     stopCueTicker();
     closeAv();
+  };
+
+  /**
+   * Opens `src` and prepares it. A reopen after resume keeps the subtitles and
+   * the audio track the viewer had; a new load starts both from the source.
+   */
+  const openSource = (src: PlayerSource, startAtSec: number | null, reopen: boolean) => {
+    teardown();
+    const g = gen;
+    current = src;
+    pendingStartSec = startAtSec;
+    clockSec = startAtSec ?? 0;
+    clockAt = now();
+    snap = {
+      ...snap,
+      status: "loading",
+      positionSec: clockSec,
+      durationSec: 0,
+      bufferedSec: 0,
+      buffering: false,
+      firstFrameReady: false,
+      audioTracks: [],
+      videoWidth: 0,
+      videoHeight: 0,
+      errorCode: null,
+      errorMessage: null,
+      noAudio: false,
+    };
+    if (!reopen) cues.reset(src.subtitles);
+    syncCues();
+    startCueTicker();
+    emit();
+
+    const lower = src.url.toLowerCase().split("?")[0];
+    const adaptive = lower.endsWith(".m3u8") || lower.endsWith(".mpd");
+    try {
+      // Straight to open(): no HEAD or probe first. Debrid and torrent hosts
+      // answer those with 405/403, and AVPlay follows redirects itself.
+      av.open(src.url);
+      opened = true;
+      // applyRect fits the rect to the video, so AVPlay fills it exactly.
+      av.setDisplayMethod?.("PLAYER_DISPLAY_MODE_FULL_SCREEN");
+      applyRect();
+      av.setListener(listenerFor(g));
+      // Streaming and buffering properties only take effect in IDLE, before
+      // prepareAsync. BUFFER_SIZE is never set: with setBufferingParam it
+      // corrupts the buffering state.
+      if (av.setBufferingParam) {
+        av.setBufferingParam(
+          "PLAYER_BUFFER_FOR_PLAY",
+          "PLAYER_BUFFER_SIZE_IN_SECOND",
+          BUFFER_SECONDS,
+        );
+        av.setBufferingParam(
+          "PLAYER_BUFFER_FOR_RESUME",
+          "PLAYER_BUFFER_SIZE_IN_SECOND",
+          BUFFER_SECONDS,
+        );
+      }
+      const ua = Object.entries(src.headers ?? {}).find(
+        ([k]) => k.toLowerCase() === "user-agent",
+      )?.[1];
+      if (ua) av.setStreamingProperty?.("USER_AGENT", ua);
+      if (adaptive && api.productinfo?.isUdPanelSupported?.()) {
+        av.setStreamingProperty?.("SET_MODE_4K", "TRUE");
+      }
+    } catch (err) {
+      console.warn("[avplay] open failed", err);
+      fail(g, avplayErrorCode(err), "open failed");
+      return;
+    }
+
+    watchdog = setTimeout(() => {
+      watchdog = null;
+      if (g !== gen || prepared) return;
+      console.warn("[avplay] prepareAsync timed out");
+      fail(g, "decode", "prepare timed out");
+    }, PREPARE_TIMEOUT_MS);
+
+    av.prepareAsync(
+      () => {
+        if (g !== gen) return;
+        clearWatchdog();
+        prepared = true;
+        if (reopen && selectedAudio != null) {
+          try {
+            av.setSelectTrack?.("AUDIO", selectedAudio);
+          } catch (err) {
+            console.warn("[avplay] audio track restore failed", err);
+          }
+        }
+        readTracks();
+        applyRect();
+        snap.durationSec = durationSec();
+        snap.status = "ready";
+        tryResumeSeek();
+        if (wantPlay) startPlayback();
+        emit();
+      },
+      (err) => {
+        console.warn("[avplay] prepareAsync failed", err);
+        fail(g, avplayErrorCode(err), "prepare failed");
+      },
+    );
   };
 
   return {
@@ -383,94 +523,8 @@ export function createAvplayBridge(api: Webapis, deps: AvplayDeps): PlayerBridge
       unhook();
     },
     async load(src: PlayerSource) {
-      teardown();
-      const g = gen;
-      pendingStartSec = src.startAtSec ?? null;
       selectedAudio = null;
-      clockSec = 0;
-      clockAt = now();
-      snap = {
-        ...snap,
-        status: "loading",
-        positionSec: 0,
-        durationSec: 0,
-        bufferedSec: 0,
-        buffering: false,
-        firstFrameReady: false,
-        audioTracks: [],
-        videoWidth: 0,
-        videoHeight: 0,
-        errorCode: null,
-        errorMessage: null,
-        noAudio: false,
-      };
-      cues.reset(src.subtitles);
-      syncCues();
-      startCueTicker();
-      emit();
-
-      const lower = src.url.toLowerCase().split("?")[0];
-      const adaptive = lower.endsWith(".m3u8") || lower.endsWith(".mpd");
-      try {
-        // Straight to open(): no HEAD or probe first. Debrid and torrent hosts
-        // answer those with 405/403, and AVPlay follows redirects itself.
-        av.open(src.url);
-        opened = true;
-        av.setDisplayMethod?.("PLAYER_DISPLAY_MODE_LETTER_BOX");
-        applyRect();
-        av.setListener(listenerFor(g));
-        // Streaming and buffering properties only take effect in IDLE, before
-        // prepareAsync. BUFFER_SIZE is never set: with setBufferingParam it
-        // corrupts the buffering state.
-        if (av.setBufferingParam) {
-          av.setBufferingParam(
-            "PLAYER_BUFFER_FOR_PLAY",
-            "PLAYER_BUFFER_SIZE_IN_SECOND",
-            BUFFER_SECONDS,
-          );
-          av.setBufferingParam(
-            "PLAYER_BUFFER_FOR_RESUME",
-            "PLAYER_BUFFER_SIZE_IN_SECOND",
-            BUFFER_SECONDS,
-          );
-        }
-        const ua = Object.entries(src.headers ?? {}).find(
-          ([k]) => k.toLowerCase() === "user-agent",
-        )?.[1];
-        if (ua) av.setStreamingProperty?.("USER_AGENT", ua);
-        if (adaptive && api.productinfo?.isUdPanelSupported?.()) {
-          av.setStreamingProperty?.("SET_MODE_4K", "TRUE");
-        }
-      } catch (err) {
-        console.warn("[avplay] open failed", err);
-        fail(g, avplayErrorCode(err), "open failed");
-        return;
-      }
-
-      watchdog = setTimeout(() => {
-        watchdog = null;
-        if (g !== gen || prepared) return;
-        console.warn("[avplay] prepareAsync timed out");
-        fail(g, "decode", "prepare timed out");
-      }, PREPARE_TIMEOUT_MS);
-
-      av.prepareAsync(
-        () => {
-          if (g !== gen) return;
-          clearWatchdog();
-          prepared = true;
-          readTracks();
-          snap.durationSec = durationSec();
-          snap.status = "ready";
-          tryResumeSeek();
-          if (wantPlay) startPlayback();
-          emit();
-        },
-        (err) => {
-          console.warn("[avplay] prepareAsync failed", err);
-          fail(g, avplayErrorCode(err), "prepare failed");
-        },
-      );
+      openSource(src, src.startAtSec ?? null, false);
     },
     async play() {
       wantPlay = true;

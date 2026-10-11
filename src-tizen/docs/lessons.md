@@ -111,7 +111,14 @@ Do not relearn them. If a rule turns out to be wrong, change it here in the same
   30s watchdog that reports an error.
 - `duration` reads 0 right after prepare. Wait for a real duration before the resume seek.
 - On `visibilitychange`, call `suspend()` when hidden and `restore()` when visible, or
-  multitasking (Smart Hub and back) kills the decoder.
+  multitasking (Smart Hub and back) kills the decoder. On GU43DU7199UXZG a bare `restore()`
+  still leaves AVPlay in `IDLE` at 0:00 with nothing prepared, so when the state after restore
+  is not `READY`/`PAUSED`/`PLAYING`, reopen the source at the saved position, paused.
+- `PLAYER_DISPLAY_MODE_LETTER_BOX` stretched a 3840×1606 (2.39:1) picture to fill 16:9. Fit the
+  display rect to the video's own aspect and use `PLAYER_DISPLAY_MODE_FULL_SCREEN` inside it.
+- `getCurrentStreamInfo()` throws `InvalidStateError` while AVPlay is still preparing. Call it on
+  its own: a throw that also empties the track list stops the player choosing the preferred
+  audio language, and the viewer gets the container default (Russian, on one Silo release).
 - On AVPlay failure, fall back to the HTML5 bridge instead of showing a black screen.
 
 ## Codecs (stream ranking)

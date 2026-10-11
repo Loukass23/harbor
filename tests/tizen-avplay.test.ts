@@ -7,6 +7,7 @@ import {
   AVPLAY_CLASS,
   PREPARE_TIMEOUT_MS,
   avplayErrorCode,
+  fitRect,
   createAvplayBridge,
   type AvplayDeps,
 } from "../src-tizen/player/avplay-bridge.ts";
@@ -22,6 +23,7 @@ function avplayStub(tracks: AvplayTrack[] = [], current: number[] = []) {
   let state: AvplayState = "NONE";
   let duration = 0;
   let listener: AvplayListener = {};
+  let restoreLoses = false;
   const prepares: { ok: () => void; err: (e: unknown) => void }[] = [];
   const rec =
     (name: string, next?: AvplayState) =>
@@ -42,7 +44,10 @@ function avplayStub(tracks: AvplayTrack[] = [], current: number[] = []) {
     setStreamingProperty: rec("setStreamingProperty"),
     setSelectTrack: rec("setSelectTrack"),
     suspend: rec("suspend"),
-    restore: rec("restore"),
+    restore() {
+      calls.push(["restore"]);
+      if (restoreLoses) state = "IDLE";
+    },
     setListener(l: AvplayListener) {
       calls.push(["setListener"]);
       listener = l;
@@ -72,6 +77,10 @@ function avplayStub(tracks: AvplayTrack[] = [], current: number[] = []) {
       duration = ms;
     },
     listener: () => listener,
+    /** What GU43DU7199UXZG does: restore() leaves AVPlay in IDLE at 0:00. */
+    restoreLosesStream() {
+      restoreLoses = true;
+    },
   };
 }
 
@@ -298,4 +307,66 @@ test("AVPlay error names map to Harbor error codes", () => {
   assert.equal(avplayErrorCode("PLAYER_ERROR_NOT_SUPPORTED_FORMAT"), "codec");
   assert.equal(avplayErrorCode({ name: "PLAYER_ERROR_GENEREIC" }), "decode");
   assert.equal(avplayErrorCode(null), "unknown");
+});
+
+test("a restore that loses the stream reopens it at the same spot, paused", async () => {
+  const { av, e, bridge, snap } = setup();
+  await bridge.load({ url: "https://x.example/a.mkv" });
+  av.ready();
+  await bridge.play();
+  av.setDuration(3_000_000);
+  av.listener().oncurrentplaytime?.(445_000);
+  av.restoreLosesStream();
+  e.setVisibility("hidden");
+  e.setVisibility("visible");
+  const opens = av.calls.filter((c) => c[0] === "open");
+  assert.equal(opens.length, 2);
+  assert.equal(opens[1][1], "https://x.example/a.mkv");
+  av.ready();
+  assert.deepEqual(av.calls.at(-1), ["seekTo", 445_000]);
+  assert.equal(snap().status, "ready");
+  assert.equal(av.names().filter((n) => n === "play").length, 1, "no automatic resume");
+  done(bridge);
+});
+
+test("the display rect keeps the video's aspect: 2.39:1 is letterboxed, not stretched", () => {
+  assert.deepEqual(fitRect({ x: 0, y: 0, w: 1920, h: 1080 }, 3840, 1606), {
+    x: 0,
+    y: 138,
+    w: 1920,
+    h: 803,
+  });
+  assert.deepEqual(fitRect({ x: 0, y: 0, w: 1920, h: 1080 }, 1440, 1080), {
+    x: 240,
+    y: 0,
+    w: 1440,
+    h: 1080,
+  });
+  assert.deepEqual(fitRect({ x: 0, y: 0, w: 1920, h: 1080 }, 0, 0), {
+    x: 0,
+    y: 0,
+    w: 1920,
+    h: 1080,
+  });
+});
+
+test("the audio list survives getCurrentStreamInfo throwing, so the preferred language can be picked", async () => {
+  const { av, bridge, snap } = setup({
+    tracks: [
+      { index: 1, type: "AUDIO", extra_info: '{"language":"rus","channels":"2"}' },
+      { index: 7, type: "AUDIO", extra_info: '{"language":"eng","channels":"6"}' },
+    ],
+  });
+  Object.assign(av.api.avplay, {
+    getCurrentStreamInfo: () => {
+      throw Object.assign(new Error("PLAYER_ERROR_INVALID_STATE"), { name: "InvalidStateError" });
+    },
+  });
+  await bridge.load({ url: "https://x.example/a.mkv" });
+  av.ready();
+  assert.deepEqual(
+    snap().audioTracks.map((t) => t.lang),
+    ["rus", "eng"],
+  );
+  done(bridge);
 });
