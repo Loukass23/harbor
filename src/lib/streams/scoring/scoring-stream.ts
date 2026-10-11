@@ -14,6 +14,23 @@ import {
 } from "./scoring-size";
 import type { CorpusStats, ScoreOptions } from "./scoring-types";
 
+/**
+ * Extra score signals for what one playback platform can and cannot decode.
+ * Each returned reason is added to the score exactly as its delta says.
+ */
+export type PlatformScoreModifier = (s: ParsedStream, opts: ScoreOptions) => ScoreReason[];
+
+let platformModifier: PlatformScoreModifier | null = null;
+
+/**
+ * Registers the platform's score signals, or clears them with null. Only the
+ * TypeScript scorer applies them; the native core pipeline, which runs under
+ * Tauri only, does not.
+ */
+export function setPlatformScoreModifier(modifier: PlatformScoreModifier | null): void {
+  platformModifier = modifier;
+}
+
 export function scoreStream(
   s: ParsedStream,
   opts: ScoreOptions,
@@ -247,6 +264,12 @@ export function scoreStream(
   if (recency.delta !== 0) {
     score += recency.delta;
     reasons.push(recency);
+  }
+
+  for (const reason of platformModifier?.(s, opts) ?? []) {
+    if (reason.delta === 0) continue;
+    score += reason.delta;
+    reasons.push(reason);
   }
 
   return { ...s, score, reasons, tier: tierOf(s) };
