@@ -30,7 +30,7 @@ import { LetterboxdProvider } from "@/lib/stremboxd/provider";
 import { TogetherProvider } from "@/lib/together/provider";
 import { TopRankModalProvider } from "@/lib/top-rank-modal";
 import { TraktProvider } from "@/lib/trakt/provider";
-import { ViewProvider } from "@/lib/view";
+import { ViewProvider, playPickerKey, playerViewKey, useView } from "@/lib/view";
 import { setBpTvShell } from "./bp-logic";
 import { setBpOverscanDefault, TEN_FOOT_OVERSCAN } from "./bp-safe-area";
 
@@ -47,6 +47,43 @@ setBpOverscanDefault(TEN_FOOT_OVERSCAN);
 const BigPictureShell = lazy(() =>
   import("./bp-shell").then((m) => ({ default: m.BigPictureShell })),
 );
+const PlayerView = lazy(() => import("@/views/player").then((m) => ({ default: m.PlayerView })));
+const PlayPicker = lazy(() =>
+  import("@/views/play-picker").then((m) => ({ default: m.PlayPicker })),
+);
+
+// Opening a stream hides the shell, so this entry has to draw playback itself or
+// the screen goes blank. The player opens the source picker for next episode,
+// retry and queue advance, the same picker desktop Big Picture shows.
+function BpTvPlayback() {
+  const { player, picker } = useView();
+  return (
+    <>
+      {player && (
+        <Suspense fallback={null}>
+          <PlayerView key={playerViewKey(player)} src={player} />
+        </Suspense>
+      )}
+      {picker && (
+        <div className="fixed inset-0 flex flex-col bg-canvas">
+          <Suspense fallback={null}>
+            <PlayPicker
+              key={playPickerKey(picker)}
+              meta={picker.meta}
+              episode={picker.episode}
+              autoPlay={picker.intent === "download" ? false : picker.autoPlay}
+              attempt={picker.attempt}
+              intent={picker.intent}
+              seasonEpisodes={picker.seasonEpisodes}
+              resume={picker.resume}
+              playerActive={!!player}
+            />
+          </Suspense>
+        </div>
+      )}
+    </>
+  );
+}
 
 type BpTvProvider = ComponentType<{ children: ReactNode }>;
 
@@ -112,6 +149,7 @@ function BpTvRoot() {
       <SettingsProfileBridge />
       <TrackerProfileBridge />
       <ProfileSyncRunner />
+      <BpTvPlayback />
       <Suspense fallback={null}>
         <BigPictureShell />
       </Suspense>

@@ -1606,6 +1606,19 @@ export function useView() {
   return v;
 }
 
+/**
+ * React key for the mounted player. Every app that mounts PlayerView uses it, so
+ * live channels keep one player across zaps and titles remount on change.
+ */
+export function playerViewKey(src: PlayerSrc): string {
+  return src.meta.id.startsWith("iptv:") ? "player-live" : `player-${src.meta.id}`;
+}
+
+/** React key for the mounted PlayPicker: a new title, episode, attempt or intent remounts it. */
+export function playPickerKey(picker: NonNullable<ViewValue["picker"]>): string {
+  return `picker-${picker.meta.id}-${picker.episode?.season ?? ""}-${picker.episode?.episode ?? ""}-${picker.attempt ?? 0}-${picker.intent ?? "play"}-${picker.seasonEpisodes?.length ?? 0}`;
+}
+
 function anchorOffsetIn(scrollEl: HTMLElement, anchor: HTMLElement): number {
   return (
     anchor.getBoundingClientRect().top - scrollEl.getBoundingClientRect().top + scrollEl.scrollTop

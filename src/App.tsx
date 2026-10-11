@@ -143,7 +143,7 @@ import {
   findHotkeyMatch,
   shouldHandleGlobalKeyboardEvent,
 } from "@/lib/hotkeys";
-import { ViewProvider, useView, type Frame, type MetaFilter, type View } from "@/lib/view";
+import { ViewProvider, playPickerKey, playerViewKey, useView, type Frame, type MetaFilter, type View } from "@/lib/view";
 import { requestOpenProfile, requestEditProfile } from "@/lib/social/open-profile";
 import { openNotificationCenter } from "@/lib/social/notification-open";
 import { anchorFromElement, openAccountMenu } from "@/lib/social/account-menu-open";
@@ -1994,7 +1994,7 @@ function Shell({ onReady }: { onReady?: () => void }) {
             <div {...layerProps(pickerTop)}>
               <Suspense fallback={null}>
                 <PlayPicker
-                  key={`picker-${picker.meta.id}-${picker.episode?.season ?? ""}-${picker.episode?.episode ?? ""}-${picker.attempt ?? 0}-${picker.intent ?? "play"}-${picker.seasonEpisodes?.length ?? 0}`}
+                  key={playPickerKey(picker)}
                   meta={picker.meta}
                   episode={picker.episode}
                   autoPlay={picker.intent === "download" ? false : picker.autoPlay}
@@ -2044,7 +2044,7 @@ function Shell({ onReady }: { onReady?: () => void }) {
       {player && (
         <Suspense fallback={null}>
           <PlayerView
-            key={player.meta.id.startsWith("iptv:") ? "player-live" : `player-${player.meta.id}`}
+            key={playerViewKey(player)}
             src={player}
           />
         </Suspense>
