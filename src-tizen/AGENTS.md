@@ -8,8 +8,8 @@ Tizen rules. Read `docs/lessons.md` before changing anything in this folder.
 - Tizen 9.0+ (Chromium 120; reference TV GU43DU7199UXZG), packaged as a `.wgt` web widget loaded over `file://`.
 - Same Big Picture UI as Android TV (`BpTvApp`). There is no Tauri and no Rust at runtime.
 - Playback: `webapis.avplay` behind Harbor's `PlayerBridge`, with the HTML5 bridge as fallback.
-- Optional companion (desktop Harbor or Stremio server on the LAN) for torrents, a CORS proxy and
-  remote control. The app must work without it.
+- Optional companion (desktop Harbor or Stremio server on the LAN) for torrents and
+  remote control (the TV applies no CORS, so no proxy is needed). The app must work without it.
 
 ## Boundary rule
 
@@ -29,7 +29,7 @@ Tizen rules. Read `docs/lessons.md` before changing anything in this folder.
 - `boot-watchdog.js`: classic script that logs boot errors and shows them if nothing mounts in 30s.
 - `platform/`: key registration, back and exit, lifecycle, `BpPlatform` implementation.
 - `player/`: AVPlay `PlayerBridge`, codec capabilities, watchdogs.
-- `net/`: companion discovery and pairing, fetch proxy resolver.
+- `net/`: companion discovery and pairing.
 - `streams/`: platform score modifier.
 - `config.xml.tpl`: manifest template, filled from `.env.tizen` at package time
   (`scripts/tizen-manifest.mjs`).

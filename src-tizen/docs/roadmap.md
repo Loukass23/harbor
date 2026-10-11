@@ -69,8 +69,8 @@ Each one is generic, small and its own PR-able commit:
 | `mountTvApp()`                                                    | split out of `src/main-tv.tsx`                         | a second entry can boot the same app                             |
 | Player engine registry, `registerPlayerEngine("avplay", factory)` | next to `src/lib/player/bridge.ts` / `html5.ts`        | AVPlay plugs in without editing the player hooks                 |
 | Extra back keys and key-registration hook                         | `src/views/big-picture/bp-back.ts`, `bp-player-key.ts` | 10009 → back, colour and media keys                              |
-| `setFetchProxy(resolver)`                                         | `src/lib/safe-fetch.ts` (non-Tauri path)               | send CORS-blocked hosts through the companion when it is present |
-| Configurable Stremio server URL                                   | `src/lib/stremio-server.ts`                            | remote or companion server instead of `127.0.0.1:11470`          |
+| ~~`setFetchProxy(resolver)`~~                                     | not needed                                             | the TV applies no CORS (phase 3 measurement, `lessons.md`)       |
+| Big Picture "Remote streaming server" pane                        | `src/views/big-picture/bp-stream-server.tsx`           | set the existing `remoteStreamServerUrl` from a remote           |
 | `setPlatformScoreModifier()`                                      | `src/lib/streams/scoring/`                             | the pattern from beta-tizen c62096b5; shared scorer untouched    |
 | `BpPlatform`                                                      | existing `setBpPlatform`                               | `lanAddress`, `fetchImageBytes` through the companion or `fetch` |
 
@@ -138,9 +138,13 @@ Each phase is a separate session or worktree, with its own PR into the Tizen bra
    - Follow-up: the hint bar and the TV performance trims key off `isAndroid()` /
      `isAndroidTv()`, so Tizen still shows keyboard glyphs ("Esc") and desktop effects. That
      needs a generic "television" flag in `src/lib/platform.ts`.
-3. **Network**
-   - Fetch proxy resolver, Stremio server URL setting, `BpPlatform` implementation.
-   - Standalone flow verified with a debrid addon.
+3. **Network** (done)
+   - Measured on the TV: no CORS for the packaged widget, so no fetch proxy (see `lessons.md`).
+   - Big Picture → Setup → Remote streaming server edits the shared `remoteStreamServerUrl`.
+     `normalizeStreamServerUrl()` moved into `src/lib/stremio-server.ts` for both settings UIs.
+   - `src-tizen/platform/bp-platform.ts`: no LAN address; image bytes via `safeFetch`.
+   - Follow-ups: the phone-typing dialog still offers a QR for a server the TV doesn't run (hide it
+     when `lanAddress` is null); a "Connected" check against a real Stremio server on the LAN.
 4. **AVPlay player**
    - Add `src-tizen/player/avplay-bridge.ts` implementing `PlayerBridge`, ported from `beta-tizen:src/lib/player/tizen-avplay.ts` with every lesson applied.
    - Add the engine registry seam and the score modifier.
@@ -150,6 +154,7 @@ Each phase is a separate session or worktree, with its own PR into the Tizen bra
    - Lazy-load or exclude heavy modules; add `check:tizen-budget`.
 6. **Companion (optional features)**
    - LAN discovery via HTTP sweep (`network.public` privilege), with pairing by code or QR.
+     Discovery fills `remoteStreamServerUrl`; no CORS proxy is needed.
    - Torrents through the companion's Stremio server.
    - Settings import from desktop/phone instead of typing on the remote.
    - Requires a small upstream endpoint in `src-tauri/src/web_server.rs`.
