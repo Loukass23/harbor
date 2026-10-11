@@ -45,7 +45,13 @@ function tizenHtml(): Plugin[] {
           if (absolute) {
             throw new Error(`absolute asset paths break file:// loading: ${absolute.join(", ")}`);
           }
-          return out;
+          // Samsung's webapis (AVPlay) exist only once the TV's own copy is
+          // loaded. Added after bundling so Vite never tries to resolve it, and
+          // after the inlined watchdog so a failure there is still reported.
+          const at = out.indexOf("</script>");
+          if (at < 0) throw new Error("boot watchdog script missing from index-tv.html");
+          const end = at + "</script>".length;
+          return `${out.slice(0, end)}\n<script src="$WEBAPIS/webapis/webapis.js"></script>${out.slice(end)}`;
         },
       },
     },

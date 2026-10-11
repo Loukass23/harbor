@@ -1,5 +1,7 @@
 import { markTelevision } from "@/lib/platform";
 import { safeFetch } from "@/lib/safe-fetch";
+import { setPlatformScoreModifier } from "@/lib/streams/scoring";
+import { tizenScoreModifier } from "../streams/score-modifier";
 import { setBpPlatform } from "@/views/big-picture/bp-platform";
 import { createTizenBpPlatform } from "./bp-platform";
 import { createKeyTranslator, installKeyAdapter, registerRemoteKeys } from "./keys";
@@ -18,6 +20,7 @@ function tryRegister(input: TvInputDevice): Map<number, string> {
 /** Wires the TV into the shared app. Call before mountTvApp(). */
 export function installTizenPlatform(): void {
   markTelevision();
+  setPlatformScoreModifier(tizenScoreModifier);
   // Back works without the Tizen API, so the adapter goes in first and alone.
   const names = new Map<number, string>();
   installKeyAdapter(window, createKeyTranslator(names));

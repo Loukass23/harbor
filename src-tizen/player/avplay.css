@@ -1,0 +1,12 @@
+/*
+ * AVPlay draws on a hardware plane behind the webview. While the bridge is
+ * attached (html.harbor-avplay), everything between the page and that plane
+ * must be transparent or the picture is painted over.
+ */
+html.harbor-avplay,
+html.harbor-avplay body,
+html.harbor-avplay #root,
+html.harbor-avplay [data-harbor-player],
+html.harbor-avplay [data-player-video-mount] {
+  background: transparent !important;
+}
