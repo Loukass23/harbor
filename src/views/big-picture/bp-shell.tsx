@@ -15,7 +15,7 @@ import type { HomeRow } from "@/views/home/home-types";
 import { SFX } from "@/lib/sfx";
 import { useView, type PlayEpisode } from "@/lib/view";
 import { useActiveKid } from "@/lib/profiles";
-import { isAndroidTv } from "@/lib/platform";
+import { isAndroidTv, isTelevision } from "@/lib/platform";
 import {
   exitBigPicture,
   goBigPictureTab,
@@ -403,12 +403,11 @@ export function BigPictureShell() {
           /* Static for the life of the tree, never toggled. Every rule that
              reads it is in BP_TOKENS and the trap is recorded there: a value
              that changes on this root invalidates style for the whole subtree
-             and measured 104.8ms median on a Stick 4K Max. isAndroidTv rather
+             and measured 104.8ms median on a Stick 4K Max. isTelevision rather
              than isAndroid, and rather than bpTvShell, because it is the gate
-             the other two performance decisions in this directory already use
-             (bp-decor-motion, bp-ambient-layers) and only that WebView was
-             measured. */
-          data-bp-tv={isAndroidTv() ? "" : undefined}
+             the TV performance decisions in this directory use (bp-decor-motion,
+             bp-art) and every television lays out on the same canvas. */
+          data-bp-tv={isTelevision() ? "" : undefined}
           role="application"
           aria-label={t("Big Picture")}
           aria-hidden={playing || undefined}
