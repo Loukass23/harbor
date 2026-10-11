@@ -11,5 +11,6 @@
   <tizen:privilege name="http://tizen.org/privilege/internet"/>
   <tizen:privilege name="http://tizen.org/privilege/tv.inputdevice"/>
   <tizen:privilege name="http://developer.samsung.com/privilege/productinfo"/>
+  <tizen:privilege name="http://developer.samsung.com/privilege/network.public"/>
   <access origin="*" subdomains="true"/>
 </widget>

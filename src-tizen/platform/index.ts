@@ -4,6 +4,7 @@ import { markTelevision } from "@/lib/platform";
 import { safeFetch } from "@/lib/safe-fetch";
 import { setPlatformScoreModifier } from "@/lib/streams/scoring";
 import { tizenScoreModifier } from "../streams/score-modifier";
+import { CompanionRunner, companionSetup } from "../net";
 import { setBpPlatform } from "@/views/big-picture/bp-platform";
 import { createTizenBpPlatform } from "./bp-platform";
 import { createKeyTranslator, installKeyAdapter, registerRemoteKeys } from "./keys";
@@ -33,12 +34,15 @@ export function installTizenPlatform(): void {
   installLifecycle(document);
 
   const tizen = tizenApi();
-  setBpPlatform(
-    createTizenBpPlatform(
+  setBpPlatform({
+    ...createTizenBpPlatform(
       safeFetch,
       tizen ? () => tizen.application.getCurrentApplication().exit() : undefined,
     ),
-  );
+    // Nothing serves phone pages here, so pairing with a computer takes that role.
+    setup: companionSetup,
+    Runner: CompanionRunner,
+  });
   if (!tizen) {
     console.warn("[tizen] tizen API missing: media keys and app exit are disabled");
     return;
