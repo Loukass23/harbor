@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-import { isRtl, LANGUAGES, setUiLanguage, useT, type UiLanguage } from "@/lib/i18n";
+import { isRtl, setUiLanguage, uiLanguageOptions, useT, type UiLanguage } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
 import { useReducedMotion } from "@/lib/use-reduced-motion";
 
 const GREETING_HOLD_MS = 3000;
 
 export function LanguageStep() {
+  const languages = uiLanguageOptions();
   const { settings, update } = useSettings();
   const t = useT();
   const reduce = useReducedMotion();
@@ -15,14 +16,14 @@ export function LanguageStep() {
 
   const settled = reduce || picked;
   const activeIdx = Math.max(
-    LANGUAGES.findIndex((l) => l.code === settings.uiLanguage),
+    languages.findIndex((l) => l.code === settings.uiLanguage),
     0,
   );
 
   useEffect(() => {
     if (settled) return;
     const id = window.setInterval(
-      () => setDrift((i) => (i + 1) % LANGUAGES.length),
+      () => setDrift((i) => (i + 1) % languages.length),
       GREETING_HOLD_MS,
     );
     return () => window.clearInterval(id);
@@ -39,14 +40,14 @@ export function LanguageStep() {
     const forward = rtl ? "ArrowLeft" : "ArrowRight";
     const backward = rtl ? "ArrowRight" : "ArrowLeft";
     let next = idx;
-    if (e.key === "ArrowDown" || e.key === forward) next = (idx + 1) % LANGUAGES.length;
+    if (e.key === "ArrowDown" || e.key === forward) next = (idx + 1) % languages.length;
     else if (e.key === "ArrowUp" || e.key === backward)
-      next = (idx - 1 + LANGUAGES.length) % LANGUAGES.length;
+      next = (idx - 1 + languages.length) % languages.length;
     else if (e.key === "Home") next = 0;
-    else if (e.key === "End") next = LANGUAGES.length - 1;
+    else if (e.key === "End") next = languages.length - 1;
     else return;
     e.preventDefault();
-    pick(LANGUAGES[next].code);
+    pick(languages[next].code);
     buttons.current[next]?.focus();
   };
 
@@ -69,7 +70,7 @@ export function LanguageStep() {
         aria-label={t("Display language")}
         className="grid max-h-[min(48vh,430px)] grid-cols-2 gap-2.5 overflow-y-auto pe-1"
       >
-        {LANGUAGES.map((lang, i) => {
+        {languages.map((lang, i) => {
           const selected = settings.uiLanguage === lang.code;
           return (
             <button
@@ -115,9 +116,10 @@ export function LanguageStep() {
 }
 
 function Greeting({ index, fade }: { index: number; fade: boolean }) {
+  const languages = uiLanguageOptions();
   return (
     <div aria-hidden className="grid">
-      {LANGUAGES.map((lang, i) => (
+      {languages.map((lang, i) => (
         <span
           key={lang.code}
           lang={lang.code}
