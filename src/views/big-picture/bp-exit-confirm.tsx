@@ -15,9 +15,12 @@ function motionReduced(): boolean {
 export function BpExitConfirm({
   onConfirm,
   onCancel,
+  closesApp = false,
 }: {
   onConfirm: () => void;
   onCancel: () => void;
+  /** Confirming closes the whole app rather than returning to the window. */
+  closesApp?: boolean;
 }) {
   useEffect(
     () =>
@@ -61,7 +64,7 @@ export function BpExitConfirm({
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        aria-describedby={bodyId}
+        aria-describedby={closesApp ? undefined : bodyId}
         data-bp-dialog
         className="relative flex w-[clamp(340px,30vw,560px)] max-w-full flex-col items-center gap-[clamp(14px,1.8vh,28px)] p-[clamp(24px,2.8vh,46px)] text-center"
         style={{
@@ -72,7 +75,7 @@ export function BpExitConfirm({
           animation: reduce ? undefined : "bp-rise var(--bp-dur) var(--bp-ease) 60ms backwards",
         }}
       >
-        <BpExitPreview className="w-[clamp(96px,12vh,168px)]" />
+        {!closesApp && <BpExitPreview className="w-[clamp(96px,12vh,168px)]" />}
 
         <div className="flex flex-col items-center gap-[clamp(5px,0.7vh,11px)]">
           <h2
@@ -85,20 +88,22 @@ export function BpExitConfirm({
               letterSpacing: "-0.015em",
             }}
           >
-            {t("Back to the window?")}
+            {closesApp ? t("Close Harbor?") : t("Back to the window?")}
           </h2>
 
-          <p
-            id={bodyId}
-            className="text-ink-muted"
-            style={{
-              maxWidth: "32ch",
-              fontSize: "clamp(17px, 2.3vh, 24px)",
-              lineHeight: 1.45,
-            }}
-          >
-            {t("Big Picture closes. Harbor keeps running behind it.")}
-          </p>
+          {!closesApp && (
+            <p
+              id={bodyId}
+              className="text-ink-muted"
+              style={{
+                maxWidth: "32ch",
+                fontSize: "clamp(17px, 2.3vh, 24px)",
+                lineHeight: 1.45,
+              }}
+            >
+              {t("Big Picture closes. Harbor keeps running behind it.")}
+            </p>
+          )}
         </div>
 
         {/* No data-bp-restore-key here. With one, Back-then-Back would reopen
@@ -148,7 +153,7 @@ export function BpExitConfirm({
               fontSize: "clamp(17px, 2.2vh, 24px)",
             }}
           >
-            {t("Leave Big Picture")}
+            {closesApp ? t("Close") : t("Leave Big Picture")}
           </button>
         </div>
       </div>

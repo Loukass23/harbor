@@ -528,6 +528,7 @@ export function BigPictureShell() {
           {phoneOpen && <BpPhoneTyping onClose={() => setPhoneOpen(false)} />}
           {confirmExit && (
             <BpExitConfirm
+              closesApp={bpPlatform().exit !== undefined}
               onConfirm={() => {
                 setConfirmExit(false);
                 const exit = bpPlatform().exit;
