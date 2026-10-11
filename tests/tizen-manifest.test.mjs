@@ -13,8 +13,8 @@ test("renders package id, application id and version", () => {
   assert.doesNotMatch(xml, /\{\{/);
 });
 
-test("pins the Tizen 7.0 floor", () => {
-  assert.match(template, /required_version="7\.0"/);
+test("pins the Tizen 9.0 floor", () => {
+  assert.match(template, /required_version="9\.0"/);
 });
 
 test("rejects package ids the TV refuses to install", () => {

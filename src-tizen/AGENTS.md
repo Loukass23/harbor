@@ -5,7 +5,7 @@ Tizen rules. Read `docs/lessons.md` before changing anything in this folder.
 
 ## Target
 
-- Tizen 7.0+ (2022 TVs, Chromium 94), packaged as a `.wgt` web widget loaded over `file://`.
+- Tizen 9.0+ (Chromium 120; reference TV GU43DU7199UXZG), packaged as a `.wgt` web widget loaded over `file://`.
 - Same Big Picture UI as Android TV (`BpTvApp`). There is no Tauri and no Rust at runtime.
 - Playback: `webapis.avplay` behind Harbor's `PlayerBridge`, with the HTML5 bridge as fallback.
 - Optional companion (desktop Harbor or Stremio server on the LAN) for torrents, a CORS proxy and

@@ -18,7 +18,7 @@ The goal is a Tizen app that:
 
 ### Decisions
 
-- **Oldest supported TV:** Tizen 7.0 (2022 TVs, Chromium 94). This allows `required_version="7.0"` and the existing `chrome87` target, so the TV bundle is the same one Android TV ships.
+- **Oldest supported TV:** Tizen 9.0 (Chromium 120), verified on the reference TV GU43DU7199UXZG. `required_version="9.0"` and build target `chrome120`. Originally 7.0/`chrome87`; raised on 2026-10-11 because no older TV is available to verify against.
 - **Companion:** optional. The app works on its own with debrid/HTTP addons and a remote Stremio server URL. A desktop Harbor or Stremio server found on the LAN adds torrents, a CORS proxy and remote control.
 - **Layout:** in-tree `src-tizen/` on a new branch cut from `beta-branch`. Nothing is merged from the old Tizen branches; code is cherry-picked or ported only after review.
 
@@ -44,7 +44,7 @@ src/                  shared app (upstream). Never imports src-tizen or mentions
   ...seams            small, generic registration points (see below)
 src-tizen/            Tizen-only; may import from src/ via @/
   AGENTS.md, CLAUDE.md  Tizen rules for humans and AI
-  config.xml.tpl      manifest template (id, version, privileges, required_version=7.0)
+  config.xml.tpl      manifest template (id, version, privileges, required_version=9.0)
   main.tsx            entry: installTizenPlatform() → mountTvApp()
   platform/           bp-platform impl, key registration, lifecycle, device caps
   player/             avplay-bridge.ts (implements PlayerBridge), codec caps, watchdog
@@ -126,7 +126,7 @@ Each phase is a separate session or worktree, with its own PR into the Tizen bra
    - Move `plan.md`/`walkthrough.md` findings into `src-tizen/docs/lessons.md`, and whitelist `src-tizen/**/*.md` in `.gitignore`.
    - Install Tizen Studio CLI (`tz`, `sdb`) and a certificate profile, and add `.env.tizen.example`.
 1. **Shell and pipeline**
-   - Add a Tizen Vite config, `src-tizen/vite.config.ts`, kept separate so the root config never conflicts on merges. It sets `base: "./"`, target `chrome87` and outDir `src-tizen/dist` (gitignored). It builds `index-tv.html` with the entry swapped to `src-tizen/main.tsx` instead of keeping a copied `src-tizen/index.html` that would drift.
+   - Add a Tizen Vite config, `src-tizen/vite.config.ts`, kept separate so the root config never conflicts on merges. It sets `base: "./"`, target `chrome120` and outDir `src-tizen/dist` (gitignored). It builds `index-tv.html` with the entry swapped to `src-tizen/main.tsx` instead of keeping a copied `src-tizen/index.html` that would drift.
    - Add the `config.xml` template and `scripts/tizen.mjs`, porting the useful parts of `beta-tizen:scripts/tizen-pipeline.mjs`.
    - Add the `mountTvApp()` seam (`src/tv-mount.tsx`).
    - **Done when:** the app boots to the home row on the TV.
@@ -179,7 +179,7 @@ Committed unless marked local:
    - Run `pnpm run check`, `typecheck`, `test` and `check:tizen-boundary`.
    - Then `/tizen-deploy` and `/tizen-debug` smoke test, `tizen-reviewer`, and the PR.
    - Real TV runs are needed for AVPlay; the emulator is only good for UI and boot.
-7. **Memory:** record the decisions (Tizen 7.0 minimum, optional companion, in-tree layout, never merge old branches).
+7. **Memory:** record the decisions (Tizen 9.0 minimum, optional companion, in-tree layout, never merge old branches).
 
 ## Verification
 

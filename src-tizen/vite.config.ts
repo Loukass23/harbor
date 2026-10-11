@@ -62,8 +62,8 @@ export default defineConfig(async (env) => {
     build: {
       outDir: "src-tizen/dist",
       emptyOutDir: true,
-      // Tizen 7.0 ships Chromium 94; same floor as the Android TV build.
-      target: "chrome87",
+      // Tizen 9.0 ships Chromium 120. Its own floor, independent of Android TV.
+      target: "chrome120",
       // Vite's runtime preloader marks the <link> tags it injects for lazy
       // chunks crossorigin, which the HTML transform above cannot reach. With
       // one stylesheet and no module preload it has nothing left to inject.

@@ -32,8 +32,8 @@ environment override it.
   - `tz emul launch` returns "terminated after timeout" while the VM is still booting. That is
     harmless.
   - Wait until `sdb devices` shows `device` instead of `offline`.
-  - The local Samsung VM is Tizen 10. It proves boot, UI and focus, but not the Chromium 94 floor
-    of Tizen 7.0. That needs a real 2022 TV.
+  - The local Samsung VM is Tizen 10. It proves boot, UI and focus. The Tizen 9.0 floor is
+    proven on the reference TV, GU43DU7199UXZG.
 - **Web Simulator:** fallback when no emulator runs. It is a desktop Chromium shell, so it only
   shows that the page loads over `file://`. It has no AVPlay and no real key events.
 

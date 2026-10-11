@@ -6,8 +6,9 @@ Do not relearn them. If a rule turns out to be wrong, change it here in the same
 
 ## Platform floor
 
-- Minimum is **Tizen 7.0 (2022 TVs, Chromium 94)**. `config.xml` uses `required_version="7.0"`,
-  and the build uses the same `chrome87` target as Android TV. Earlier attempts swung between
+- Minimum is **Tizen 9.0 (Chromium 120)**, verified on GU43DU7199UXZG. `config.xml` uses
+  `required_version="9.0"` and the build targets `chrome120`. It was briefly 7.0/`chrome87`, the
+  Android TV floor, but no 2022 TV was available to prove it. Earlier attempts swung between
   es2015, esnext and chrome87, and between 2.3 and 8.0, without ever settling. Don't reopen this
   without a documented reason.
 - `AbortSignal.timeout` and other recent APIs may be missing. Feature-detect, never assume.
