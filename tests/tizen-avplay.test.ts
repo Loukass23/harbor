@@ -17,7 +17,7 @@ type Call = [string, ...unknown[]];
 // A failed assertion skips a test's own cleanup; the next test must still get fresh timers.
 test.afterEach(() => mock.timers.reset());
 
-function avplayStub(tracks: AvplayTrack[] = []) {
+function avplayStub(tracks: AvplayTrack[] = [], current: number[] = []) {
   const calls: Call[] = [];
   let state: AvplayState = "NONE";
   let duration = 0;
@@ -55,6 +55,7 @@ function avplayStub(tracks: AvplayTrack[] = []) {
     getDuration: () => duration,
     getCurrentTime: () => 0,
     getTotalTrackInfo: () => tracks,
+    getCurrentStreamInfo: () => tracks.filter((t) => current.includes(t.index)),
   };
   return {
     api: { avplay },
@@ -74,7 +75,7 @@ function avplayStub(tracks: AvplayTrack[] = []) {
   };
 }
 
-function env(dpr = 1) {
+function env() {
   const classes = new Set<string>();
   const visibility = new Set<() => void>();
   const resize = new Set<() => void>();
@@ -95,8 +96,8 @@ function env(dpr = 1) {
     removeEventListener: (_: string, fn: () => void) => visibility.delete(fn),
   };
   const win = {
-    innerWidth: 1142,
-    devicePixelRatio: dpr,
+    innerWidth: 1140,
+    screen: { width: 1920 },
     addEventListener: (_: string, fn: () => void) => resize.add(fn),
     removeEventListener: (_: string, fn: () => void) => resize.delete(fn),
   };
@@ -107,7 +108,7 @@ function env(dpr = 1) {
     removeChild(el: { parentElement: unknown }) {
       el.parentElement = null;
     },
-    getBoundingClientRect: () => ({ left: 0, top: 0, width: 1142, height: 642.375 }),
+    getBoundingClientRect: () => ({ left: 0, top: 0, width: 1140, height: 641.25 }),
   } as unknown as HTMLElement;
   const setVisibility = (v: string) => {
     doc.visibilityState = v;
@@ -133,10 +134,10 @@ const noCues = (() => ({
   destroy() {},
 })) as unknown as AvplayDeps["cues"];
 
-function setup(opts: { dpr?: number; tracks?: AvplayTrack[] } = {}) {
+function setup(opts: { tracks?: AvplayTrack[]; current?: number[] } = {}) {
   mock.timers.enable({ apis: ["setTimeout", "setInterval"] });
-  const av = avplayStub(opts.tracks);
-  const e = env(opts.dpr);
+  const av = avplayStub(opts.tracks, opts.current);
+  const e = env();
   const bridge = createAvplayBridge(av.api, { doc: e.doc, win: e.win, cues: noCues, now: () => 0 });
   let snap: PlayerSnapshot | null = null;
   bridge.subscribe((s) => (snap = s));
@@ -235,8 +236,8 @@ test("hidden suspends and visible restores, without resuming playback", async ()
   done(bridge);
 });
 
-test("the display rect is in panel pixels", async () => {
-  const { av, bridge } = setup({ dpr: 1920 / 1142 });
+test("the display rect is in screen pixels: 1140 CSS px wide on GU43DU7199UXZG, ratio 1", async () => {
+  const { av, bridge } = setup();
   await bridge.load({ url: "https://x.example/a.mp4" });
   assert.deepEqual(
     av.calls.find((c) => c[0] === "setDisplayRect"),
@@ -253,6 +254,8 @@ test("audio tracks come from AVPlay and text tracks are never selected natively"
       { index: 2, type: "AUDIO", extra_info: '{"language":"fra","channels":"2"}' },
       { index: 3, type: "TEXT", extra_info: '{"language":"eng"}' },
     ],
+    // AVPlay starts on the container's default track, not the first one (seen on the TV).
+    current: [0, 2],
   });
   await bridge.load({ url: "https://x.example/a.mkv" });
   av.ready();
@@ -260,15 +263,19 @@ test("audio tracks come from AVPlay and text tracks are never selected natively"
   assert.deepEqual(
     snap().audioTracks.map((t) => [t.id, t.lang, t.selected]),
     [
-      ["avplay-audio-1", "eng", true],
-      ["avplay-audio-2", "fra", false],
+      ["avplay-audio-1", "eng", false],
+      ["avplay-audio-2", "fra", true],
     ],
   );
-  bridge.setAudioTrack("avplay-audio-2");
+  bridge.setAudioTrack("avplay-audio-1");
   bridge.setSubtitleTrack("seed-0");
   assert.deepEqual(
     av.calls.filter((c) => c[0] === "setSelectTrack"),
-    [["setSelectTrack", "AUDIO", 2]],
+    [["setSelectTrack", "AUDIO", 1]],
+  );
+  assert.deepEqual(
+    snap().audioTracks.map((t) => t.selected),
+    [true, false],
   );
   done(bridge);
 });

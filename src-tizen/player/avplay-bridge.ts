@@ -31,7 +31,7 @@ export type AvplayDocument = {
 
 export type AvplayWindow = {
   innerWidth: number;
-  devicePixelRatio: number;
+  screen: { width: number };
   addEventListener(type: "resize", fn: () => void): void;
   removeEventListener(type: "resize", fn: () => void): void;
 };
@@ -196,12 +196,13 @@ export function createAvplayBridge(api: Webapis, deps: AvplayDeps): PlayerBridge
     emit();
   };
 
-  // Physical panel pixels, not CSS pixels (lessons.md). The webview's CSS
-  // viewport is narrower than the panel, so scale by the device pixel ratio.
+  // Screen pixels, not CSS pixels (lessons.md). The webview lays out at
+  // 1140 CSS px across a 1920 px screen with devicePixelRatio 1, so the ratio
+  // is useless here; scale by screen width over viewport width instead.
   const applyRect = () => {
     if (!host || !opened) return;
     const r = host.getBoundingClientRect();
-    const s = win.devicePixelRatio || 1;
+    const s = win.innerWidth > 0 ? win.screen.width / win.innerWidth : 1;
     try {
       av.setDisplayRect(
         Math.round(r.left * s),
@@ -234,7 +235,13 @@ export function createAvplayBridge(api: Webapis, deps: AvplayDeps): PlayerBridge
 
   const readTracks = () => {
     try {
-      const info = readAvplayTracks(av.getTotalTrackInfo?.() ?? [], selectedAudio);
+      // AVPlay picks the container's default audio, which is often not the
+      // first track: ask which one plays instead of assuming.
+      const playing = av.getCurrentStreamInfo?.().find((t) => t.type === "AUDIO")?.index;
+      const info = readAvplayTracks(
+        av.getTotalTrackInfo?.() ?? [],
+        selectedAudio ?? playing ?? null,
+      );
       snap.audioTracks = info.audio;
       if (info.width && info.height) {
         snap.videoWidth = info.width;

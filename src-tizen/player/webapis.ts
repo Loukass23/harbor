@@ -39,6 +39,8 @@ export type Avplay = {
   setBufferingParam?(option: string, unit: string, amount: number): void;
   setStreamingProperty?(type: string, value: string): void;
   getTotalTrackInfo?(): AvplayTrack[];
+  /** The tracks playing now, one per type. */
+  getCurrentStreamInfo?(): AvplayTrack[];
   setSelectTrack?(type: string, index: number): void;
   setSpeed?(speed: number): void;
   suspend?(): void;

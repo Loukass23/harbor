@@ -88,8 +88,19 @@ Do not relearn them. If a rule turns out to be wrong, change it here in the same
 ## AVPlay
 
 - Properties (buffering, streaming, DRM) can only be set in the `IDLE` state, before `prepareAsync`.
-- `setDisplayRect` takes physical panel pixels, not CSS pixels. Video renders on a plane
+- `setDisplayRect` takes screen pixels, not CSS pixels. Video renders on a plane
   _behind_ the webview, so every container above it must be transparent (`html.harbor-avplay`).
+- The webview lays out at 1140×642 CSS px on a 1920×1080 screen with `devicePixelRatio` **1**
+  (GU43DU7199UXZG, Tizen 9.0). Scale by `screen.width / innerWidth`, never by the pixel ratio:
+  that draws the video at 60% in the top-left corner.
+- `webapis` exists only after the page loads `$WEBAPIS/webapis/webapis.js`; the Tizen Vite build
+  adds that tag. CDP screenshots show the video plane as white, so check playback with
+  `webapis.avplay.getState()` and `getCurrentTime()` instead.
+- AVPlay starts on the container's default audio track, which is often not the first one in
+  `getTotalTrackInfo()` (a Silo MKV started on track 7 of 7). Read the playing track from
+  `getCurrentStreamInfo()`. The `index` field, not the array position, is what
+  `setSelectTrack` takes. AVPlay also marks an embedded text track as current on its own;
+  that is harmless as long as Harbor never selects one.
 - **Never** call `setSelectTrack("TEXT", ...)`. It crashes the native decoder on streams
   without sidecar subtitles. Subtitles always use Harbor's DOM overlay (`snap.subText`).
 - **Never** send a HEAD request before `open()`. Debrid and torrent servers answer 405/403 or
