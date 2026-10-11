@@ -18,11 +18,12 @@ function wantsFallback(s: PlayerSnapshot, sawFrame: boolean): boolean {
  * Plays through `primary` and switches to `fallback` once per source when the
  * primary can't start it or can't decode it, instead of leaving a black screen.
  * The switch keeps the position, the subtitles added since the load and the
- * listener's settings; the failing snapshot is never shown.
+ * listener's settings; the failing snapshot is never shown. `fallback` may be
+ * async, so its code can stay out of the boot bundle until a switch needs it.
  */
 export function createFallbackBridge(
   primary: () => PlayerBridge,
-  fallback: () => PlayerBridge,
+  fallback: () => PlayerBridge | Promise<PlayerBridge>,
 ): PlayerBridge {
   let current = primary();
   let onPrimary = true;
@@ -50,6 +51,8 @@ export function createFallbackBridge(
 
   const onSnap = (s: PlayerSnapshot) => {
     if (s.firstFrameReady) sawFrame = true;
+    // The failing primary keeps reporting while the fallback loads; none of it is shown.
+    if (onPrimary && switched) return;
     if (onPrimary && !switched && source && wantsFallback(s, sawFrame)) {
       console.warn("[avplay] falling back to HTML5:", s.errorCode, s.errorMessage);
       void switchToFallback();
@@ -65,9 +68,15 @@ export function createFallbackBridge(
     const src = source;
     const resumeAt = last && last.positionSec > 0 ? last.positionSec : src?.startAtSec;
     try {
+      const next = await fallback();
+      // A load or destroy during the wait owns the player now.
+      if (token !== switchToken) {
+        next.destroy();
+        return;
+      }
       off?.();
       current.destroy();
-      current = fallback();
+      current = next;
       onPrimary = false;
       if (host) current.attach(host);
       off = current.subscribe(onSnap);

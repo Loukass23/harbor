@@ -153,3 +153,60 @@ test("closing the player mid-switch stops the fallback from playing", async () =
   await flush();
   assert.ok(!made[1].calls.some((c) => c[0] === "play"));
 });
+
+function deferredSetup() {
+  const made: Fake[] = [];
+  let release: (() => void) | null = null;
+  const bridge = createFallbackBridge(
+    () => {
+      const b = fake("avplay");
+      made.push(b);
+      return b;
+    },
+    () =>
+      new Promise<PlayerBridge>((resolve) => {
+        release = () => {
+          const b = fake("html5");
+          made.push(b);
+          resolve(b);
+        };
+      }),
+  );
+  const seen: PlayerSnapshot[] = [];
+  bridge.subscribe((s) => seen.push(s));
+  bridge.attach({} as HTMLElement);
+  return { bridge, made, seen, release: () => release?.() };
+}
+
+test("an async fallback hides the failing primary while it loads, then plays", async () => {
+  const { bridge, made, seen, release } = deferredSetup();
+  await bridge.load({ url: "https://x.example/a.mkv" });
+  await bridge.play();
+  made[0].push({ status: "error", errorCode: "codec" });
+  made[0].push({ status: "error", errorCode: "codec", errorMessage: "again" });
+  await flush();
+  assert.equal(made.length, 1, "the primary stays until the fallback is ready");
+  assert.ok(!seen.some((s) => s.status === "error"));
+  release();
+  await flush();
+  assert.equal(made[1].name, "html5");
+  assert.ok(made[0].destroyed);
+  assert.deepEqual(
+    made[1].calls.map((c) => c[0]),
+    ["attach", "load", "play"],
+  );
+});
+
+test("a new load while the fallback loads keeps the primary and drops the fallback", async () => {
+  const { bridge, made, release } = deferredSetup();
+  await bridge.load({ url: "https://x.example/a.mkv" });
+  made[0].push({ status: "error", errorCode: "codec" });
+  await bridge.load({ url: "https://x.example/b.mp4" });
+  release();
+  await flush();
+  assert.ok(!made[0].destroyed);
+  assert.ok(made[1].destroyed);
+  assert.ok(!made[1].calls.some((c) => c[0] === "load"));
+  const last = made[0].calls.at(-1) ?? [];
+  assert.equal((last[1] as PlayerSource).url, "https://x.example/b.mp4");
+});

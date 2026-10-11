@@ -1,4 +1,3 @@
-import { createHtml5Bridge } from "@/lib/player/html5";
 import { setWebPlayerEngine } from "@/lib/player/web-engine";
 import { createAvplayBridge } from "./avplay-bridge";
 import { createCueTracks } from "./cue-tracks";
@@ -13,7 +12,8 @@ export function installAvplay(): boolean {
   setWebPlayerEngine(() =>
     createFallbackBridge(
       () => createAvplayBridge(api, { doc: document, win: window, cues: createCueTracks }),
-      createHtml5Bridge,
+      // hls.js and mpegts.js come with it: loaded on the first fallback, not at boot.
+      () => import("@/lib/player/html5").then((m) => m.createHtml5Bridge()),
     ),
   );
   return true;
