@@ -42,7 +42,11 @@ function avplayStub(tracks: AvplayTrack[] = [], current: number[] = []) {
     setDisplayMethod: rec("setDisplayMethod"),
     setBufferingParam: rec("setBufferingParam"),
     setStreamingProperty: rec("setStreamingProperty"),
-    setSelectTrack: rec("setSelectTrack"),
+    // Like the TV: switching tracks throws until playback has started.
+    setSelectTrack(...args: unknown[]) {
+      if (state !== "PLAYING" && state !== "PAUSED") throw new Error("PLAYER_ERROR_INVALID_STATE");
+      calls.push(["setSelectTrack", ...args]);
+    },
     suspend: rec("suspend"),
     restore() {
       calls.push(["restore"]);
@@ -276,8 +280,15 @@ test("audio tracks come from AVPlay and text tracks are never selected natively"
       ["avplay-audio-2", "fra", true],
     ],
   );
+  // The player picks the preferred language before playback starts.
   bridge.setAudioTrack("avplay-audio-1");
   bridge.setSubtitleTrack("seed-0");
+  assert.deepEqual(
+    av.calls.filter((c) => c[0] === "setSelectTrack"),
+    [],
+  );
+  await bridge.play();
+  av.listener().oncurrentplaytime?.(500);
   assert.deepEqual(
     av.calls.filter((c) => c[0] === "setSelectTrack"),
     [["setSelectTrack", "AUDIO", 1]],

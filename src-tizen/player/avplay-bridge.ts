@@ -144,6 +144,8 @@ export function createAvplayBridge(api: Webapis, deps: AvplayDeps): PlayerBridge
   let cueTimer: ReturnType<typeof setInterval> | null = null;
   let suspended = false;
   let selectedAudio: number | null = null;
+  /** setSelectTrack throws until playback starts, so a choice made earlier waits here. */
+  let pendingAudio: number | null = null;
   let current: PlayerSource | null = null;
   let clockSec = 0;
   let clockAt = 0;
@@ -282,6 +284,20 @@ export function createAvplayBridge(api: Webapis, deps: AvplayDeps): PlayerBridge
     }
   };
 
+  const applyPendingAudio = () => {
+    if (pendingAudio == null) return;
+    const s = state();
+    if (s !== "PLAYING" && s !== "PAUSED") return;
+    const index = pendingAudio;
+    pendingAudio = null;
+    try {
+      av.setSelectTrack?.("AUDIO", index);
+    } catch (err) {
+      console.warn("[avplay] audio track switch failed", err);
+    }
+    readTracks();
+  };
+
   const startPlayback = () => {
     try {
       av.play();
@@ -311,6 +327,7 @@ export function createAvplayBridge(api: Webapis, deps: AvplayDeps): PlayerBridge
       if (snap.durationSec <= 0) snap.durationSec = durationSec();
       if (!snap.firstFrameReady) snap.firstFrameReady = true;
       tryResumeSeek();
+      applyPendingAudio();
       emit();
     },
     onstreamcompleted: () => {
@@ -426,6 +443,7 @@ export function createAvplayBridge(api: Webapis, deps: AvplayDeps): PlayerBridge
       noAudio: false,
     };
     if (!reopen) cues.reset(src.subtitles);
+    pendingAudio = reopen ? selectedAudio : null;
     syncCues();
     startCueTicker();
     emit();
@@ -481,13 +499,6 @@ export function createAvplayBridge(api: Webapis, deps: AvplayDeps): PlayerBridge
         if (g !== gen) return;
         clearWatchdog();
         prepared = true;
-        if (reopen && selectedAudio != null) {
-          try {
-            av.setSelectTrack?.("AUDIO", selectedAudio);
-          } catch (err) {
-            console.warn("[avplay] audio track restore failed", err);
-          }
-        }
         readTracks();
         applyRect();
         snap.durationSec = durationSec();
@@ -589,14 +600,13 @@ export function createAvplayBridge(api: Webapis, deps: AvplayDeps): PlayerBridge
     setAudioTrack(id) {
       const index = Number(id.replace(/^avplay-audio-/, ""));
       if (!Number.isInteger(index) || !av.setSelectTrack) return;
-      try {
-        av.setSelectTrack("AUDIO", index);
-        selectedAudio = index;
-        readTracks();
-        emit();
-      } catch (err) {
-        console.warn("[avplay] audio track switch failed", err);
-      }
+      // The player picks the preferred language as soon as the tracks are
+      // known, which is before playback starts and the switch is allowed.
+      selectedAudio = index;
+      pendingAudio = index;
+      readTracks();
+      applyPendingAudio();
+      emit();
     },
     canAutoSelectSubtitle: () => cues.canAutoSelect(),
     // Never setSelectTrack("TEXT"): it crashes the decoder on streams without

@@ -116,6 +116,9 @@ Do not relearn them. If a rule turns out to be wrong, change it here in the same
   is not `READY`/`PAUSED`/`PLAYING`, reopen the source at the saved position, paused.
 - `PLAYER_DISPLAY_MODE_LETTER_BOX` stretched a 3840×1606 (2.39:1) picture to fill 16:9. Fit the
   display rect to the video's own aspect and use `PLAYER_DISPLAY_MODE_FULL_SCREEN` inside it.
+- `setSelectTrack("AUDIO", n)` throws `InvalidStateError` in `READY`, which is exactly when the
+  player picks the preferred language. Hold the choice and apply it on the first
+  `oncurrentplaytime` once the state is `PLAYING` or `PAUSED`.
 - `getCurrentStreamInfo()` throws `InvalidStateError` while AVPlay is still preparing. Call it on
   its own: a throw that also empties the track list stops the player choosing the preferred
   audio language, and the viewer gets the container default (Russian, on one Silo release).
