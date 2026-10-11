@@ -13,6 +13,7 @@ const fetchReturning = (resp: Response | Error): typeof fetch =>
 test("the TV reports no LAN address, since nothing on it listens for a phone", async () => {
   const platform = createTizenBpPlatform(fetchReturning(new Response("")));
   assert.equal(await platform.lanAddress(), null);
+  assert.equal(platform.servesPhone, false);
 });
 
 test("image bytes come straight from fetch", async () => {

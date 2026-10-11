@@ -12,6 +12,7 @@ export function createTizenBpPlatform(fetchImpl: typeof fetch, exit?: () => void
     // Nothing on the TV listens on a port, so there is no address a phone could
     // be sent to.
     lanAddress: async () => null,
+    servesPhone: false,
     fetchImageBytes: async (url) => {
       const ctrl = new AbortController();
       const timer = setTimeout(() => ctrl.abort(), IMAGE_TIMEOUT_MS);
