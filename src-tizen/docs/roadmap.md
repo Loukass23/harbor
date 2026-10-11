@@ -131,9 +131,13 @@ Each phase is a separate session or worktree, with its own PR into the Tizen bra
    - Add the `mountTvApp()` seam (`src/tv-mount.tsx`).
    - **Done when:** the app boots to the home row on the TV.
 
-2. **Input and lifecycle**
-   - Key registration, back/exit, and `visibilitychange`.
-   - Add the boundary check and its CI step.
+2. **Input and lifecycle** (done)
+   - Key registration, back/exit, and `visibilitychange` (`src-tizen/platform/`). Seams:
+     `BpPlatform.exit` and the exit confirm's `closesApp` copy.
+   - The boundary check and its CI step landed in phase 0.
+   - Follow-up: the hint bar and the TV performance trims key off `isAndroid()` /
+     `isAndroidTv()`, so Tizen still shows keyboard glyphs ("Esc") and desktop effects. That
+     needs a generic "television" flag in `src/lib/platform.ts`.
 3. **Network**
    - Fetch proxy resolver, Stremio server URL setting, `BpPlatform` implementation.
    - Standalone flow verified with a debrid addon.

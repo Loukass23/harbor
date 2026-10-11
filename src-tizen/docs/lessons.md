@@ -60,6 +60,20 @@ Do not relearn them. If a rule turns out to be wrong, change it here in the same
   handle it, and exit only via `tizen.application.getCurrentApplication().exit()` from the root.
 - A ReferenceError inside a keyboard hook blacked out the whole UI on the first keypress.
   Key handlers need tests.
+- `registerKeyBatch(names, undefined, onError)` throws `TypeMismatchError`. Callbacks must be
+  functions or `null`. That throw at startup stopped `mountTvApp()` from running, so
+  `main.tsx` now catches any platform install failure and mounts anyway.
+- Only register keys the shared app handles (the media transport keys). Registering a key
+  takes it from the system. Tizen's key names (`MediaPlayPause` 10252, `MediaPlay` 415,
+  `MediaPause` 19, `MediaStop` 413, `MediaFastForward` 417, `MediaRewind` 412,
+  `MediaTrackPrevious` 10232, `MediaTrackNext` 10233) match the DOM `key` values the player
+  checks. `src-tizen/platform/keys.ts` re-sends any event that arrives with another `key`.
+- Back (10009, `XF86Back`) is re-sent as Escape from the first capture listener on `window`.
+  Big Picture's layers (focus, dialogs, trailer, gallery, player confirm) all close on
+  Escape, so no shared key check changes. Big Picture's own window listener stops
+  propagation, so a test probe on `document` never sees the Escape; probe on `window`.
+- At the root, Back opens the shared exit confirm. "Close" calls `BpPlatform.exit` →
+  `tizen.application.getCurrentApplication().exit()`. Nothing else exits the app.
 
 ## AVPlay
 

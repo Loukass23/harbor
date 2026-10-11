@@ -7,7 +7,7 @@
 | ----------- | ------------------------------------------------------------------------------------------------ |
 | `build`     | `vite build --config src-tizen/vite.config.ts` → `src-tizen/dist` (also `pnpm build:tizen`)      |
 | `package`   | writes `config.xml` and `icon.png` into `dist`, then `tz pack` → `src-tizen/dist/Debug/dist.wgt` |
-| `install`   | `tz install` the `.wgt` on the device                                                            |
+| `install`   | `tz install` the `.wgt` on the device. Uninstalls first, so app data resets to onboarding        |
 | `launch`    | `tz run` by package id                                                                           |
 | `debug`     | restarts the app in debug mode, runs `sdb forward` and prints the CDP port                       |
 | `logs`      | `sdb dlog` filtered to console messages (emulator only; empty on a retail TV, use `debug`)       |
