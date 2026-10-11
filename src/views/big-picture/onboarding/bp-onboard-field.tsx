@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { isAndroid } from "@/lib/platform";
+import { isAndroid, isTelevision } from "@/lib/platform";
 import { BP_ROW_FLUSH } from "./bp-step-parts";
 import { Eye, EyeOff } from "lucide-react";
 import { SFX } from "@/lib/sfx";
@@ -40,10 +40,12 @@ export function BpOnboardField({
 }) {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [armed, setArmed] = useState(false);
-  // The ring lands here the moment the step opens, and on Android focusing a
-  // writable input throws the system IME over the whole screen before the user
-  // has asked for anything. Held readOnly until OK, so the keyboard is a choice.
-  const locked = isAndroid() && !armed;
+  const refocusing = useRef(false);
+  // The ring lands here the moment the step opens, and on Android or a TV
+  // focusing a writable input throws the system IME over the whole screen
+  // before the user has asked for anything. Held readOnly until OK, so the
+  // keyboard is a choice.
+  const locked = (isAndroid() || isTelevision()) && !armed;
 
   const t = useBpT();
   const masked = !!secret && !revealed;
@@ -77,14 +79,25 @@ export function BpOnboardField({
                 e.stopPropagation();
                 if (locked) {
                   setArmed(true);
-                  requestAnimationFrame(() => inputRef.current?.focus());
+                  requestAnimationFrame(() => {
+                    const input = inputRef.current;
+                    if (!input) return;
+                    // A TV opens its keyboard only on a fresh focus: focusing
+                    // the input it already has does nothing once readOnly drops.
+                    refocusing.current = true;
+                    input.blur();
+                    refocusing.current = false;
+                    input.focus();
+                  });
                   return;
                 }
                 if (!onSubmit) return;
                 e.preventDefault();
                 onSubmit();
               }}
-              onBlur={() => setArmed(false)}
+              onBlur={() => {
+                if (!refocusing.current) setArmed(false);
+              }}
               placeholder={placeholder}
               aria-label={label}
               className="min-w-0 flex-1 bg-transparent text-[clamp(16px,2.3vh,30px)] font-semibold tracking-[0.01em] text-ink outline-none placeholder:text-ink-subtle"
@@ -103,7 +116,11 @@ export function BpOnboardField({
             aria-label={revealed ? t("Hide") : t("Show")}
             className="flex h-[clamp(54px,6.4vh,80px)] w-[clamp(54px,6.4vh,80px)] shrink-0 items-center justify-center rounded-[var(--bp-r-md)] border border-[var(--bp-edge-2)] text-ink"
           >
-            {revealed ? <EyeOff size={22} strokeWidth={2.1} /> : <Eye size={22} strokeWidth={2.1} />}
+            {revealed ? (
+              <EyeOff size={22} strokeWidth={2.1} />
+            ) : (
+              <Eye size={22} strokeWidth={2.1} />
+            )}
           </button>
         )}
       </div>
