@@ -103,6 +103,7 @@ import { GameDownloadNotificationsRunner } from "@/lib/games/download-notificati
 import { GameSourceAlertsRunner } from "@/lib/games/source-alerts-runner";
 import { MangaTrackingRunner } from "@/lib/manga-tracking";
 import { RemoteHostMount } from "@/lib/remote/host-mount";
+import { CompanionPairPrompt } from "@/components/companion-pair-prompt";
 import { RemoteOpenBridge } from "@/lib/remote/remote-open-bridge";
 import { PlayOnModal } from "@/components/play-on-modal";
 import { ControllerConnectedToast } from "@/components/controller-connected-toast";
@@ -462,6 +463,7 @@ export function App({ onReady }: { onReady?: () => void }) {
                                                     <GameSourceAlertsRunner />
                                                     <MangaTrackingRunner />
                                                     <RemoteHostMount />
+                                                    <CompanionPairPrompt />
                                                     <RemoteOpenBridge />
                                                     <PlayOnModal />
                                                     <GamepadRunner />

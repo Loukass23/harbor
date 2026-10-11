@@ -7,6 +7,7 @@ import { ROW_ACTION, ROW_DESC } from "./kit";
 import { Section, ToggleRow } from "./shared";
 import { isTauri } from "./player-panel/internals";
 import { RemoteCard } from "./remotes-panel/remote-card";
+import { PairedDevicesSection } from "./remotes-panel/paired-devices";
 import type { DeviceKind } from "./remotes-panel/device-art";
 
 const WEB_PORT = 11471;
@@ -147,6 +148,8 @@ export function RemotesPanel() {
             probed={probed}
           />
         ))}
+
+      <PairedDevicesSection enabled={enabled} />
     </>
   );
 }
