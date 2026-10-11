@@ -115,6 +115,15 @@ const FOCUS_EXPR = `(() => {
   };
 })()`;
 
+// Screenshots can't see the AVPlay plane, so playback is checked from its state.
+const PLAYER_EXPR = `(() => {
+  const av = globalThis.webapis?.avplay;
+  if (!av) return { avplay: false, videos: document.querySelectorAll("video").length };
+  const state = av.getState();
+  const playing = state === "PLAYING" || state === "PAUSED";
+  return { avplay: true, state, positionSec: playing ? Math.round(av.getCurrentTime() / 1000) : null };
+})()`;
+
 const READY_EXPR = `(() => {
   const boot = document.getElementById("boot");
   const booted = !boot || boot.hasAttribute("data-leaving");
@@ -224,6 +233,8 @@ async function main() {
       return withCdp(port(), (cdp) => press(cdp, args));
     case "focus":
       return print(await withCdp(port(), (cdp) => evaluate(cdp, FOCUS_EXPR)));
+    case "player":
+      return print(await withCdp(port(), (cdp) => evaluate(cdp, PLAYER_EXPR)));
     case "screenshot": {
       if (!args[0]) throw new Error("usage: screenshot <file.png>");
       const { data } = await withCdp(port(), (cdp) => cdp.send("Page.captureScreenshot"));

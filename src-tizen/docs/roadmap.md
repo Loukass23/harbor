@@ -166,9 +166,23 @@ Each phase is a separate session or worktree, with its own PR into the Tizen bra
        the TV.
      - Android TV was not run. It now mounts the same player.
      - Dev installs don't appear in the TV's app list (reported during phase 4, unrelated to it).
-5. **Performance pass**
-   - Set a bundle and heap budget, measured over CDP (reuse `docs/measure-tv.sh`).
-   - Lazy-load or exclude heavy modules; add `check:tizen-budget`.
+5. **Performance pass** (done)
+   - `.wgt` 90 → 37 MB, boot chunk 2.43 → 1.62 MiB. Budgets, numbers and method are in
+     `performance.md`. `check:tizen-budget` runs after every Tizen build.
+   - Seams, one commit each: `restrictUiLanguages()` (English-only UI for now) and
+     `setFaceIdAvailable()` (X-Ray without face matching). The Big Picture TV trims, remote
+     glyphs and battery glyph now key off `isTelevision()`.
+   - `src-tizen/build/` stubs the face engine and the other catalogs. `vite.config.ts` leaves
+     unused `public/` entries out. The HTML5 fallback is imported lazily.
+   - `scripts/tizen-cdp.mjs` (the tizen-debug skill's tool) measures over a fixed key walk.
+   - Verified on GU43DU7199UXZG: boot, Home, English-only onboarding, remote hint glyphs, AVPlay
+     playback of a 4K DV source, Back → Leave closes AVPlay.
+   - Open:
+     - Runtime heap and boot did not change (the removed payloads never loaded). Home takes
+       about 23 s to take focus against 2.3 s to first render; profile that next.
+     - The boot chunk still holds `@tauri-apps/api`, the manga prelude and the Together client.
+     - Starting a title through "Choose a source instead" began at 0:00 rather than the
+       "Almost done" position. Not compared against the previous build; check before phase 6.
 6. **Companion (optional features)**
    - LAN discovery via HTTP sweep (`network.public` privilege), with pairing by code or QR.
      Discovery fills `remoteStreamServerUrl`; no CORS proxy is needed.

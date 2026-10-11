@@ -11,6 +11,7 @@ description: Inspect Harbor running on a Tizen TV over Chrome DevTools Protocol,
    - `eval "<expr>"`: evaluate in the page. Read-only inspection only.
    - `keys Down Down Enter Back`: dispatch remote keys (Back = keyCode 10009).
    - `focus`: the focused element's label and Home row, to steer `keys` without screenshots.
+   - `player`: AVPlay state and position, since screenshots can't see the video plane.
    - `screenshot <file>`: save a PNG to the scratchpad, then read it.
    - `heap`: JS heap (exact, from the inspector) after a GC, DOM node count, decoded image MB.
    - `measure [n]`: relaunch n times, read boot marks, heap at idle and after a fixed key
