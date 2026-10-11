@@ -126,10 +126,11 @@ Each phase is a separate session or worktree, with its own PR into the Tizen bra
    - Move `plan.md`/`walkthrough.md` findings into `src-tizen/docs/lessons.md`, and whitelist `src-tizen/**/*.md` in `.gitignore`.
    - Install Tizen Studio CLI (`tz`, `sdb`) and a certificate profile, and add `.env.tizen.example`.
 1. **Shell and pipeline**
-   - Add a Vite `tizen` mode (`base: "./"`, target `chrome87`, entry `src-tizen/index.html` → `src-tizen/main.tsx`, outDir `src-tizen/dist` (already gitignored)).
+   - Add a Tizen Vite config, `src-tizen/vite.config.ts`, kept separate so the root config never conflicts on merges. It sets `base: "./"`, target `chrome87` and outDir `src-tizen/dist` (gitignored). It builds `index-tv.html` with the entry swapped to `src-tizen/main.tsx` instead of keeping a copied `src-tizen/index.html` that would drift.
    - Add the `config.xml` template and `scripts/tizen.mjs`, porting the useful parts of `beta-tizen:scripts/tizen-pipeline.mjs`.
-   - Add the `mountTvApp()` seam.
+   - Add the `mountTvApp()` seam (`src/tv-mount.tsx`).
    - **Done when:** the app boots to the home row on the TV.
+
 2. **Input and lifecycle**
    - Key registration, back/exit, and `visibilitychange`.
    - Add the boundary check and its CI step.

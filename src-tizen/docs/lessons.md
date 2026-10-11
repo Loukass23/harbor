@@ -24,6 +24,30 @@ Do not relearn them. If a rule turns out to be wrong, change it here in the same
   ("Permit to install applications") must be on.
 - The signing profile, TV address and credentials live in `.env.tizen` (gitignored).
   Never commit them. `tizen-beta` committed a LAN IP (`192.168.178.89`) as the default.
+- `base: "./"` only fixes URLs that Vite sees: HTML, CSS and imported assets. String
+  literals built at runtime, such as `"/avatars/x.webp"` and `"/services/netflix.svg"`
+  (about 290 in `src/`), still resolve to `file:///C:/…` and fail. Images fall back, so
+  boot survives. They need a shared public-URL seam, not a Tizen patch.
+- Vite's lazy-chunk preloader adds `crossorigin` to the `<link>` tags it injects at runtime.
+  The Tizen build sets `modulePreload: false` and `cssCodeSplit: false` so it never injects any.
+- Big Picture renders through portals next to `#root` and leaves `#root` empty. "Booted"
+  means the app took `#boot` down (removed, or `data-leaving`). The first watchdog checked
+  `#root` and wiped a working UI after 30s.
+- `tz pack -w <dir>` treats the folder as a project. It writes `tizen_web_project.yaml`
+  and a full copy of the folder under `Debug/projects/`, and names the package after the
+  folder (`Debug/dist.wgt`). Delete those before packing again. `tz set -w <dir> -s <profile>`
+  picks the signing profile and creates the yaml. `tz gen` needs a workspace and fails here.
+- `tz run -r` (Web Simulator) only accepts a page named `index.html`. Start
+  `sec-tv-simulator/simulator.exe --file=<dist>/index-tv.html` directly; `--remote-debugging-port`
+  needs `--disableInspector`. The app runs in a child frame of `ripple.html`.
+- `tz install` logs the app as `<package>.<wgt file name>` (`kmDHFrYo6a.dist`). That is only
+  a label: the real app id is the one in `config.xml` (`kmDHFrYo6a.Harbor`), and that is what
+  `sdb shell 0 debug` needs. beta-tizen hardcoded `.dist` because of this log line.
+- `sdb dlog` prints nothing on a retail TV in Developer Mode. Read the console over CDP
+  (`scripts/tizen.mjs debug`) instead.
+- The local Samsung TV emulator (Tizen 10) needs hardware virtualization. Without it, the
+  guest crawls and `sdb devices` stays `offline`. `tz emul launch` prints "terminated after
+  timeout" even when the VM is still starting.
 
 ## Input
 

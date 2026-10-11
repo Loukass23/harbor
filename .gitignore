@@ -18,6 +18,8 @@ target
 *.tsbuildinfo
 /vite.config.js
 /vite.config.d.ts
+/src-tizen/vite.config.js
+/src-tizen/vite.config.d.ts
 
 logs
 *.log

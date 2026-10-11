@@ -20,6 +20,7 @@
       "@/*": ["src/*"]
     }
   },
-  "include": ["src"],
+  "include": ["src", "src-tizen"],
+  "exclude": ["src-tizen/dist", "src-tizen/vite.config.ts"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

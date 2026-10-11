@@ -23,18 +23,23 @@ Tizen rules. Read `docs/lessons.md` before changing anything in this folder.
 
 ## Layout
 
-- `main.tsx`: Tizen entry. Installs the platform, then mounts the shared TV app.
+- `main.tsx`: Tizen entry. Installs the platform, then calls `mountTvApp()` from `@/tv-mount`.
+- `vite.config.ts`: Tizen build. Reuses the root config and `index-tv.html`, swaps in `main.tsx`,
+  inlines `boot-watchdog.js` and fails the build on absolute paths or `crossorigin` on local assets.
+- `boot-watchdog.js`: classic script that logs boot errors and shows them if nothing mounts in 30s.
 - `platform/`: key registration, back and exit, lifecycle, `BpPlatform` implementation.
 - `player/`: AVPlay `PlayerBridge`, codec capabilities, watchdogs.
 - `net/`: companion discovery and pairing, fetch proxy resolver.
 - `streams/`: platform score modifier.
-- `config.xml.tpl`: manifest template, filled from `.env.tizen` at package time.
+- `config.xml.tpl`: manifest template, filled from `.env.tizen` at package time
+  (`scripts/tizen-manifest.mjs`).
 - `docs/`: lessons and integration notes. Committed.
 
 ## Commands
 
 - `pnpm run check`, `pnpm run typecheck`, `pnpm test`, `pnpm check:tizen-boundary` after every change.
-- Device pipeline (`scripts/tizen.mjs`): build, package, install, launch, logs, debug.
+- Device pipeline (`scripts/tizen.mjs`): build, package, install, launch, logs, debug, simulator.
+  See `docs/pipeline.md`.
   Settings come from `.env.tizen`; see `.env.tizen.example`.
 - `pnpm build` and `pnpm build:tv` must still produce unchanged desktop and Android bundles.
 
