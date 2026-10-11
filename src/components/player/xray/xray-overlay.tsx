@@ -6,6 +6,7 @@ import type { CastEntry } from "@/lib/providers/tmdb";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
 import { fetch as tauriHttpFetch } from "@tauri-apps/plugin-http";
+import { faceIdAvailable } from "@/lib/face/availability";
 import { useFaceId } from "@/lib/face/use-face-id";
 import { useXrayCast } from "@/lib/xray/use-xray-cast";
 import { usePageVisible } from "@/lib/visibility";
@@ -49,11 +50,12 @@ export function XrayOverlay({
   }, [meta.id]);
   const resumeRef = useRef(false);
   const active = settings.xrayEnabled && view !== "closed";
+  const matching = faceIdAvailable();
   const { cast, details } = useXrayCast(meta, active);
   const { people, ready, galleryReady, progress, error } = useFaceId({
     metaKey: meta.id,
     cast: cast ?? NO_CAST,
-    liveScan: active && settings.xrayLiveScan && pageVisible,
+    liveScan: matching && active && settings.xrayLiveScan && pageVisible,
     isPaused,
     loadBitmap,
   });
@@ -105,6 +107,7 @@ export function XrayOverlay({
           galleryReady={galleryReady}
           progress={progress}
           error={error}
+          matching={matching}
           needsTmdbKey={!settings.tmdbKey}
           onViewAll={() => setView("browser")}
           onClose={() => setView("closed")}

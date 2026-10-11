@@ -20,6 +20,7 @@ target
 /vite.config.d.ts
 /src-tizen/vite.config.js
 /src-tizen/vite.config.d.ts
+/src-tizen/.stats/
 
 logs
 *.log

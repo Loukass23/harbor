@@ -1,4 +1,4 @@
-import { LANGUAGES } from "@/lib/i18n";
+import { LANGUAGES, uiLanguageOptions } from "@/lib/i18n";
 import { SERVICES } from "@/lib/providers/streaming";
 import type { StreamingService } from "@/lib/settings";
 import type { Settings } from "@/lib/settings/types";
@@ -194,7 +194,7 @@ export function bpSettingsControls(
         id: "uiLanguage",
         label: t("Display language"),
         value: s.uiLanguage,
-        options: LANGUAGES.map((l) => ({ value: l.code, label: l.nativeLabel })),
+        options: uiLanguageOptions().map((l) => ({ value: l.code, label: l.nativeLabel })),
       },
     ];
   }

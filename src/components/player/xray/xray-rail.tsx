@@ -9,6 +9,8 @@ type Props = {
   galleryReady: boolean;
   progress: { done: number; total: number };
   error: string | null;
+  /** False when face matching cannot run here; the rail lists the cast instead. */
+  matching?: boolean;
   needsTmdbKey?: boolean;
   onOpenPerson: (person: XrayPerson) => void;
   onViewAll: () => void;
@@ -22,6 +24,7 @@ export function XrayRail({
   galleryReady,
   progress,
   error,
+  matching = true,
   needsTmdbKey,
   onViewAll,
   onOpenPerson,
@@ -30,7 +33,7 @@ export function XrayRail({
   const t = useT();
 
   const emptyGallery = galleryReady && progress.total === 0;
-  const canMatch = !error && !emptyGallery;
+  const canMatch = matching && !error && !emptyGallery;
   const fallback = people.length === 0 && !canMatch && (castPeople?.length ?? 0) > 0;
   const list = people.length > 0 ? people : fallback ? (castPeople ?? []) : [];
   const status = error
@@ -79,7 +82,7 @@ export function XrayRail({
             </button>
           </header>
 
-          {status && (
+          {matching && status && (
             <div className="flex items-center gap-2 py-1.5 text-[12.5px] text-white/70">
               {!error && !ready ? (
                 <Loader2 size={13} className="shrink-0 animate-spin motion-reduce:animate-none" />

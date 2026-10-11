@@ -1,4 +1,4 @@
-import { isAndroidTv } from "@/lib/platform";
+import { isAndroidTv, isTelevision } from "@/lib/platform";
 
 const TMDB_SIZE = /\/t\/p\/(w\d+|h\d+|original)\//;
 const METAHUB_SIZE = /\/(small|medium|large)\//;
@@ -33,7 +33,7 @@ export function bpHeroArt(
   if (TMDB_SIZE.test(url)) {
     // Android TV keeps its measured decode budget; desktop can opt into the
     // original hero without inflating every card that also uses this helper.
-    if (fullQuality && !isAndroidTv()) return url.replace(TMDB_SIZE, "/t/p/original/");
+    if (fullQuality && !isTelevision()) return url.replace(TMDB_SIZE, "/t/p/original/");
     const want = Math.ceil((bpViewportHeight() * 16) / 9);
     const bucket = TMDB_BUCKETS.find((b) => b >= want) ?? TMDB_BUCKETS[TMDB_BUCKETS.length - 1];
     const size = shape === "portrait" ? "w780" : `w${bucket}`;

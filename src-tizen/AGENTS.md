@@ -31,6 +31,10 @@ Tizen rules. Read `docs/lessons.md` before changing anything in this folder.
 - `player/`: AVPlay `PlayerBridge`, codec capabilities, watchdogs.
 - `net/`: companion discovery and pairing.
 - `streams/`: platform score modifier.
+- `build/`: stand-ins the Tizen build swaps in for shared modules the TV never runs (face
+  engine, non-English catalogs). `vite.config.ts` also leaves their `public/` files out.
+- `budget.json`: size limits checked by `pnpm check:tizen-budget` after every Tizen build.
+  See `docs/performance.md` for the numbers and how to measure heap on the TV.
 - `config.xml.tpl`: manifest template, filled from `.env.tizen` at package time
   (`scripts/tizen-manifest.mjs`).
 - `docs/`: lessons and integration notes. Committed.
@@ -38,6 +42,8 @@ Tizen rules. Read `docs/lessons.md` before changing anything in this folder.
 ## Commands
 
 - `pnpm run check`, `pnpm run typecheck`, `pnpm test`, `pnpm check:tizen-boundary` after every change.
+- `pnpm build:tizen` ends with `pnpm check:tizen-budget`. Over budget means split or exclude
+  the growth first; raise `budget.json` only with the reason in the commit.
 - Device pipeline (`scripts/tizen.mjs`): build, package, install, launch, logs, debug, simulator.
   See `docs/pipeline.md`.
   Settings come from `.env.tizen`; see `.env.tizen.example`.

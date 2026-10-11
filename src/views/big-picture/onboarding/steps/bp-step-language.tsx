@@ -1,6 +1,6 @@
 import { Check } from "lucide-react";
 import { flagSrc } from "@/components/flag";
-import { LANGUAGES, setUiLanguage, type UiLanguage } from "@/lib/i18n";
+import { setUiLanguage, uiLanguageOptions, type UiLanguage } from "@/lib/i18n";
 import { SFX } from "@/lib/sfx";
 import { useSettings } from "@/lib/settings";
 import { useBpT } from "@/views/big-picture/bp-i18n";
@@ -33,8 +33,9 @@ function flagsFor(label: string): string[] {
 export function BpStepLanguage() {
   const t = useBpT();
   const { settings, update } = useSettings();
-  const at = LANGUAGES.findIndex((l) => l.code === settings.uiLanguage);
-  const ordered = at > 0 ? [LANGUAGES[at], ...LANGUAGES.filter((_, i) => i !== at)] : LANGUAGES;
+  const languages = uiLanguageOptions();
+  const at = languages.findIndex((l) => l.code === settings.uiLanguage);
+  const ordered = at > 0 ? [languages[at], ...languages.filter((_, i) => i !== at)] : languages;
 
   const pick = (code: UiLanguage) => {
     SFX.click();
@@ -47,7 +48,7 @@ export function BpStepLanguage() {
     <BpDecisionScroll>
       {ordered.map((lang) => {
         const selected = settings.uiLanguage === lang.code;
-        const seat = LANGUAGES.indexOf(lang);
+        const seat = languages.indexOf(lang);
         return (
           <div
             key={lang.code}

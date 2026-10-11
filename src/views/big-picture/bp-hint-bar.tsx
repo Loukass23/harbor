@@ -1,7 +1,7 @@
 import { useGamepads } from "@/lib/gamepad/store";
 import { detectLayout } from "@/lib/gamepad/layout";
 import { ButtonGlyph, type GlyphKind } from "@/components/gamepad-button-glyph";
-import { isAndroid } from "@/lib/platform";
+import { isAndroid, isTelevision } from "@/lib/platform";
 import { BP_NAV_JUMP } from "./bp-logic";
 import { useBpT } from "./bp-i18n";
 
@@ -118,7 +118,7 @@ export function BpHintBar({
   const pads = useGamepads();
   const usingPad = pads.length > 0;
   const layout = detectLayout(pads.map((pad) => pad.name));
-  const onTv = isAndroid();
+  const onTv = isAndroid() || isTelevision();
 
   // First because the bar is right aligned: a narrow window sheds the leftmost
   // hint, and this is the one that can afford to go.
@@ -176,7 +176,10 @@ export function BpHintBar({
                 {h.glyph}
               </span>
             )}
-            <span data-bp-hint-label className="text-[clamp(13.4px,1.5vh,18px)] font-medium text-ink-muted">
+            <span
+              data-bp-hint-label
+              className="text-[clamp(13.4px,1.5vh,18px)] font-medium text-ink-muted"
+            >
               {label[h.action]}
             </span>
           </span>

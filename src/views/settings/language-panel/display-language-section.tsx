@@ -1,7 +1,7 @@
 import { Check } from "../icons";
 import { Flag } from "@/components/flag";
 import { useSettings } from "@/lib/settings";
-import { LANGUAGES, setUiLanguage, useT } from "@/lib/i18n";
+import { setUiLanguage, uiLanguageOptions, useT } from "@/lib/i18n";
 import { ROW_DESC, ROW_TITLE, Section } from "../shared";
 
 export function DisplayLanguageSection() {
@@ -15,7 +15,7 @@ export function DisplayLanguageSection() {
       )}
     >
       <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,320px),1fr))] gap-2.5">
-        {LANGUAGES.map((lang) => {
+        {uiLanguageOptions().map((lang) => {
           const selected = settings.uiLanguage === lang.code;
           return (
             <button
@@ -43,9 +43,7 @@ export function DisplayLanguageSection() {
               >
                 {lang.greeting}
               </span>
-              {selected && (
-                <Check size={18} strokeWidth={2.6} className="shrink-0 text-accent" />
-              )}
+              {selected && <Check size={18} strokeWidth={2.6} className="shrink-0 text-accent" />}
             </button>
           );
         })}

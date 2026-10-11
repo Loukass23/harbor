@@ -1,3 +1,5 @@
+import { setFaceIdAvailable } from "@/lib/face/availability";
+import { restrictUiLanguages } from "@/lib/i18n/store";
 import { markTelevision } from "@/lib/platform";
 import { safeFetch } from "@/lib/safe-fetch";
 import { setPlatformScoreModifier } from "@/lib/streams/scoring";
@@ -21,6 +23,10 @@ function tryRegister(input: TvInputDevice): Map<number, string> {
 export function installTizenPlatform(): void {
   markTelevision();
   setPlatformScoreModifier(tizenScoreModifier);
+  // Both match what vite.config.ts leaves out of the package: the other
+  // catalogs, and the face engine that an AVPlay video plane can't feed.
+  restrictUiLanguages(["en"]);
+  setFaceIdAvailable(false);
   // Back works without the Tizen API, so the adapter goes in first and alone.
   const names = new Map<number, string>();
   installKeyAdapter(window, createKeyTranslator(names));

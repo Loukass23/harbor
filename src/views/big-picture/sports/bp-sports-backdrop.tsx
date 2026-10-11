@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { isAndroidTv } from "@/lib/platform";
+import { isTelevision } from "@/lib/platform";
 import { hubLeague } from "@/lib/sports/hub-data";
 import { useSportsArtwork } from "@/views/sports/use-artwork";
 import { bpPushLayer, useBpPrune, type BpLayer } from "../bp-ambient-layers";
@@ -123,7 +123,7 @@ export function BpSportsBackdrop({ subject }: { subject: BpSportsSubject }) {
 
   useBpPrune(layers, setLayers);
 
-  const soft = !isAndroidTv();
+  const soft = !isTelevision();
 
   return (
     <div
