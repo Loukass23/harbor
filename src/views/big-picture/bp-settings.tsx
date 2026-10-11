@@ -12,6 +12,7 @@ import { pushBpBack } from "./bp-back";
 import { setBpFocus } from "./use-bp-focus";
 import { BpConnect } from "./bp-connect";
 import { BpLiveSetup } from "./bp-live-setup";
+import { BpStreamServer } from "./bp-stream-server";
 import { useBpOnboardFacts } from "./onboarding/use-bp-onboard-facts";
 import {
   bpConnectedNames,
@@ -121,6 +122,8 @@ export function BpSettings() {
       <div data-bp-scroll-y className={SUB_PAGE}>
         {pane === "connect" ? (
           <BpConnect onBack={() => setPane("root")} />
+        ) : pane === "server" ? (
+          <BpStreamServer onBack={() => setPane("root")} />
         ) : (
           <BpLiveSetup onDone={() => setPane("root")} onBack={() => setPane("root")} />
         )}
@@ -195,9 +198,11 @@ export function BpSettings() {
                         ? connected.length > 0
                           ? t("Connected: {list}", { list: connected.join(", ") })
                           : control.detail
-                        : settings.iptvPlaylists.length > 0
-                          ? t("{count} added", { count: settings.iptvPlaylists.length })
-                          : control.detail
+                        : control.pane === "server"
+                          ? settings.remoteStreamServerUrl || control.detail
+                          : settings.iptvPlaylists.length > 0
+                            ? t("{count} added", { count: settings.iptvPlaylists.length })
+                            : control.detail
                     }
                     autofocus={i === 0}
                     onPress={() => setPane(control.pane)}

@@ -28,12 +28,21 @@ export function remoteStreamServerUrl(): string {
   }
 }
 
+/** Trims, drops trailing slashes and assumes http:// when no scheme was typed. */
+export function normalizeStreamServerUrl(raw: string): string {
+  const trimmed = raw.trim().replace(/\/+$/, "");
+  if (!trimmed) return "";
+  return /^https?:\/\//i.test(trimmed) ? trimmed : `http://${trimmed}`;
+}
+
 export function remoteStreamServerStrict(): boolean {
   if (!remoteStreamServerUrl()) return false;
   try {
     const raw = localStorage.getItem("harbor.settings");
     if (!raw) return false;
-    return (JSON.parse(raw) as { remoteStreamServerStrict?: boolean }).remoteStreamServerStrict === true;
+    return (
+      (JSON.parse(raw) as { remoteStreamServerStrict?: boolean }).remoteStreamServerStrict === true
+    );
   } catch {
     return false;
   }
@@ -127,7 +136,12 @@ export async function probeStremioServer(force = false, base?: string): Promise<
 }
 
 async function httpProbe(force: boolean, base: string): Promise<boolean> {
-  if (!force && probeCache && probeCache.base === base && Date.now() - probeCache.at < PROBE_TTL_MS) {
+  if (
+    !force &&
+    probeCache &&
+    probeCache.base === base &&
+    Date.now() - probeCache.at < PROBE_TTL_MS
+  ) {
     return probeCache.ok;
   }
   try {

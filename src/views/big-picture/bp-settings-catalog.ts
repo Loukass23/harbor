@@ -15,7 +15,7 @@ export type BpCatId =
   | "setup"
   | "interface";
 
-export type BpPane = "connect" | "live";
+export type BpPane = "connect" | "live" | "server";
 
 export type BpT = (key: string, vars?: Record<string, string | number>) => string;
 
@@ -349,6 +349,13 @@ export function bpSettingsControls(
         label: t("Live TV playlists"),
         detail: t("Add an M3U link or Xtream Codes login"),
         pane: "live",
+      },
+      {
+        kind: "push",
+        id: "server",
+        label: t("Remote streaming server"),
+        detail: t("Not set"),
+        pane: "server",
       },
       {
         kind: "options",

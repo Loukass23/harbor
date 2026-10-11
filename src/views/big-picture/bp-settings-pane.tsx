@@ -291,6 +291,7 @@ export function BpSettingsPane({
           rows={[
             ["TMDB", s.tmdbKey.trim() ? t("On") : t("None")],
             [t("Live TV playlists"), String(s.iptvPlaylists.length)],
+            [t("Remote streaming server"), s.remoteStreamServerUrl || t("Not set")],
             [t("Setup"), connected.length > 0 ? connected.join(", ") : t("None")],
           ]}
         />
