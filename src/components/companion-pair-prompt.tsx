@@ -1,5 +1,5 @@
 import { createPortal } from "react-dom";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { MonitorSmartphone } from "lucide-react";
@@ -9,6 +9,9 @@ import { readActiveStremioAuthKey } from "@/lib/auth";
 import { loadInstalled } from "@/lib/addon-store";
 import { availableSections, buildCompanionPayload } from "@/lib/companion/build-payload";
 import type { CompanionPairRequest, CompanionSection } from "@/lib/companion/protocol";
+
+/** The device stops waiting after two minutes; so does the dialog. */
+const REQUEST_TTL_MS = 120_000;
 
 const SECTION_LABELS: Record<CompanionSection, string> = {
   stremio: "Stremio account (signs the device in)",
@@ -25,19 +28,26 @@ const SECTION_LABELS: Record<CompanionSection, string> = {
 export function CompanionPairPrompt() {
   const t = useT();
   const { settings } = useSettings();
-  const [request, setRequest] = useState<CompanionPairRequest | null>(null);
+  // Queued, never replaced: a second request must not swap the code under the
+  // user's cursor while they compare it with the one on the TV.
+  const [queue, setQueue] = useState<CompanionPairRequest[]>([]);
+  const request = queue[0] ?? null;
   const [chosen, setChosen] = useState<Set<CompanionSection>>(new Set());
   const [busy, setBusy] = useState(false);
+  const denyRef = useRef<HTMLButtonElement | null>(null);
 
   useEffect(() => {
     if (!("__TAURI_INTERNALS__" in window)) return;
     const offs: Array<() => void> = [];
     let cancelled = false;
+    const drop = (requestId: string) =>
+      setQueue((cur) => cur.filter((r) => r.requestId !== requestId));
     void listen<CompanionPairRequest>("companion://pair-request", (e) => {
-      setRequest(e.payload);
+      setQueue((cur) => [...cur, e.payload]);
+      window.setTimeout(() => drop(e.payload.requestId), REQUEST_TTL_MS);
     }).then((off) => (cancelled ? off() : offs.push(off)));
     void listen<{ requestId: string }>("companion://pair-closed", (e) => {
-      setRequest((cur) => (cur?.requestId === e.payload.requestId ? null : cur));
+      drop(e.payload.requestId);
     }).then((off) => (cancelled ? off() : offs.push(off)));
     return () => {
       cancelled = true;
@@ -62,6 +72,11 @@ export function CompanionPairPrompt() {
     setBusy(false);
   }, [requestId, offeredKey]);
 
+  // Deny is the safe default for a stray Enter from a remote or a gamepad.
+  useEffect(() => {
+    if (requestId) denyRef.current?.focus();
+  }, [requestId]);
+
   if (!request || !source) return null;
 
   const answer = async (approved: boolean) => {
@@ -72,7 +87,28 @@ export function CompanionPairPrompt() {
       approved,
       payload,
     }).catch((e) => console.warn("[companion] resolve failed", e));
-    setRequest(null);
+    setQueue((cur) => cur.filter((r) => r.requestId !== request.requestId));
+  };
+
+  // Big Picture's focus engine stands down for a [data-bp-overlay], so the
+  // dialog moves focus itself: arrows step through its controls, Escape denies.
+  const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === "Escape") {
+      e.preventDefault();
+      if (!busy) void answer(false);
+      return;
+    }
+    const step = { ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1 }[e.key];
+    if (!step) return;
+    const items = Array.from(
+      e.currentTarget.querySelectorAll<HTMLElement>("input, button:not([disabled])"),
+    );
+    const at = items.indexOf(document.activeElement as HTMLElement);
+    const next = items[(at + step + items.length) % items.length];
+    if (next) {
+      e.preventDefault();
+      next.focus();
+    }
   };
 
   const toggle = (section: CompanionSection) =>
@@ -84,10 +120,14 @@ export function CompanionPairPrompt() {
     });
 
   return createPortal(
-    <div className="fixed inset-0 z-[230] flex items-center justify-center bg-black/60 px-6 animate-fade-in">
+    <div
+      data-bp-overlay
+      className="fixed inset-0 z-[230] flex items-center justify-center bg-black/60 px-6 animate-fade-in"
+    >
       <div
         role="dialog"
         aria-modal="true"
+        onKeyDown={onKeyDown}
         aria-label={t("Allow this device?")}
         className="w-full max-w-md rounded-2xl border border-edge bg-surface p-6 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.8)] animate-modal-in"
       >
@@ -126,6 +166,7 @@ export function CompanionPairPrompt() {
         )}
         <div className="mt-6 flex items-center justify-end gap-2.5">
           <button
+            ref={denyRef}
             type="button"
             disabled={busy}
             onClick={() => void answer(false)}

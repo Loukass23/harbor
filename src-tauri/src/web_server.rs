@@ -240,27 +240,15 @@ async fn serve_http(State(state): State<ServeState>, uri: axum::http::Uri) -> Re
     serve_bundled_asset(&state.app, uri.path())
 }
 
+// No CORS headers on purpose. The TV's packaged app is not bound by CORS, and
+// allowing browsers would let any web page the desktop user opens raise pair
+// requests and read an approval.
 fn companion_json(status: StatusCode, body: serde_json::Value) -> Response<Body> {
     Response::builder()
         .status(status)
         .header(header::CONTENT_TYPE, "application/json")
         .header(header::CACHE_CONTROL, "no-store")
-        .header(header::ACCESS_CONTROL_ALLOW_ORIGIN, "*")
         .body(Body::from(body.to_string()))
-        .unwrap()
-}
-
-async fn companion_preflight() -> Response<Body> {
-    Response::builder()
-        .status(StatusCode::NO_CONTENT)
-        .header(header::ACCESS_CONTROL_ALLOW_ORIGIN, "*")
-        .header(header::ACCESS_CONTROL_ALLOW_METHODS, "GET, POST, OPTIONS")
-        .header(
-            header::ACCESS_CONTROL_ALLOW_HEADERS,
-            "content-type, authorization",
-        )
-        .header(header::ACCESS_CONTROL_MAX_AGE, "600")
-        .body(Body::empty())
         .unwrap()
 }
 
@@ -276,8 +264,21 @@ struct PairBody {
     code: String,
 }
 
-async fn companion_pair(State(state): State<ServeState>, body: axum::body::Bytes) -> Response<Body> {
-    let Ok(req) = serde_json::from_slice::<PairBody>(&body) else {
+async fn companion_pair(
+    State(state): State<ServeState>,
+    headers: HeaderMap,
+    body: axum::body::Bytes,
+) -> Response<Body> {
+    // A cross-site form or text/plain post skips the browser's preflight;
+    // a JSON content type cannot, and the preflight finds no CORS here.
+    let json = headers
+        .get(header::CONTENT_TYPE)
+        .and_then(|v| v.to_str().ok())
+        .is_some_and(|v| v.starts_with("application/json"));
+    let parsed = json
+        .then(|| serde_json::from_slice::<PairBody>(&body).ok())
+        .flatten();
+    let Some(req) = parsed else {
         return companion_json(
             StatusCode::BAD_REQUEST,
             serde_json::json!({ "error": "invalid" }),
@@ -317,6 +318,14 @@ async fn companion_pair_poll(
         }),
     };
     companion_json(StatusCode::OK, body)
+}
+
+async fn companion_pair_cancel(
+    State(state): State<ServeState>,
+    Path(request_id): Path<String>,
+) -> Response<Body> {
+    crate::companion::cancel(&state.app, &request_id);
+    companion_json(StatusCode::OK, serde_json::json!({ "status": "cancelled" }))
 }
 
 async fn companion_stream_server(
@@ -432,22 +441,13 @@ pub async fn web_serve_start(app: AppHandle) -> Result<u16, String> {
     let router = axum::Router::new()
         .route("/api/remote", get(remote_ws_handler))
         .route("/manga-img", get(manga_img_proxy))
-        .route(
-            "/api/companion/identity",
-            get(companion_identity).options(companion_preflight),
-        )
-        .route(
-            "/api/companion/pair",
-            post(companion_pair).options(companion_preflight),
-        )
+        .route("/api/companion/identity", get(companion_identity))
+        .route("/api/companion/pair", post(companion_pair))
         .route(
             "/api/companion/pair/{request_id}",
-            get(companion_pair_poll).options(companion_preflight),
+            get(companion_pair_poll).delete(companion_pair_cancel),
         )
-        .route(
-            "/api/companion/stream-server",
-            post(companion_stream_server).options(companion_preflight),
-        )
+        .route("/api/companion/stream-server", post(companion_stream_server))
         .fallback(serve_http)
         .with_state(state);
 

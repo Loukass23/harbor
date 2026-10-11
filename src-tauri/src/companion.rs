@@ -55,7 +55,8 @@ struct PendingRequest {
     outcome: Outcome,
 }
 
-/// What a poll sees. `Approved` carries the token and payload exactly once.
+/// What a poll sees. An approval stays collectable until the request expires,
+/// so a response lost on the device's Wi-Fi can be fetched again.
 #[derive(Debug, PartialEq)]
 pub enum PollState {
     Pending,
@@ -165,7 +166,12 @@ impl Pairing {
             self.pending.remove(id);
         }
         closed.extend(replaced);
-        if self.pending.len() >= MAX_PENDING {
+        let open = self
+            .pending
+            .values()
+            .filter(|r| r.outcome == Outcome::Pending)
+            .count();
+        if open >= MAX_PENDING {
             return Err(RequestError::Busy);
         }
         let request_id = random_hex(1);
@@ -236,11 +242,20 @@ impl Pairing {
                 self.pending.remove(request_id);
                 PollState::Denied
             }
-            Outcome::Approved { token, payload } => {
-                self.pending.remove(request_id);
-                PollState::Approved { token, payload }
-            }
+            Outcome::Approved { token, payload } => PollState::Approved { token, payload },
         }
+    }
+
+    /// The device gave up. Only an unanswered request can be withdrawn.
+    pub fn cancel(&mut self, request_id: &str) -> bool {
+        let open = self
+            .pending
+            .get(request_id)
+            .is_some_and(|r| r.outcome == Outcome::Pending);
+        if open {
+            self.pending.remove(request_id);
+        }
+        open
     }
 
     pub fn authorize(&self, token: &str) -> bool {
@@ -390,6 +405,15 @@ pub async fn poll_wait(app: &AppHandle, request_id: &str, wait: Duration) -> Pol
     }
 }
 
+pub fn cancel(app: &AppHandle, request_id: &str) {
+    if with_store(app, |s| s.pairing.cancel(request_id)) {
+        let _ = app.emit(
+            "companion://pair-closed",
+            serde_json::json!({ "requestId": request_id }),
+        );
+    }
+}
+
 pub fn authorize(app: &AppHandle, token: &str) -> bool {
     with_store(app, |s| s.pairing.authorize(token))
 }
@@ -415,17 +439,17 @@ pub async fn companion_pair_resolve(
         }
         Ok::<_, String>(save_needed)
     })?;
+    // A paired TV is there to play torrents, so the server is up before the TV
+    // hears the answer. Waking it first had it ask for a server mid-start,
+    // which restarted it and could move it to another port.
+    if approved && !crate::torrent_engine::lan_status().0 {
+        if let Err(e) = crate::torrent_engine::start_lan_server(&app).await {
+            eprintln!("[companion] stream server did not start: {e}");
+        }
+    }
     changed().notify_waiters();
     if saved {
         let _ = app.emit("companion://paired-changed", ());
-    }
-    if approved {
-        // A paired TV is there to play torrents; have the server ready.
-        if !crate::torrent_engine::lan_status().0 {
-            if let Err(e) = crate::torrent_engine::start_lan_server(&app).await {
-                eprintln!("[companion] stream server did not start: {e}");
-            }
-        }
     }
     Ok(())
 }
@@ -481,7 +505,7 @@ mod tests {
     }
 
     #[test]
-    fn approval_is_delivered_once_with_a_token() {
+    fn approval_carries_a_token_until_the_request_expires() {
         let mut p = Pairing::default();
         let now = Instant::now();
         let id = open(&mut p, TV, now);
@@ -498,7 +522,21 @@ mod tests {
         assert_eq!(got, payload);
         assert!(p.authorize(&token));
         assert!(!p.authorize("nope"));
+        // A lost response can be fetched again, but not past the request's life.
+        assert!(matches!(p.poll(&id, now), PollState::Approved { .. }));
+        assert_eq!(p.poll(&id, now + REQUEST_TTL), PollState::Expired);
+    }
+
+    #[test]
+    fn only_an_open_request_can_be_cancelled() {
+        let mut p = Pairing::default();
+        let now = Instant::now();
+        let id = open(&mut p, TV, now);
+        assert!(p.cancel(&id));
         assert_eq!(p.poll(&id, now), PollState::Expired);
+        let id = open(&mut p, TV, now);
+        p.resolve(&id, true, serde_json::Value::Null, now).unwrap();
+        assert!(!p.cancel(&id));
     }
 
     #[test]
