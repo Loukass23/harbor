@@ -20,7 +20,7 @@ function load(path: string, mocks: Record<string, unknown>, globals: Record<stri
 test("full quality changes hero candidates without expanding TV or card decode sizes", () => {
   let tv = false;
   const art = load("src/views/big-picture/bp-art.ts", {
-    "@/lib/platform": { isAndroidTv: () => tv },
+    "@/lib/platform": { isAndroidTv: () => tv, isTelevision: () => tv },
   });
   const src = "https://image.tmdb.org/t/p/w500/backdrop.jpg";
   const sources = [{ url: src, portrait: false }, { url: src, portrait: false }];

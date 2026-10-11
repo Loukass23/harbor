@@ -1,4 +1,4 @@
-import { isAndroidTv } from "@/lib/platform";
+import { isTelevision } from "@/lib/platform";
 import { useSettings } from "@/lib/settings";
 import { useReducedMotion } from "@/lib/use-reduced-motion";
 
@@ -11,10 +11,10 @@ import { useReducedMotion } from "@/lib/use-reduced-motion";
 // thirty-two cost almost nothing more, so gating the two or three transforms is
 // what pays, not counting them.
 //
-// Gate on isAndroidTv, not isAndroid: only the stick's WebView was measured, and a
+// Gate on isTelevision, not isAndroid: only TV webviews were measured, and a
 // native Android handheld very likely composites these fine.
 export function useBpDecorMotion(): boolean {
   const reduce = useReducedMotion();
   const { settings } = useSettings();
-  return !reduce && !isAndroidTv() && settings.bigPictureBackdropZoom !== false;
+  return !reduce && !isTelevision() && settings.bigPictureBackdropZoom !== false;
 }

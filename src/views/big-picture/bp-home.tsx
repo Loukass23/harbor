@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { Meta } from "@/lib/cinemeta";
 import type { HomeRow } from "@/views/home/home-types";
 import { pushBigPicture } from "@/lib/big-picture";
-import { isAndroidTv } from "@/lib/platform";
+import { isTelevision } from "@/lib/platform";
 import { useSettings, type StreamingService } from "@/lib/settings";
 import { useMobileCw, useMobileCwReady } from "@/views/mobile/mobile-cw-row";
 import { BpPageSkeleton } from "./bp-page-skeleton";
@@ -71,7 +71,7 @@ export function BpHome({ onSelect }: { onSelect: (m: Meta) => void }) {
   const seed = useMemo(() => (seedItem ? cwMeta(seedItem) : seedMeta), [seedItem, seedMeta]);
 
   const heroPool = useMemo(() => (rows[0]?.metas ?? []).slice(0, 8), [rows]);
-  useBpHeroCycle(heroPool, heroPool.length > 1 && !isAndroidTv());
+  useBpHeroCycle(heroPool, heroPool.length > 1 && !isTelevision());
 
   // Continue watching and the catalogs resolve at different moments. Emitting a
   // seed before both have settled hands data-bp-autofocus from one row to

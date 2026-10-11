@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Wifi, WifiOff, BatteryCharging, CloudOff } from "lucide-react";
-import { isAndroid } from "@/lib/platform";
+import { isAndroid, isTelevision } from "@/lib/platform";
 import { useSyncQueueStale } from "@/lib/profile-sync";
 import { useBpT } from "./bp-i18n";
 
@@ -120,7 +120,7 @@ export function BpStatus() {
       ) : (
         <WifiOff strokeWidth={2} className="h-[clamp(14px,1.9vh,22px)] w-auto text-danger" />
       )}
-      {battery && !isAndroid() && <BatteryGlyph {...battery} />}
+      {battery && !isAndroid() && !isTelevision() && <BatteryGlyph {...battery} />}
     </span>
   );
 }

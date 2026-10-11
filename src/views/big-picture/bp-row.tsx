@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import type { Meta } from "@/lib/cinemeta";
-import { isAndroidTv } from "@/lib/platform";
+import { isTelevision } from "@/lib/platform";
 import { useSettings } from "@/lib/settings";
 import type { HomeRow } from "@/views/home/home-types";
 import { BpTile, type BpTileShape } from "./bp-tile";
@@ -154,7 +154,7 @@ export function BpRow({
   useEffect(() => {
     const track = trackRef.current;
     if (!track) return;
-    const tv = isAndroidTv();
+    const tv = isTelevision();
     const onScroll = () => {
       // A glide fires a scroll event per frame where a jump fired one per press,
       // and setShown adds a CHUNK on each, so one press would page in a hundred
