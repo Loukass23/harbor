@@ -8,6 +8,11 @@ export type BpPlatform = {
    * platform owns the process; without it, confirming exit leaves Big Picture.
    */
   exit?: () => void;
+  /**
+   * False where nothing on this device serves Harbor's phone pages (the web UI
+   * on the LAN), so "type on your phone" has nowhere to send the phone.
+   */
+  servesPhone?: boolean;
 };
 
 type HarborFetchResponse = { ok: boolean; body: string; contentType?: string | null };

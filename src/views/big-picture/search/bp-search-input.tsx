@@ -4,11 +4,16 @@ import { Search } from "@/components/icons/search-icon";
 import { isAndroid } from "@/lib/platform";
 import { SFX } from "@/lib/sfx";
 import { useBpT } from "../bp-i18n";
+import { bpPlatform } from "../bp-platform";
 
 // The field holds three focusables. Without a track, Left/Right off any of them
 // falls into free spatial mode and leaks down into the results. The page already
 // pays the gutter, so [data-bp-row]'s own gutter pair has to be cancelled.
-const FIELD_SCOPE = { paddingInline: 0, marginInline: 0, containIntrinsicSize: "auto 76px" } as const;
+const FIELD_SCOPE = {
+  paddingInline: 0,
+  marginInline: 0,
+  containIntrinsicSize: "auto 76px",
+} as const;
 
 // Same reason as the field: a chip strip that inherits the 340px row default
 // reserves five times its own height before it has rendered once.
@@ -101,20 +106,22 @@ export function BpSearchField({
           <Keyboard size={16} strokeWidth={2.2} />
           {t("Type")}
         </button>
-        <button
-          type="button"
-          data-bp-focusable
-          data-bp-chip
-          onClick={() => {
-            SFX.open();
-            window.dispatchEvent(new CustomEvent("bp:phone-typing"));
-          }}
-          aria-label={t("Type on your phone")}
-          className={`${ICON_CHIP} border border-[var(--bp-edge)] text-ink-subtle`}
-        >
-          <Smartphone size={16} strokeWidth={2.2} />
-          {t("Phone")}
-        </button>
+        {bpPlatform().servesPhone !== false && (
+          <button
+            type="button"
+            data-bp-focusable
+            data-bp-chip
+            onClick={() => {
+              SFX.open();
+              window.dispatchEvent(new CustomEvent("bp:phone-typing"));
+            }}
+            aria-label={t("Type on your phone")}
+            className={`${ICON_CHIP} border border-[var(--bp-edge)] text-ink-subtle`}
+          >
+            <Smartphone size={16} strokeWidth={2.2} />
+            {t("Phone")}
+          </button>
+        )}
       </div>
     </div>
   );

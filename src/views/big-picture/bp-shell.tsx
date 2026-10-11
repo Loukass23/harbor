@@ -298,7 +298,7 @@ export function BigPictureShell() {
   // an aria-modal setup layer walks native tab order into the route behind it.
   const onOptions = useCallback(() => {
     if (sources || onboardingOpenRef.current) return;
-    if (route.kind === "search") {
+    if (route.kind === "search" && bpPlatform().servesPhone !== false) {
       setPhoneOpen((v) => !v);
       return;
     }
@@ -306,7 +306,9 @@ export function BigPictureShell() {
   }, [route.kind, sources]);
 
   useEffect(() => {
-    const open = () => setPhoneOpen(true);
+    const open = () => {
+      if (bpPlatform().servesPhone !== false) setPhoneOpen(true);
+    };
     window.addEventListener("bp:phone-typing", open);
     return () => window.removeEventListener("bp:phone-typing", open);
   }, []);
@@ -546,7 +548,9 @@ export function BigPictureShell() {
                   : ONBOARD_HINTS
                 : sources
                   ? SOURCES_HINTS
-                  : (HINTS[route.kind] ?? HINTS.home)
+                  : bpPlatform().servesPhone === false
+                    ? (HINTS[route.kind] ?? HINTS.home).filter((a) => a !== "phone")
+                    : (HINTS[route.kind] ?? HINTS.home)
             }
             // Setup is a z-60 page like the source list, so the bar has to be
             // lifted over it or the only Back affordance is painted out.
