@@ -211,9 +211,17 @@ Each phase is a separate session or worktree, with its own PR into the Tizen bra
      - Testing with `pnpm tauri dev`: its webview origin is `localhost:1420`, so it has its
        own localStorage. Settings come from the shared settings file, but the Stremio sign-in
        and addons do not; sign in inside the dev window before pairing.
-7. **CI and release**
-   - Workflow that builds an unsigned `.wgt` and runs `tests/tizen-*`.
-   - Signed builds stay local.
+7. **CI and release** (done)
+   - `.github/workflows/tizen.yml`, separate from `ci.yml` so upstream edits never conflict:
+     `pnpm test:tizen`, `pnpm build:tizen` with the budget check, and an unsigned `.wgt` from
+     `node scripts/tizen.mjs zip`, uploaded as an artifact. It gives Tizen PRs a signal while
+     `ci.yml`'s full test step still hangs on Linux.
+   - Signed builds stay local, either built here or by signing a CI build
+     (`pipeline.md`, "Release").
+   - Open:
+     - CI writes an empty `src/lib/ebook/translation-chapter-instructions.md` until upstream
+       commits it.
+     - The hang in `ci.yml`'s test step is not fixed.
 8. **Upstream**
    - Offer each `src/` seam as a standalone PR to `harborstremio/harbor`, then the `src-tizen/` folder as an optional target.
 

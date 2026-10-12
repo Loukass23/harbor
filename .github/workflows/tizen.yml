@@ -1,0 +1,84 @@
+name: Tizen
+
+# Tizen tests, the Tizen build with its size budget, and an unsigned .wgt.
+# Signing needs the developer's Samsung certificates and stays local
+# (src-tizen/docs/pipeline.md, "Release").
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths: &tizen-paths
+      - src/**
+      - src-tizen/**
+      - scripts/tizen*.mjs
+      - scripts/check-tizen-*.mjs
+      - scripts/node-test-loader.mjs
+      - tests/tizen-*
+      - public/**
+      - index-tv.html
+      - vite.config.ts
+      - package.json
+      - pnpm-lock.yaml
+      - .github/workflows/tizen.yml
+  push:
+    branches: [tizen-next]
+    paths: *tizen-paths
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tizen-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tizen:
+    name: Tizen
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Test
+        run: pnpm run test:tizen
+
+      # src/lib/ebook/translation.ts imports this file, but upstream never committed it
+      # (a `*.md` ignore rule hides it). Drop this step once upstream adds it.
+      - name: Ebook placeholder
+        run: |
+          file=src/lib/ebook/translation-chapter-instructions.md
+          [ -f "$file" ] || : > "$file"
+
+      - name: Build and check budget
+        run: pnpm build:tizen
+
+      - name: Unsigned .wgt
+        env:
+          # A repository variable, not a secret. The fallback keeps forks building.
+          HARBOR_TIZEN_PACKAGE_ID: ${{ vars.HARBOR_TIZEN_PACKAGE_ID || 'HarborCI00' }}
+        run: node scripts/tizen.mjs zip
+
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: harbor-tizen-${{ github.sha }}
+          path: |
+            src-tizen/dist-unsigned/*.wgt
+            src-tizen/.stats/bundle.json
+          # bundle.json sits under the hidden .stats folder.
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 14

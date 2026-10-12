@@ -5,6 +5,7 @@ import { execFileSync, spawn, spawnSync } from "node:child_process";
 import {
   copyFileSync,
   existsSync,
+  mkdirSync,
   readdirSync,
   readFileSync,
   rmSync,
@@ -13,12 +14,15 @@ import {
 import { homedir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { zipSync } from "fflate";
 import { readApplicationId, renderManifest } from "./tizen-manifest.mjs";
 import { seed } from "./tizen-seed.mjs";
+import { PACKAGING, wgtEntries } from "./tizen-wgt.mjs";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const TIZEN_DIR = join(ROOT, "src-tizen");
 const DIST_DIR = join(TIZEN_DIR, "dist");
+const UNSIGNED_DIR = join(TIZEN_DIR, "dist-unsigned");
 
 // .env.tizen holds the signing profile and the TV address. Values already in the
 // environment win, and none of them is ever printed.
@@ -108,7 +112,7 @@ function pack() {
   stage();
   // tz treats the folder as a project and writes these into it. Stale copies would
   // end up inside the next .wgt.
-  for (const leftover of ["Debug", "tizen_web_project.yaml", ".tizen-rds"]) {
+  for (const leftover of PACKAGING) {
     rmSync(join(DIST_DIR, leftover), { recursive: true, force: true });
   }
   // Empty profile: tz signs with the active profile from Certificate Manager.
@@ -117,6 +121,19 @@ function pack() {
   }
   run("tz", ["pack", "-w", DIST_DIR]);
   console.log(`\npackaged ${wgtPath()}`);
+}
+
+// Unsigned .wgt for CI, which has no certificates. The TV refuses to install it;
+// sign it locally by extracting it into src-tizen/dist and running package.
+function zip() {
+  stage();
+  const { version } = JSON.parse(readFileSync(join(ROOT, "package.json"), "utf8"));
+  rmSync(UNSIGNED_DIR, { recursive: true, force: true });
+  mkdirSync(UNSIGNED_DIR, { recursive: true });
+  const out = join(UNSIGNED_DIR, `harbor-tizen-${version}-unsigned.wgt`);
+  writeFileSync(out, zipSync(wgtEntries(DIST_DIR)));
+  console.log(`
+wrote ${out}`);
 }
 
 function install() {
@@ -175,6 +192,7 @@ function logs() {
 const commands = {
   build,
   package: pack,
+  zip,
   install,
   launch,
   simulator,
