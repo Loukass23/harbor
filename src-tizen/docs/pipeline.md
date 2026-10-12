@@ -3,17 +3,18 @@
 `node scripts/tizen.mjs <command...>` runs the commands in order, for example
 `node scripts/tizen.mjs build package install launch`.
 
-| Command     | What it does                                                                                     |
-| ----------- | ------------------------------------------------------------------------------------------------ |
-| `build`     | `vite build --config src-tizen/vite.config.ts` → `src-tizen/dist` (also `pnpm build:tizen`)      |
-| `package`   | writes `config.xml` and `icon.png` into `dist`, then `tz pack` → `src-tizen/dist/Debug/dist.wgt` |
-| `install`   | `tz install` the `.wgt` on the device. Uninstalls first, so app data resets to onboarding        |
-| `launch`    | `tz run` by package id                                                                           |
-| `debug`     | restarts the app in debug mode, runs `sdb forward` and prints the CDP port                       |
-| `logs`      | `sdb dlog` filtered to console messages (emulator only; empty on a retail TV, use `debug`)       |
-| `simulator` | writes `config.xml` into `dist` and opens it in the Samsung TV Web Simulator (`tz run -r`)       |
-| `seed`      | signs in to Stremio and writes API keys into the installed app (see below)                       |
-| `deploy`    | `build package install launch`                                                                   |
+| Command     | What it does                                                                                      |
+| ----------- | ------------------------------------------------------------------------------------------------- |
+| `build`     | `vite build --config src-tizen/vite.config.ts` → `src-tizen/dist` (also `pnpm build:tizen`)       |
+| `package`   | writes `config.xml` and `icon.png` into `dist`, then `tz pack` → `src-tizen/dist/Debug/dist.wgt`  |
+| `zip`       | writes `config.xml` and `icon.png` into `dist`, then zips it unsigned → `src-tizen/dist-unsigned` |
+| `install`   | `tz install` the `.wgt` on the device. Uninstalls first, so app data resets to onboarding         |
+| `launch`    | `tz run` by package id                                                                            |
+| `debug`     | restarts the app in debug mode, runs `sdb forward` and prints the CDP port                        |
+| `logs`      | `sdb dlog` filtered to console messages (emulator only; empty on a retail TV, use `debug`)        |
+| `simulator` | writes `config.xml` into `dist` and opens it in the Samsung TV Web Simulator (`tz run -r`)        |
+| `seed`      | signs in to Stremio and writes API keys into the installed app (see below)                        |
+| `deploy`    | `build package install launch`                                                                    |
 
 ## Settings
 
@@ -39,6 +40,26 @@ The script signs in to Stremio from this PC and sends only the resulting session
 never the password. It writes `TORBOX_API_KEY` and `TMDB_API_KEY` into the active profile's
 settings and reloads the app. It prints which items it seeded, never their values. Use it for
 development only. Real users sign in through the app.
+
+## Release
+
+The `.wgt` version is `package.json`'s `version`; `package` and `zip` reject anything outside
+Tizen's `0-255.0-255.0-65535` range.
+
+**CI** (`.github/workflows/tizen.yml`) runs on pull requests into any branch and pushes to
+`tizen-next` that touch the app, `public/` or the Tizen scripts. It runs `pnpm test:tizen`, `pnpm build:tizen` (which fails over
+`budget.json`) and `zip`, then uploads the unsigned `.wgt` and `src-tizen/.stats/bundle.json` as
+the `harbor-tizen-<sha>` artifact for 14 days. The package id comes from the repository variable
+`HARBOR_TIZEN_PACKAGE_ID`, or `HarborCI00` when it is unset. CI has no certificates.
+
+**Signed builds stay local.** The TV refuses an unsigned `.wgt`. Either:
+
+- build and sign here: `node scripts/tizen.mjs build package`; or
+- sign a CI build: empty `src-tizen/dist`, extract the artifact's `.wgt` into it, then run
+  `node scripts/tizen.mjs package`. Packaging rewrites `config.xml` with the local package id
+  and `tz pack` signs with the local profile.
+
+The signed `.wgt` is `src-tizen/dist/Debug/dist.wgt`.
 
 ## Targets
 

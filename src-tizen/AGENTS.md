@@ -42,10 +42,11 @@ Tizen rules. Read `docs/lessons.md` before changing anything in this folder.
 ## Commands
 
 - `pnpm run check`, `pnpm run typecheck`, `pnpm test`, `pnpm check:tizen-boundary` after every change.
+  `pnpm test:tizen` runs only `tests/tizen-*`; the Tizen CI workflow runs it too.
 - `pnpm build:tizen` ends with `pnpm check:tizen-budget`. Over budget means split or exclude
   the growth first; raise `budget.json` only with the reason in the commit.
-- Device pipeline (`scripts/tizen.mjs`): build, package, install, launch, logs, debug, simulator.
-  See `docs/pipeline.md`.
+- Device pipeline (`scripts/tizen.mjs`): build, package, zip, install, launch, logs, debug, simulator.
+  `zip` writes an unsigned `.wgt` (what CI uploads). Signing stays local; see `docs/pipeline.md`.
   Settings come from `.env.tizen`; see `.env.tizen.example`.
 - `pnpm build` and `pnpm build:tv` must still produce unchanged desktop and Android bundles.
 
