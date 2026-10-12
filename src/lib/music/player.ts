@@ -29,7 +29,7 @@ import { musicAdvance, musicPrevious, musicWarmTargets, resetMusicOrder } from "
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { useSyncExternalStore } from "react";
-import { readMusicPreference, writeMusicPreference } from "./preferences";
+import { readMusicPreference, readStoredMusicPreference, writeMusicPreference } from "./preferences";
 import {
   clampMusicVolume,
   initializeMusicAudioSettings,
@@ -242,6 +242,7 @@ function currentCheckpoint(): MusicCheckpoint | null {
     sourceKey: `${current.connectorId ?? ""}:${current.id}`,
     position: state.currentTime,
     origin: getMusicPlaybackOrigin(),
+    track: current,
     savedAt: Date.now(),
   };
 }
@@ -249,6 +250,10 @@ function currentCheckpoint(): MusicCheckpoint | null {
 /** Written to both stores: IndexedDB survives a full localStorage, localStorage survives an unload. */
 function saveMusicCheckpoint(): void {
   const checkpoint = currentCheckpoint();
+  // A player with no current track must not erase the last checkpoint. The profile reset and
+  // the idle restore both publish a null current, and writing that as the string "null" wiped
+  // the saved session on every start.
+  if (!checkpoint) return;
   writeCheckpointToDb(checkpoint);
   writeMusicPreference(SESSION_KEY, JSON.stringify(checkpoint));
 }
@@ -316,7 +321,9 @@ function clearLegacyMigration(migration: LegacyMusicMigration | null): void {
 }
 
 export function resetMusicForProfile(): void {
-  if (!initialization && activeProfile === activeProfileId()) return;
+  // The mount-time call runs with the profile unchanged and the restore already in flight;
+  // resetting then would clear that restore for nothing. Only a real profile change resets.
+  if (activeProfile === activeProfileId() && initialization) return;
   cancelMusicQueueAutomation();
   activeProfile = activeProfileId();
   initialization = null;
@@ -363,7 +370,9 @@ export function initializeMusic(): Promise<void> {
       clearLegacyMigration(migration);
       let mirrored: MusicCheckpoint | null = null;
       try {
-        mirrored = JSON.parse(readMusicPreference(SESSION_KEY) ?? "null");
+        // Direct storage read: the preference cache can outlive a hot update and would then
+        // restore a checkpoint that no longer matches what is stored.
+        mirrored = JSON.parse(readStoredMusicPreference(SESSION_KEY) ?? "null");
       } catch {
         /* A corrupt checkpoint does not block the library. */
       }
@@ -376,16 +385,30 @@ export function initializeMusic(): Promise<void> {
               `${track.connectorId ?? ""}:${track.id}` === saved?.sourceKey,
           )
         : -1;
+      // A track that played through a substitute source no longer matches the saved queue, so
+      // the checkpoint itself carries the track. With no usable checkpoint at all, the most
+      // recent track is the honest fallback: the queue top is arbitrary and would resume a song
+      // the listener did not choose, which is how one miss became a permanent wrong resume.
+      const recovered =
+        restoredIndex < 0 ? (saved?.track ?? bootstrap.recents[0] ?? null) : null;
+      const queue = recovered
+        ? [
+            recovered,
+            ...bootstrap.queue.filter(
+              (track) => queueTrackKey(track) !== queueTrackKey(recovered),
+            ),
+          ]
+        : bootstrap.queue;
       const index = restoredIndex >= 0 ? restoredIndex : 0;
-      const current = bootstrap.queue[index] ?? null;
+      const current = restoredIndex >= 0 ? (queue[index] ?? null) : recovered;
       const position =
-        restoredIndex >= 0
-          ? usableCheckpointPosition(saved?.position, current?.durationSeconds)
+        current && (restoredIndex >= 0 || recovered === saved?.track)
+          ? usableCheckpointPosition(saved?.position, current.durationSeconds)
           : 0;
       publish({
         phase: current ? "paused" : "idle",
         current,
-        queue: bootstrap.queue,
+        queue,
         queueIndex: current ? index : -1,
         currentTime: position,
         duration: current?.durationSeconds ?? 0,
