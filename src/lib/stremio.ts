@@ -167,18 +167,17 @@ export function logout(authKey: string) {
   return call<unknown>("logout", { authKey });
 }
 
+// Empty ids with all: true returns the whole collection, removed items included.
+// It is how stremio-core pulls the library on login (models/ctx/ctx.rs), and it
+// saves the datastoreMeta round trip that used to come first on every cold start.
 export async function library(authKey: string): Promise<LibraryItem[]> {
-  const ids = await call<Array<[string, string]>>("datastoreMeta", {
+  const items = await call<LibraryItem[]>("datastoreGet", {
     authKey,
     collection: "libraryItem",
-  });
-  if (!ids?.length) return [];
-  return call<LibraryItem[]>("datastoreGet", {
-    authKey,
-    collection: "libraryItem",
-    ids: ids.map(([id]) => id),
+    ids: [],
     all: true,
   });
+  return items ?? [];
 }
 
 const LIBRARY_FORCE_REFETCH_MS = 300_000;

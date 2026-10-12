@@ -183,6 +183,12 @@ Do not relearn them. If a rule turns out to be wrong, change it here in the same
   of the 90 MB `.wgt`. The Tizen build stubs them (`src-tizen/build/`) and leaves those public
   folders out (`PUBLIC_EXCLUDED` in `vite.config.ts`). Face matching can't work here anyway: the
   AVPlay plane can't be captured into a canvas.
+- A compositor `Commit` blocks the main thread until raster finishes. Paint cost is therefore
+  main-thread time: a slow repaint delays every promise continuation and fetch behind it.
+  Large images inside the root layer are the worst case; give them their own layer
+  (`will-change: opacity` on the image), keyed on `isTelevision()`, not `isAndroidTv()`.
+- To find what paints, reload with CSS injected before load over CDP
+  (`Page.addScriptToEvaluateOnNewDocument`) and compare raster and commit totals in a trace.
 - Turning Vite's `publicDir` off to filter `public/` also stops it rewriting `/favicon.png`-style
   URLs to relative ones, which file:// needs. Remove the excluded entries after the copy instead.
 

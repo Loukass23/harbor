@@ -1,5 +1,5 @@
 import { memo, useEffect, useState, type RefObject } from "react";
-import { isAndroidTv } from "@/lib/platform";
+import { isTelevision } from "@/lib/platform";
 import { BpMosaic } from "./bp-mosaic";
 import { BpLiveSplit } from "./bp-live-split";
 import { useBpDecorMotion } from "./bp-decor-motion";
@@ -171,7 +171,7 @@ function BpAmbientLayersBody(v: BpAmbientView) {
   // against an 18MB steady state, so read GL mtrack out of
   // `dumpsys meminfo app.harbor` after touching this, not just framestats.
   // TV only. Desktop composites these fine and was never measured here.
-  const xfadeLayer = isAndroidTv() ? "opacity" : undefined;
+  const xfadeLayer = isTelevision() ? "opacity" : undefined;
 
   return (
     <div
@@ -315,7 +315,6 @@ function BpAmbientLayersBody(v: BpAmbientView) {
         <div className="absolute inset-0" style={{ background: "var(--bp-scrim-side)" }} />
         <div className="absolute inset-0" style={{ background: PAGE_FADE }} />
         <div className="absolute inset-0" style={{ background: TOP_FADE }} />
-
       </div>
 
       {(["a", "b"] as const).map((slot) => (
