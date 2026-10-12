@@ -5,25 +5,20 @@
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { PACKAGING } from "./tizen-wgt.mjs";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const DIST = join(ROOT, "src-tizen", "dist");
 const STATS = join(ROOT, "src-tizen", ".stats", "bundle.json");
 const BUDGET = join(ROOT, "src-tizen", "budget.json");
 
-// tz writes its own project files and the .wgt into dist; none of it is the app.
-const PACKAGING = new Set([
-  "Debug",
-  "config.xml",
-  "icon.png",
-  "tizen_web_project.yaml",
-  ".tizen-rds",
-]);
+// Packaging also writes the manifest and icon into dist; neither is the app.
+const NOT_APP = new Set([...PACKAGING, "config.xml", "icon.png"]);
 
 function dirBytes(dir) {
   let total = 0;
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
-    if (dir === DIST && PACKAGING.has(entry.name)) continue;
+    if (dir === DIST && NOT_APP.has(entry.name)) continue;
     const path = join(dir, entry.name);
     total += entry.isDirectory() ? dirBytes(path) : statSync(path).size;
   }

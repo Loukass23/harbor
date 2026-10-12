@@ -21,6 +21,7 @@ target
 /src-tizen/vite.config.js
 /src-tizen/vite.config.d.ts
 /src-tizen/.stats/
+/src-tizen/dist-unsigned/
 
 logs
 *.log
