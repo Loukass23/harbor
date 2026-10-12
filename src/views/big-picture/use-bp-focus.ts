@@ -64,6 +64,12 @@ export {
 };
 
 const SETTLE_WINDOW_MS = 6000;
+// A surface whose seed row waits on the network (Home waits for Continue
+// Watching) can outlast the settle window on a slow television, and then nothing
+// ever claims focus: the screen sits with no ring until a stray layout change
+// recovers it. Past the window the pass keeps going only while nothing holds
+// focus and the user has not taken over, never longer than this.
+const SEED_HOLD_MAX_MS = 60_000;
 
 type BpPick = { el: HTMLElement | null; revert: BpRevert };
 
@@ -392,6 +398,7 @@ export function useBpFocusRoot(params: {
     let observer: MutationObserver | null = null;
     let raf = 0;
     const deadline = Date.now() + SETTLE_WINDOW_MS;
+    const holdUntil = Date.now() + SEED_HOLD_MAX_MS;
     const seq = bpInteractionSeq();
     interactedRef.current = false;
     resetBpAnchor();
@@ -433,15 +440,36 @@ export function useBpFocusRoot(params: {
         return;
       }
       const marked = root.querySelector<HTMLElement>("[data-bp-autofocus='true']");
-      const target = marked ?? (focused ? null : bpFocusables(root)[0]);
+      // Past the settle window only the seed may land. Falling back to the first
+      // focusable there parks the ring in the top bar, and the seed then drags
+      // it down a second later.
+      const holding = Date.now() > deadline;
+      const target = marked ?? (focused || holding ? null : bpFocusables(root)[0]);
       if (!target || target === focused) return;
       setBpFocus(target, { silent: true });
+    };
+
+    // Only remote and keyboard moves bump the interaction sequence. A pointer or
+    // wheel also means the user has taken over, and the seed must not pull the
+    // page back after that.
+    let pointed = false;
+    const onPointer = () => {
+      pointed = true;
+    };
+    window.addEventListener("pointerdown", onPointer, { capture: true, passive: true });
+    window.addEventListener("wheel", onPointer, { capture: true, passive: true });
+
+    const settled = () => {
+      const now = Date.now();
+      if (now <= deadline) return false;
+      if (now > holdUntil || pointed || bpInteractionSeq() !== seq) return true;
+      return currentBpFocus(bpFocusScope(rootRef.current)) !== null;
     };
 
     const tick = () => {
       raf = 0;
       attempt();
-      if (Date.now() > deadline) observer?.disconnect();
+      if (settled()) observer?.disconnect();
     };
 
     const schedule = () => {
@@ -456,7 +484,7 @@ export function useBpFocusRoot(params: {
       observer.observe(root, { childList: true, subtree: true });
     }
     const keepAlive = window.setInterval(() => {
-      if (Date.now() > deadline) {
+      if (settled()) {
         window.clearInterval(keepAlive);
         return;
       }
@@ -464,6 +492,8 @@ export function useBpFocusRoot(params: {
     }, 400);
 
     return () => {
+      window.removeEventListener("pointerdown", onPointer, { capture: true });
+      window.removeEventListener("wheel", onPointer, { capture: true });
       window.clearInterval(keepAlive);
       if (raf) window.cancelAnimationFrame(raf);
       observer?.disconnect();
