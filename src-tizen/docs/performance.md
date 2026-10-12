@@ -98,6 +98,20 @@ catalog gate. What changed is navigation (a third of the raster), a library that
 measured on Tizen. Heap is not comparable with the phase 5
 table: this account has more rows and addons (idle 49 MB, walk 63 MB).
 
+### Home snapshot
+
+`bp-home-cache.ts` keeps last session's shelves in IndexedDB so a cold start can draw them at
+once. For a profile with a TMDB key it never saved: TMDB rows carry their page fetcher, the put
+threw `DataCloneError`, and the save swallows errors. Once fixed, the snapshot was 18.7 MB, 17 MB
+of it episode lists that two TMDB-addon series catalogs put in their catalog metas. The stored
+rows now drop both (`bpSnapshotRows`): 1.4 MB.
+
+Home focus with the snapshot working: 22.3 s (5 runs, 20.8–24.2 s), within noise of before.
+Reading it back still takes about 9 s during boot against about 200 ms at idle, at 1.4 MB as at
+18.7 MB, so the cost is the starved worker threads, not the size. Holding the ambient art
+until first focus halves raster but did not move focus either (22.6 s and 23.7 s); that
+experiment was not kept.
+
 ## Open
 
 - Home still takes about 24 s to show the focus ring. Next: hold the ambient art on a television

@@ -92,12 +92,31 @@ export async function bpHomeCacheLoad(key: string): Promise<BpHomeSnapshot | nul
   }
 }
 
+/**
+ * The rows as stored: trimmed to what the opening frame draws.
+ *
+ * - No page fetcher. A TMDB row carries one, IndexedDB cannot clone a function, and
+ *   the put threw DataCloneError, so a TMDB home was never saved.
+ * - No episode lists. Some addon catalogs ship every episode of every series in
+ *   their catalog metas; two such rows made 17 of an 18.7 MB snapshot, and reading
+ *   that back on a television took longer than rebuilding the shelves. A card never
+ *   reads them.
+ *
+ * The live build hands both back when it replaces these rows.
+ */
+export function bpSnapshotRows(rows: readonly HomeRow[]): HomeRow[] {
+  return rows.slice(0, MAX_ROWS).map(({ fetcher: _fetcher, ...r }) => ({
+    ...r,
+    metas: r.metas.slice(0, MAX_PER_ROW).map(({ videos: _videos, ...m }) => m),
+  }));
+}
+
 export async function bpHomeCacheSave(key: string, snap: BpHomeSnapshot): Promise<void> {
   if (snap.rows.length === 0) return;
   // Trimmed before it is written, never after it is read. What goes in is what
   // the opening frame draws, and drawing thirty cards of a row nobody has
   // scrolled to costs the same as drawing three hundred.
-  const rows = snap.rows.slice(0, MAX_ROWS).map((r) => ({ ...r, metas: r.metas.slice(0, MAX_PER_ROW) }));
+  const rows = bpSnapshotRows(snap.rows);
   const payload: Stored = { key, at: Date.now(), rows, hero: snap.hero.slice(0, 12) };
   try {
     await writeSlot(SLOT, payload);
