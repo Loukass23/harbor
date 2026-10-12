@@ -55,13 +55,6 @@ jobs:
       - name: Test
         run: pnpm run test:tizen
 
-      # src/lib/ebook/translation.ts imports this file, but upstream never committed it
-      # (a `*.md` ignore rule hides it). Drop this step once upstream adds it.
-      - name: Ebook placeholder
-        run: |
-          file=src/lib/ebook/translation-chapter-instructions.md
-          [ -f "$file" ] || : > "$file"
-
       - name: Build and check budget
         run: pnpm build:tizen
 

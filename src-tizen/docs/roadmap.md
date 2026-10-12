@@ -219,8 +219,6 @@ Each phase is a separate session or worktree, with its own PR into the Tizen bra
    - Signed builds stay local, either built here or by signing a CI build
      (`pipeline.md`, "Release").
    - Open:
-     - CI writes an empty `src/lib/ebook/translation-chapter-instructions.md` until upstream
-       commits it.
      - The hang in `ci.yml`'s test step is not fixed.
 8. **Upstream**
    - Offer each `src/` seam as a standalone PR to `harborstremio/harbor`, then the `src-tizen/` folder as an optional target.
