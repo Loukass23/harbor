@@ -49,7 +49,7 @@ export const HARBOR_DISCORD_INVITE = resolveBase(
   "https://discord.gg/harbor",
 );
 
-/** True for a URL built from a Harbor base that is turned off (it starts with "/"). */
+/** True for a URL built from a Harbor base that is turned off: a path starting with a single "/". */
 export function isDisabledHostedUrl(url: string): boolean {
-  return !HOSTED_FEATURES && url.startsWith("/");
+  return !HOSTED_FEATURES && url.startsWith("/") && !url.startsWith("//");
 }
