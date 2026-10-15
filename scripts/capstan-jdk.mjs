@@ -183,8 +183,10 @@ export async function resolveJdks(target, log) {
   if (!TARGETS[target]) throw new Error(`unknown target ${target}, known: ${Object.keys(TARGETS).join(", ")}`);
   const named = jdkHome(process.env.HARBOR_CAPSTAN_JDK ?? process.env.JAVA_HOME ?? "");
   const host = hostTriple();
+  // A JAVA_HOME older than 17 (Ubuntu runners default to 11) would jlink a runtime that
+  // cannot load the compat layer's class files, so it is skipped rather than used.
   const hostJdk =
-    hasJmods(named) && existsSync(join(named, "bin", exe("jlink")))
+    hasJmods(named) && existsSync(join(named, "bin", exe("jlink"))) && featureOf(named) >= DEFAULT_FEATURE
       ? named
       : await fetchJdk(host, DEFAULT_FEATURE, log);
   if (target === host) return { hostJdk, targetJdk: hostJdk };
