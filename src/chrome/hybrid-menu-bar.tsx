@@ -8,7 +8,7 @@ import { checkForUpdate } from "@/lib/updater/use-update";
 import { useSettings } from "@/lib/settings";
 import { useView } from "@/lib/view";
 import { useT } from "@/lib/i18n";
-import { HARBOR_BUGS_BASE } from "@/lib/config/endpoints";
+import { HARBOR_BUGS_BASE, HOSTED_FEATURES, UPDATER_ENABLED } from "@/lib/config/endpoints";
 
 type Item =
   | { kind: "action"; label: string; hint?: string; onClick: () => void; danger?: boolean }
@@ -88,8 +88,12 @@ export function HybridMenuBar() {
       id: "help",
       label: t("Help"),
       items: [
-        { kind: "action", label: t("Check for Updates"), onClick: () => void checkForUpdate(true) },
-        { kind: "action", label: t("Report a Bug"), onClick: () => openUrl(HARBOR_BUGS_BASE) },
+        ...(UPDATER_ENABLED
+          ? [{ kind: "action" as const, label: t("Check for Updates"), onClick: () => void checkForUpdate(true) }]
+          : []),
+        ...(HOSTED_FEATURES
+          ? [{ kind: "action" as const, label: t("Report a Bug"), onClick: () => openUrl(HARBOR_BUGS_BASE) }]
+          : []),
         { kind: "sep" },
         { kind: "label", label: `Harbor ${APP_VERSION}` },
       ],

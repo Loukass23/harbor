@@ -2,6 +2,7 @@ import { useLayoutEffect, useId, useRef, useState } from "react";
 import { X } from "lucide-react";
 import { createPortal } from "react-dom";
 import { APP_VERSION } from "@/lib/build-info";
+import { HOSTED_FEATURES } from "@/lib/config/endpoints";
 import { useT } from "@/lib/i18n";
 import { captureFocusReturn } from "@/lib/keyboard-navigation";
 import { isBackKey } from "@/lib/keyboard-navigation/geometry";
@@ -85,15 +86,17 @@ function NotesDialog({ note, onClose }: { note: ReleaseNote; onClose: () => void
         >
           <RichNote note={{ ...note, title: undefined }} />
         </div>
-        <footer className="border-t border-edge p-5">
-          <button
-            type="button"
-            onClick={() => void openUrl("https://harborsystem.online")}
-            className="min-h-11 rounded-md px-3 text-accent hover:bg-elevated focus-visible:outline-2"
-          >
-            {t("Report an issue")}
-          </button>
-        </footer>
+        {HOSTED_FEATURES && (
+          <footer className="border-t border-edge p-5">
+            <button
+              type="button"
+              onClick={() => void openUrl("https://harborsystem.online")}
+              className="min-h-11 rounded-md px-3 text-accent hover:bg-elevated focus-visible:outline-2"
+            >
+              {t("Report an issue")}
+            </button>
+          </footer>
+        )}
       </div>
     </dialog>,
     document.body,

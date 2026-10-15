@@ -1,4 +1,11 @@
-import { MAL_AUTHORIZE_URL, MAL_CLIENT_ID, MAL_TOKEN_PROXY } from "./config";
+import {
+  MAL_AUTHORIZE_URL,
+  MAL_CLIENT_ID,
+  MAL_CLIENT_SECRET,
+  MAL_REDIRECT_URI,
+  MAL_TOKEN_PROXY,
+  MAL_TOKEN_URL,
+} from "./config";
 import { getSession, setSession } from "./session";
 import type { MalSession } from "./types";
 
@@ -24,6 +31,7 @@ export function buildAuthorizeUrl(): string {
     code_challenge: verifier,
     code_challenge_method: "plain",
   });
+  if (MAL_REDIRECT_URI) params.set("redirect_uri", MAL_REDIRECT_URI);
   return `${MAL_AUTHORIZE_URL}?${params.toString()}`;
 }
 
@@ -47,6 +55,28 @@ async function tauriFetch(input: string, init?: RequestInit): Promise<Response> 
     return tauriFetchFn(input, init as Record<string, unknown>) as unknown as Response;
   }
   return fetch(input, init);
+}
+
+// With our own client, MAL is called directly (form-encoded, secret included);
+// otherwise Harbor's proxy adds Harbor's secret.
+function requestToken(fields: Record<string, string>): Promise<Response> {
+  if (MAL_TOKEN_PROXY) {
+    return tauriFetch(MAL_TOKEN_PROXY, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(fields),
+    });
+  }
+  const body = new URLSearchParams({ ...fields, client_id: MAL_CLIENT_ID });
+  if (MAL_CLIENT_SECRET) body.set("client_secret", MAL_CLIENT_SECRET);
+  if (MAL_REDIRECT_URI && fields.grant_type === "authorization_code") {
+    body.set("redirect_uri", MAL_REDIRECT_URI);
+  }
+  return tauriFetch(MAL_TOKEN_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: body.toString(),
+  });
 }
 
 export async function completeAuthorization(pastedCode: string): Promise<MalSession> {
@@ -74,14 +104,10 @@ async function exchangeCode(
   code: string,
   codeVerifier: string,
 ): Promise<{ access_token: string; refresh_token: string; expires_in: number }> {
-  const res = await tauriFetch(MAL_TOKEN_PROXY, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      grant_type: "authorization_code",
-      code,
-      code_verifier: codeVerifier,
-    }),
+  const res = await requestToken({
+    grant_type: "authorization_code",
+    code,
+    code_verifier: codeVerifier,
   });
 
   if (!res.ok) {
@@ -97,13 +123,9 @@ export async function refreshAccessToken(): Promise<MalSession | null> {
   const current = getSession();
   if (!current?.refreshToken) return null;
   try {
-    const res = await tauriFetch(MAL_TOKEN_PROXY, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        grant_type: "refresh_token",
-        refresh_token: current.refreshToken,
-      }),
+    const res = await requestToken({
+      grant_type: "refresh_token",
+      refresh_token: current.refreshToken,
     });
     if (!res.ok) {
       setSession(null);

@@ -9,7 +9,7 @@ import {
   setSettingsSearchVocabulary,
 } from "./search-match";
 import { settingsAnchor, type SectionId } from "./shared";
-import { TOP_GROUPS } from "./groups";
+import { isSectionShown, TOP_GROUPS } from "./groups";
 import { markSectionSeen, useSettingsNew } from "./settings-new";
 import { useExperimentalAccess } from "@/lib/updater/experimental-access";
 import { useStreamPluginCount } from "@/lib/plugins";
@@ -451,7 +451,7 @@ type NavItem = {
   keywords?: string[];
 };
 
-const NAV_GROUPS: Array<{ heading: string | null; items: NavItem[] }> = [
+const ALL_NAV_GROUPS: Array<{ heading: string | null; items: NavItem[] }> = [
   {
     heading: null,
     items: [
@@ -1121,9 +1121,14 @@ export type SettingsOption = {
   keywords?: string[];
 };
 
+const NAV_GROUPS = ALL_NAV_GROUPS.map((g) => ({
+  ...g,
+  items: g.items.filter((i) => isSectionShown(i.id)),
+})).filter((g) => g.items.length > 0);
+
 const NAV_ITEM_BY_ID = new Map(NAV_GROUPS.flatMap((g) => g.items).map((i) => [i.id, i] as const));
 
-const SETTINGS_OPTIONS: SettingsOption[] = [
+const ALL_SETTINGS_OPTIONS: SettingsOption[] = [
   {
     label: "Who's watching background",
     section: "account",
@@ -11007,6 +11012,8 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     keywords: ["icons", "animation", "illustrators", "drawings", "icon credits"],
   },
 ];
+
+const SETTINGS_OPTIONS = ALL_SETTINGS_OPTIONS.filter((o) => isSectionShown(o.section));
 
 setSettingsSearchVocabulary([
   ...SETTINGS_OPTIONS.flatMap((o) => [

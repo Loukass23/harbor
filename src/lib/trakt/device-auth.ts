@@ -2,6 +2,7 @@ import {
   TRAKT_API_BASE,
   TRAKT_CLIENT_ID,
   TRAKT_DEVICE_TOKEN_PROXY,
+  TRAKT_SIGN_IN_AVAILABLE,
 } from "./config";
 import { setSession } from "./session";
 import type { DeviceCode, TraktSession, TraktUserMe } from "./types";
@@ -11,6 +12,9 @@ const baseHeaders = (): HeadersInit => ({
 });
 
 export async function requestDeviceCode(): Promise<DeviceCode> {
+  if (!TRAKT_SIGN_IN_AVAILABLE) {
+    throw new Error("Trakt sign-in needs Harbor's token server, which is no longer available.");
+  }
   const res = await fetch(`${TRAKT_API_BASE}/oauth/device/code`, {
     method: "POST",
     headers: baseHeaders(),

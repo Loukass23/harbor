@@ -11,7 +11,7 @@ import type { LibraryKey } from "./settings/library-panel";
 import type { RelayMode } from "./settings/relay-section";
 import type { DebridKey } from "./settings/streaming-sources-panel";
 import { SettingsTools } from "./settings/nav";
-import { groupForSection, TOP_GROUPS } from "./settings/groups";
+import { groupForSection, isSectionShown, TOP_GROUPS } from "./settings/groups";
 import { requestTracker } from "./settings/tracker-request";
 import { SubTabsProvider, type SubTabReg } from "./settings/sub-tabs";
 import { SettingsSidebar } from "./settings/settings-sidebar";
@@ -733,8 +733,8 @@ export function Settings({ visible = true }: { visible?: boolean }) {
 
                       {active === "webhooks" && <WebhooksPanel />}
 
-                      {active === "bug" && <BugReportPanel />}
-                      {active === "support" && <SupportPanel />}
+                      {active === "bug" && isSectionShown("bug") && <BugReportPanel />}
+                      {active === "support" && isSectionShown("support") && <SupportPanel />}
 
                       {active === "remotes" && <RemotesPanel />}
 

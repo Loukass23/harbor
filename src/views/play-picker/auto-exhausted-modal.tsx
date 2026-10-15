@@ -4,6 +4,7 @@ import { parseKitsuId } from "@/lib/providers/kitsu";
 import { splitFranchiseDisplaySeason } from "@/lib/streams/anime-identity-core";
 import { useT } from "@/lib/i18n";
 import { openUrl } from "@/lib/window";
+import { HOSTED_FEATURES } from "@/lib/config/endpoints";
 
 export function AutoExhaustedModal({
   meta,
@@ -68,12 +69,14 @@ export function AutoExhaustedModal({
           >
             Browse streams manually
           </button>
-          <button
-            onClick={() => openUrl(reportUrl)}
-            className="flex h-11 items-center justify-center rounded-full bg-elevated text-[13.5px] font-medium text-ink ring-1 ring-edge-soft transition-colors hover:bg-raised"
-          >
-            {t("Report a bug")}
-          </button>
+          {HOSTED_FEATURES && (
+            <button
+              onClick={() => openUrl(reportUrl)}
+              className="flex h-11 items-center justify-center rounded-full bg-elevated text-[13.5px] font-medium text-ink ring-1 ring-edge-soft transition-colors hover:bg-raised"
+            >
+              {t("Report a bug")}
+            </button>
+          )}
           <button
             onClick={goBack}
             className="mt-1 text-[12.5px] text-ink-subtle transition-colors hover:text-ink-muted"
