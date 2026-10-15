@@ -1,6 +1,6 @@
 import { useSyncExternalStore } from "react";
 import { check } from "@tauri-apps/plugin-updater";
-import { HARBOR_API_BASE } from "@/lib/config/endpoints";
+import { HARBOR_API_BASE, UPDATER_ENABLED } from "@/lib/config/endpoints";
 import { t } from "@/lib/i18n";
 import {
   normalUpdateChannel,
@@ -254,7 +254,7 @@ async function readExperimentalManifest(path = "latest-experimental.json"): Prom
 }
 
 export async function checkForUpdate(manual = false): Promise<void> {
-  if (!IS_TAURI) return;
+  if (!IS_TAURI || !UPDATER_ENABLED) return;
   // The downloaded update package always installs to the real Harbor install
   // location regardless of this build's identifier, so in dev it would silently
   // update and relaunch the user's separately installed release build instead
