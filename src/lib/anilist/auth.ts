@@ -1,8 +1,10 @@
 import {
   ANILIST_AUTHORIZE_URL,
   ANILIST_CLIENT_ID,
+  ANILIST_CLIENT_SECRET,
   ANILIST_PIN_REDIRECT_URI,
   ANILIST_TOKEN_EXCHANGE_URL,
+  ANILIST_TOKEN_URL,
 } from "./config";
 import { fetchViewer } from "./queries";
 import { setSession } from "./session";
@@ -11,6 +13,7 @@ import type { AnilistSession } from "./types";
 const DEFAULT_TOKEN_TTL_SEC = 31536000;
 
 export function buildAuthorizeUrl(): string {
+  if (!ANILIST_CLIENT_ID) throw new Error("AniList is not configured. Set VITE_ANILIST_CLIENT_ID and VITE_ANILIST_CLIENT_SECRET in .env.local.");
   const params = new URLSearchParams({
     client_id: ANILIST_CLIENT_ID,
     redirect_uri: ANILIST_PIN_REDIRECT_URI,
@@ -54,10 +57,21 @@ export async function completeAuthorization(pastedCode: string): Promise<Anilist
 async function exchangeCode(code: string): Promise<string> {
   const isTauri = "__TAURI__" in window || "__TAURI_INTERNALS__" in window;
   const post = isTauri ? (await import("@tauri-apps/plugin-http")).fetch : fetch;
-  const res = await post(ANILIST_TOKEN_EXCHANGE_URL, {
+  // With our own client, AniList is called directly with its secret;
+  // otherwise Harbor's exchange adds Harbor's secret.
+  const body = ANILIST_TOKEN_EXCHANGE_URL
+    ? { code }
+    : {
+        grant_type: "authorization_code",
+        client_id: ANILIST_CLIENT_ID,
+        client_secret: ANILIST_CLIENT_SECRET,
+        redirect_uri: ANILIST_PIN_REDIRECT_URI,
+        code,
+      };
+  const res = await post(ANILIST_TOKEN_EXCHANGE_URL ?? ANILIST_TOKEN_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json", Accept: "application/json" },
-    body: JSON.stringify({ code }),
+    body: JSON.stringify(body),
   });
   if (!res.ok) throw new Error("AniList rejected that code. Authorize again and paste the newest one.");
   const json = (await res.json()) as { access_token?: string };
