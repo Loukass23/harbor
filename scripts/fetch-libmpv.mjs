@@ -1,42 +1,70 @@
+import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readdirSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const SHA256 = "0a81c004aae0ee7d512b9a26e38f66281f9591e84e1663215cc3a36a4bde6f6a";
-// Keep each DLL pin on its own release so older branches retain their matching binary.
-const TAG = process.env.HARBOR_LIBMPV_TAG ?? "mpvdll-0a81c004aae0";
-const url =
-  process.env.HARBOR_LIBMPV_URL ??
-  `https://github.com/harborstremio/harbor/releases/download/${TAG}/libmpv-2.dll`;
+// libmpv-2.dll from shinchiro's mpv-dev build, the same release as the mpv.exe in
+// fetch-mpv.mjs. src-tauri/libmpv/mpv.lib imports by name, so a newer libmpv-2.dll
+// links without regenerating it. The archive is pinned, not the DLL inside it.
+const RELEASE = "20261010";
+const ASSET = "mpv-dev-x86_64-20261010-git-b2c255c13e.7z";
+const SHA256 = "394490ed6354c2294b87c63dfa3663b23524b5551aace9cbe35c4085682b14fa";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const dest = join(root, "src-tauri", "libmpv", "libmpv-2.dll");
-const digest = (buf) => createHash("sha256").update(buf).digest("hex");
 
 if (process.platform !== "win32" && !process.env.HARBOR_LIBMPV_FORCE) {
-  console.log("[libmpv] not Windows, skipping (mac and linux link system libmpv)");
+  console.log("[libmpv] not Windows, skipping (linux links system libmpv)");
   process.exit(0);
 }
 
-if (existsSync(dest) && digest(readFileSync(dest)) === SHA256) {
-  console.log("[libmpv] libmpv-2.dll already present and verified");
+if (existsSync(dest) && statSync(dest).size > 0) {
+  console.log(`[libmpv] ${dest} already present`);
   process.exit(0);
 }
 
-console.log(`[libmpv] fetching ${url}`);
-const res = await fetch(url, { redirect: "follow" });
-if (!res.ok) {
-  console.error(`[libmpv] download failed (${res.status} ${res.statusText})`);
-  console.error("[libmpv] set HARBOR_LIBMPV_URL to a mirror, or drop libmpv-2.dll into src-tauri/libmpv/ by hand");
-  process.exit(1);
+function findFile(dir, name) {
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const path = join(dir, entry.name);
+    if (entry.isDirectory()) {
+      const found = findFile(path, name);
+      if (found) return found;
+    } else if (entry.name === name) {
+      return path;
+    }
+  }
+  return null;
 }
-const buf = Buffer.from(await res.arrayBuffer());
-const got = digest(buf);
-if (got !== SHA256) {
-  console.error(`[libmpv] checksum mismatch (expected ${SHA256}, got ${got})`);
-  process.exit(1);
+
+const url = `https://github.com/shinchiro/mpv-winbuild-cmake/releases/download/${RELEASE}/${ASSET}`;
+const temp = mkdtempSync(join(tmpdir(), "harbor-libmpv-"));
+
+try {
+  console.log(`[libmpv] fetching ${url}`);
+  const response = await fetch(url, { redirect: "follow" });
+  if (!response.ok) throw new Error(`[libmpv] download failed (${response.status} ${response.statusText})`);
+
+  const archive = join(temp, ASSET);
+  const bytes = Buffer.from(await response.arrayBuffer());
+  const digest = createHash("sha256").update(bytes).digest("hex");
+  if (digest !== SHA256) throw new Error(`[libmpv] checksum mismatch (expected ${SHA256}, got ${digest})`);
+  writeFileSync(archive, bytes);
+
+  const extracted = join(temp, "extracted");
+  mkdirSync(extracted);
+  try {
+    execFileSync("7z", ["x", "-y", archive, `-o${extracted}`], { stdio: "inherit" });
+  } catch {
+    throw new Error("[libmpv] extraction failed; install 7-Zip and ensure `7z` is on PATH");
+  }
+
+  const dll = findFile(extracted, "libmpv-2.dll");
+  if (!dll) throw new Error("[libmpv] libmpv-2.dll was not found in the archive");
+  mkdirSync(dirname(dest), { recursive: true });
+  copyFileSync(dll, dest);
+  console.log(`[libmpv] wrote ${dest} (${(statSync(dest).size / 1048576).toFixed(1)} MB)`);
+} finally {
+  rmSync(temp, { recursive: true, force: true });
 }
-mkdirSync(dirname(dest), { recursive: true });
-writeFileSync(dest, buf);
-console.log(`[libmpv] wrote ${dest} (${(buf.length / 1048576).toFixed(1)} MB)`);
