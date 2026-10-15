@@ -19,11 +19,22 @@ Harbor is a cross-platform Stremio client built with Tauri 2, React, TypeScript,
 
 The frontend owns the interface and user interactions. Rust owns native integrations, playback, operating-system behavior, and performance-sensitive work.
 
+## Personal Fork
+
+- Upstream Harbor shut down in October 2026. This repository is a personal fork with no upstream to merge from; `main` is the only trunk.
+- Supported targets: Linux desktop and Samsung Tizen TV (`src-tizen/`). Windows, macOS, and Android code still exists but is not maintained or tested. Do not break it on purpose, and do not spend effort on it.
+- Harbor's own servers are gone. Builds read flags from `.env.local` (gitignored; copy `.env.example`):
+  - `VITE_HARBOR_HOSTED`: features backed by Harbor's servers stay off unless `on`. An explicit `VITE_HARBOR_*_BASE` override still enables its feature.
+  - `VITE_HARBOR_UPDATER`: the in-app updater stays off unless `on`.
+  - `VITE_MAL_*`, `VITE_ANILIST_*`, `VITE_SIMKL_*`: your own tracker app credentials. They end up in the bundle, so keep builds private.
+- The Tizen build leaves tracker client secrets out of the `.wgt` unless `HARBOR_TIZEN_EMBED_SECRETS=on` is set in `.env.tizen` or the environment.
+- The Reference Repositories below still apply.
+
 ## Core Priorities
 
 - Correctness and reliability.
 - Smooth playback and responsive navigation.
-- Consistent behavior across Windows, macOS, Linux, and TV-style input.
+- Consistent behavior across Linux desktop and TV-style input.
 - Simple and maintainable code.
 
 When trade-offs are required, prefer predictable behavior over clever or temporary solutions.

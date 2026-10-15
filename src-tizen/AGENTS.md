@@ -13,12 +13,12 @@ Tizen rules. Read `docs/lessons.md` before changing anything in this folder.
 
 ## Boundary rule
 
-- `src/` is shared with upstream Harbor and never imports `src-tizen/` or touches Tizen APIs
+- `src/` must not depend on `src-tizen/`: it never imports it or touches Tizen APIs
   (`webapis`, `tizen.*`, `tizenhwkey`, AVPlay). `pnpm check:tizen-boundary` enforces this.
 - `src-tizen/` may import from `src/` via `@/`.
-- When Tizen needs something from shared code, add a small **generic** seam in `src/`
-  (a registry, setter or option) that any platform could use, then fill it from `src-tizen/`.
-  Keep each seam in its own commit so it can be contributed upstream on its own.
+- When Tizen needs something from shared code, add a seam in `src/` (a registry, setter or
+  option) and fill it from `src-tizen/`. There is no upstream to merge from, so a seam may be
+  as large as the change needs; it only has to keep the desktop build working.
 - Never add `isTizen()` branches to shared code.
 
 ## Layout
