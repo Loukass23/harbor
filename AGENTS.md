@@ -22,7 +22,8 @@ The frontend owns the interface and user interactions. Rust owns native integrat
 ## Personal Fork
 
 - Upstream Harbor shut down in October 2026. This repository is a personal fork with no upstream to merge from; `main` is the only trunk.
-- Supported targets: Linux desktop and Samsung Tizen TV (`src-tizen/`). Windows, macOS, and Android code still exists but is not maintained or tested. Do not break it on purpose, and do not spend effort on it.
+- Supported targets: Linux desktop, Windows (the laptop by the TV, built by `.github/workflows/tauri-build.yml`), and Samsung Tizen TV (`src-tizen/`). macOS and Android packaging is removed. Some `cfg(target_os = "macos" | "android")` Rust code remains; do not spend effort on it.
+- `android-extension-compat/` is not Android packaging: it is the CloudStream extension layer ("capstan") that `scripts/capstan-stage.mjs` stages for desktop builds. Keep it.
 - Harbor's own servers are gone. Builds read flags from `.env.local` (gitignored; copy `.env.example`):
   - `VITE_HARBOR_HOSTED`: features backed by Harbor's servers stay off unless `on`. An explicit `VITE_HARBOR_*_BASE` override still enables its feature.
   - `VITE_HARBOR_UPDATER`: the in-app updater stays off unless `on`.
