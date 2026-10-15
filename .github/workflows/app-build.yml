@@ -33,8 +33,6 @@ jobs:
         platform:
           - name: Windows
             runner: windows-latest
-          - name: macOS
-            runner: macos-latest
           - name: Linux
             runner: ubuntu-22.04
 
@@ -56,10 +54,6 @@ jobs:
             libwebkit2gtk-4.1-dev \
             pkg-config \
             xz-utils
-
-      - name: Install macOS build dependencies
-        if: matrix.platform.name == 'macOS'
-        run: brew install mpv pkg-config
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
