@@ -1,4 +1,12 @@
+import { HOSTED_FEATURES } from "@/lib/config/endpoints";
 import type { SectionId } from "./shared";
+
+// Sections that only talk to Harbor's own servers.
+const HOSTED_ONLY_SECTIONS: ReadonlySet<SectionId> = new Set<SectionId>(["bug", "support"]);
+
+export function isSectionShown(id: SectionId): boolean {
+  return HOSTED_FEATURES || !HOSTED_ONLY_SECTIONS.has(id);
+}
 
 export type TopGroup = {
   id: string;
@@ -8,7 +16,7 @@ export type TopGroup = {
   children: SectionId[];
 };
 
-export const TOP_GROUPS: TopGroup[] = [
+const ALL_TOP_GROUPS: TopGroup[] = [
   {
     id: "start",
     section: "SETUP",
@@ -87,6 +95,11 @@ export const TOP_GROUPS: TopGroup[] = [
     children: ["updates"],
   },
 ];
+
+export const TOP_GROUPS: TopGroup[] = ALL_TOP_GROUPS.map((g) => ({
+  ...g,
+  children: g.children.filter(isSectionShown),
+})).filter((g) => g.children.length > 0);
 
 export function groupForSection(id: SectionId): TopGroup | undefined {
   return TOP_GROUPS.find((g) => g.children.includes(id));
