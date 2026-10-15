@@ -27,6 +27,9 @@ environment override it.
 - `HARBOR_TIZEN_SERIAL`: `sdb` serial. Empty means the only connected device.
 - `STREMIO_EMAIL`, `STREMIO_PASSWORD`, `TORBOX_API_KEY`, `TMDB_API_KEY`: optional, read only by
   `seed`.
+- `HARBOR_TIZEN_EMBED_SECRETS`: `on` keeps `VITE_MAL_CLIENT_SECRET` and
+  `VITE_ANILIST_CLIENT_SECRET` from `.env.local` in the build. Off by default, because an unsigned
+  `.wgt` is a plain zip. AniList sign-in on the TV needs it on.
 
 ## Seeding a test install
 

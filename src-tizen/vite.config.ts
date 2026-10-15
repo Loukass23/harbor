@@ -212,11 +212,21 @@ function tizenStats(): Plugin {
   };
 }
 
+// .env.local is shared with the desktop build, but an unsigned .wgt is a plain
+// zip, so tracker client secrets stay out unless explicitly opted in.
+const TRACKER_SECRETS = ["VITE_MAL_CLIENT_SECRET", "VITE_ANILIST_CLIENT_SECRET"];
+
+function secretDefines(): Record<string, string> {
+  if (process.env.HARBOR_TIZEN_EMBED_SECRETS === "on") return {};
+  return Object.fromEntries(TRACKER_SECRETS.map((name) => [`import.meta.env.${name}`, '""']));
+}
+
 export default defineConfig(async (env) => {
   const base: UserConfig =
     typeof rootConfig === "function" ? await rootConfig(env) : await rootConfig;
   return {
     ...base,
+    define: { ...base.define, ...secretDefines() },
     base: "./",
     plugins: [tizenStubs(), ...(base.plugins ?? []), ...tizenHtml(), tizenPublic(), tizenStats()],
     build: {
