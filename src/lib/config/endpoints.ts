@@ -1,10 +1,10 @@
-// Off in builds for the personal fork: Harbor's own servers are being shut down.
-// Harbor-owned defaults then resolve to "", so callers build relative URLs that
-// never leave the device. An explicit VITE_HARBOR_*_BASE override still applies.
-export const HOSTED_FEATURES = import.meta.env.VITE_HARBOR_HOSTED !== "off";
+// Off unless set to "on": Harbor's own servers are shut down. Harbor-owned
+// defaults then resolve to "", so callers build relative URLs that never leave
+// the device. An explicit VITE_HARBOR_*_BASE override still applies.
+export const HOSTED_FEATURES = import.meta.env.VITE_HARBOR_HOSTED === "on";
 
-// Off when there is no update feed to check (the harbor.site feed is gone).
-export const UPDATER_ENABLED = import.meta.env.VITE_HARBOR_UPDATER !== "off";
+// Off unless set to "on": the harbor.site update feed is gone.
+export const UPDATER_ENABLED = import.meta.env.VITE_HARBOR_UPDATER === "on";
 
 function resolveBase(raw: string | undefined, fallback: string): string {
   const value = typeof raw === "string" && raw.trim() ? raw.trim() : fallback;
