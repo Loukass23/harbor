@@ -31,7 +31,7 @@ jobs:
           - name: Linux-x86_64
             runner: ubuntu-22.04
             target: x86_64-unknown-linux-gnu
-            bundle: deb,appimage
+            bundle: deb
 
     steps:
       - uses: actions/checkout@v4
@@ -146,7 +146,7 @@ jobs:
 
       - name: Build Linux system packages
         if: contains(matrix.platform.runner, 'ubuntu')
-        run: pnpm tauri:build:linux-system --target ${{ matrix.platform.target }} --bundles deb,appimage
+        run: pnpm tauri:build:linux-system --target ${{ matrix.platform.target }} --bundles deb
 
       - name: Upload artifacts
         if: success()
@@ -155,7 +155,6 @@ jobs:
           name: harbor-${{ matrix.platform.name }}
           path: |
             src-tauri/target/${{ matrix.platform.target }}/release/bundle/**/*.deb
-            src-tauri/target/${{ matrix.platform.target }}/release/bundle/**/*.AppImage
             src-tauri/target/${{ matrix.platform.target }}/release/bundle/nsis/*.exe
           retention-days: 14
           if-no-files-found: warn
