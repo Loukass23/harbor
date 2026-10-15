@@ -69,6 +69,7 @@
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import {
+  chmodSync,
   copyFileSync,
   existsSync,
   mkdirSync,
@@ -288,6 +289,15 @@ function stage() {
   markLaunchers(join(dest, "runtime"), target, (line) => log(line));
 }
 
+// jlink writes some runtime files read-only (legal/*, 0444). tauri-build copies resources with
+// their mode, so the copy under target/ could not be overwritten by the next build.
+function makeWritable() {
+  for (const path of [dest, ...walk(dest)]) {
+    const mode = statSync(path).mode;
+    if (!(mode & 0o200)) chmodSync(path, mode | 0o200);
+  }
+}
+
 function writeManifest(sourceHash, hash) {
   const files = walk(dest)
     .map((p) => ({ path: relative(dest, p).split(sep).join("/"), bytes: statSync(p).size }))
@@ -463,6 +473,7 @@ async function main() {
     stage();
     writeManifest(sourceHash, want);
   }
+  if (process.platform !== "win32") makeWritable();
   await verifyOrDie();
   report((line) => log(line));
 }
