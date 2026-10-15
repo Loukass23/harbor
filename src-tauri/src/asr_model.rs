@@ -1,9 +1,12 @@
 use futures_util::StreamExt;
+use sha2::{Digest, Sha256};
 use std::io::Write;
 use std::path::PathBuf;
 use tauri::{Emitter, Manager};
 
-const MODEL_URL: &str = "https://harbor.site/models/ggml-tiny.bin";
+// Pinned to a whisper.cpp commit so the file, and its checksum, never change under us.
+const MODEL_URL: &str = "https://huggingface.co/ggerganov/whisper.cpp/resolve/5359861c739e955e79d9a303bcbc70fb988958b1/ggml-tiny.bin";
+const MODEL_SHA256: &str = "be07e048e1e599ad46341c8d2a135645097a538221678b7acdd1b1919c6e1b21";
 const MODEL_FILE: &str = "ggml-tiny.bin";
 const MIN_VALID_BYTES: u64 = 1_000_000;
 
@@ -51,11 +54,13 @@ pub async fn asr_ensure_model(app: tauri::AppHandle) -> Result<String, String> {
     let mut file = std::fs::File::create(&tmp).map_err(|e| format!("create part: {}", e))?;
     let mut received: u64 = 0;
     let mut last_emit: u64 = 0;
+    let mut hasher = Sha256::new();
     let mut stream = resp.bytes_stream();
     while let Some(chunk) = stream.next().await {
         let chunk = chunk.map_err(|e| format!("read: {}", e))?;
         file.write_all(&chunk)
             .map_err(|e| format!("write: {}", e))?;
+        hasher.update(&chunk);
         received += chunk.len() as u64;
         if received - last_emit >= 1_048_576 {
             last_emit = received;
@@ -67,6 +72,11 @@ pub async fn asr_ensure_model(app: tauri::AppHandle) -> Result<String, String> {
     if received < MIN_VALID_BYTES {
         let _ = std::fs::remove_file(&tmp);
         return Err("download truncated".into());
+    }
+    let digest: String = hasher.finalize().iter().map(|b| format!("{:02x}", b)).collect();
+    if digest != MODEL_SHA256 {
+        let _ = std::fs::remove_file(&tmp);
+        return Err("download checksum mismatch".into());
     }
     std::fs::rename(&tmp, &dest).map_err(|e| format!("finalize: {}", e))?;
     let _ = app.emit("asr-model://progress", (received, received));
