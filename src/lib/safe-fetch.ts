@@ -1,6 +1,7 @@
 import { invoke } from "@tauri-apps/api/core";
 import { fetch as tauriFetchImpl } from "@tauri-apps/plugin-http";
 import { TrackerBlockedError, isBlockedUrl, noteBlocked } from "./privacy/blocklist";
+import { isDisabledHostedUrl } from "./config/endpoints";
 import { bridgeOutcome, recordBridge } from "./fetch-bridge-stats";
 import {
   allowDirectHost,
@@ -140,6 +141,18 @@ function isCancellation(e: unknown): boolean {
   const err = e as { name?: string; message?: string } | undefined;
   if (err?.name === "AbortError" || err?.name === "TimeoutError") return true;
   return /request cancell?ed/i.test(err?.message ?? "");
+}
+
+export class HostedFeatureDisabledError extends Error {
+  constructor(url: string) {
+    super(`Harbor hosted features are off: ${url}`);
+    this.name = "HostedFeatureDisabledError";
+  }
+}
+
+function rejectDisabledHosted(target: string | null): Promise<never> | null {
+  if (!target || !isDisabledHostedUrl(target)) return null;
+  return Promise.reject(new HostedFeatureDisabledError(target));
 }
 
 let proxyOriginCache: boolean | null = null;
@@ -333,6 +346,8 @@ export function safeFetchBase64(
   ) {
     return Promise.reject(new TypeError("blocked non-public provider subtitle target"));
   }
+  const disabled = rejectDisabledHosted(target);
+  if (disabled) return disabled;
   if (isBlockedUrl(target)) {
     noteBlocked();
     return Promise.reject(new TrackerBlockedError(new URL(target).hostname));
@@ -513,6 +528,8 @@ function webStringFetch(input: string, init?: RequestInit): Promise<Response> {
 
 export const safeFetch: typeof fetch = (input, init) => {
   const target = urlOf(input);
+  const disabled = rejectDisabledHosted(target);
+  if (disabled) return disabled;
   if (isBlockedUrl(target)) {
     noteBlocked();
     let host = target;
@@ -565,6 +582,8 @@ export function safeFetchLocal(input: RequestInfo | URL, init?: RequestInit): Pr
 
 export const safeFetchStream: typeof fetch = (input, init) => {
   const target = typeof input === "string" ? input : input instanceof URL ? input.href : null;
+  const disabled = rejectDisabledHosted(target);
+  if (disabled) return disabled;
   if (target && isBlockedUrl(target)) {
     noteBlocked();
     return Promise.reject(new TrackerBlockedError(new URL(target).hostname));
@@ -593,6 +612,8 @@ export function safeFetchBytes(
         headers: policyHeaders,
       }
     : undefined;
+  const disabled = rejectDisabledHosted(target);
+  if (disabled) return disabled;
   if (publicNetworkOnly && (!target || !isSafeProviderSubtitleUrl(target))) {
     return Promise.reject(new TypeError("blocked non-public provider subtitle target"));
   }
