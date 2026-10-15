@@ -143,12 +143,6 @@ mod win_graphics;
 mod cf_solver;
 #[cfg(mobile)]
 mod mobile;
-// Android P2P policy. torrent_engine picks up engine_dir, new_session and the
-// DHT rate from here behind the same cfg, so leaving this undeclared silently
-// reverts Android to the desktop tuning: payloads into a cacheDir the OS
-// reclaims mid-stream, and 400 DHT qps that fills a home router's NAT table.
-#[cfg(target_os = "android")]
-mod p2p_android;
 
 #[cfg(desktop)]
 pub(crate) fn release_stremio_scheme(app: &tauri::AppHandle) {
